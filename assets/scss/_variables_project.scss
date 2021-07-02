@@ -3,4 +3,25 @@
 Add styles or override variables from the theme here.
 
 */
+.landing-monkey {
+  width: 100% !important;
+}
 
+/* sm */
+@media (min-width: 768px) {
+  .landing-monkey {
+    width: 75% !important;
+  }
+}
+/* md */
+@media (min-width: 992px) {
+  .landing-monkey {
+      width: 60% !important;
+  }
+}
+/* lg */
+@media (min-width: 1200px) {
+  .landing-monkey {
+      width: 50% !important;
+  }
+}
