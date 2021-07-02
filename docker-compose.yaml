@@ -1,12 +1,11 @@
-version: "3.3"
+version: "3.4"
 
 services:
-
-  site:
-    image: docsy/docsy-example
+  usoc21-www:
+    image: unikraft/summer-of-code-2021
     build:
       context: .
-    command: server
+      target: build
     ports:
       - "1313:1313"
     volumes:
