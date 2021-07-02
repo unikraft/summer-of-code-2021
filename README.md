@@ -1,47 +1,30 @@
-# Docsy Example
+# Unikraft Summer of Code (2021)
 
-[Docsy](https://github.com/google/docsy) is a Hugo theme for technical documentation sites, providing easy site navigation, structure, and more. This **Docsy Example Project** uses the Docsy theme, as well as providing a skeleton documentation structure for you to use. You can either copy this project and edit it with your own content, or use the theme in your projects like any other [Hugo theme](https://gohugo.io/themes/installing-and-using-themes/).
+**Unikraft Summer of Code is a Unikernel and library Operating Systems workshop
+held by members of the Unikraft community** including professors, lecturers and
+PhD students from University POLITEHNICA of Bucharest, Lancaster University,
+Manchester University and industry partners NEC Laboratories Europe GmbH.
 
-The theme is included in this project as a Git submodule:
+In this **free** two week event, you will learn about how to build Unikraft
+unikernels, including zero-to-hero workshops on how to get started using
+Unikraft. As the week progresses, we will dive into more in-depth topics of
+Unikraft, including programming structures and architectures, how it is
+organized, methodologies for porting libraries and applications to Unikraft and
+more!
 
-```bash
-▶ git submodule
- a053131a4ebf6a59e4e8834a42368e248d98c01d themes/docsy (heads/master)
-```
-
-This Docsy Example Project is hosted at [https://example.docsy.dev/](https://example.docsy.dev/).
-
-You can find detailed theme instructions in the Docsy user guide: https://docsy.dev/docs/
-
-This is not an officially supported Google product. This project is currently maintained.
-
-## Using the Docsy Example Project as a template
-
-A simple way to get started is to use this project as a template, which gives you a site project that is set up and ready to use. To do this: 
-
-1. Click **Use this template**.
-
-2. Select a name for your new project and click **Create repository from template**.
-
-3. Make your own local working copy of your new repo using git clone, replacing https://github.com/my/example.git with your repo’s web URL:
-
-```bash
-git clone --recurse-submodules --depth 1 https://github.com/my/example.git
-```
-
-You can now edit your own versions of the site’s source files.
-
-If you want to do SCSS edits and want to publish these, you need to install `PostCSS`
-
-```bash
-npm install
-```
+The workshop will be hands-on and will take place for 10 days, between August 23
+and September 3, 2021, 4pm-8pm CEST.  And an 8 hours hackathon on September 4,
+2021, 9am-5pm CEST.  It will be online and in English. Topics include building
+unikernels, benchmarking, debugging, porting applications, virtualization and
+platform specifics.
 
 ## Running the website locally
 
-Building and running the site locally requires a recent `extended` version of [Hugo](https://gohugo.io).
-You can find out more about how to install Hugo for your environment in our
-[Getting started](https://www.docsy.dev/docs/getting-started/#prerequisites-and-installation) guide.
+Building and running the site locally requires a recent `extended` version of
+[Hugo](https://gohugo.io). You can find out more about how to install Hugo for
+your environment in our [Getting
+started](https://www.docsy.dev/docs/getting-started/#prerequisites-and-installation)
+guide.
 
 Once you've made your working copy of the site repo, from the repo root folder, run:
 
@@ -51,12 +34,11 @@ hugo server
 
 ## Running a container locally
 
-You can run docsy-example inside a [Docker](https://docs.docker.com/)
-container, the container runs with a volume bound to the `docsy-example`
-folder. This approach doesn't require you to install any dependencies other
-than [Docker Desktop](https://www.docker.com/products/docker-desktop) on
-Windows and Mac, and [Docker Compose](https://docs.docker.com/compose/install/)
-on Linux.
+You can run docsy-example inside a [Docker](https://docs.docker.com/) container,
+the container runs with a volume bound to the `docsy-example` folder. This
+approach doesn't require you to install any dependencies other than [Docker
+Desktop](https://www.docker.com/products/docker-desktop) on Windows and Mac, and
+[Docker Compose](https://docs.docker.com/compose/install/) on Linux.
 
 1. Build the docker image 
 
