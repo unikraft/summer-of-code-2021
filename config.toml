@@ -56,7 +56,7 @@ id = "UA-00000000-0"
 [languages]
 [languages.en]
 title = "Unikraft Summer of Code 2021"
-description = "A Docsy example site"
+description = "A free and virtual Unikernel and library Operating Systems workshop held by members of the Unikraft community"
 languageName ="English"
 # Weight used for sorting.
 weight = 1
