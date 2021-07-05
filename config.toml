@@ -158,7 +158,7 @@ enable = false
 # End user relevant links. These will show up on left side of footer and in the community page if you have one.
 [[params.links.user]]
 	name = "Discord"
-	url = "https://discord.gg/RG5ZQGKxyW"
+	url = "https://bit.ly/UnikraftDiscord"
 	icon = "fab fa-discord"
         desc = "Join the discussion with the Unikraft community"
 [[params.links.user]]
