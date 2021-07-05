@@ -55,8 +55,9 @@ RUN set -xe; \
     echo 'deb https://dl.yarnpkg.com/debian/ stable main' >> /etc/apt/sources.list.d/yarn.list; \
     apt-get update; \
     apt-get install -y \
-      nodejs yarn; \
+      nodejs; \
     npm install -g esbuild-linux-64; \
+    npm install; \
     cd /tmp; \
     curl -LO https://github.com/gohugoio/hugo/releases/download/v${HUGO_VER}/hugo_extended_${HUGO_VER}_Linux-64bit.tar.gz; \
     tar -xzf hugo_extended_${HUGO_VER}_Linux-64bit.tar.gz; \
