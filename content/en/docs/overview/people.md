@@ -4,7 +4,7 @@ linkTitle: "People"
 date: 2021-07-05
 ---
 
-### Steering Committee and Project Coordinators
+### Program Chairs and Project Coordinators
 
 | Name                                            | Organization                        | Email                         |
 |-------------------------------------------------|-------------------------------------|-------------------------------|
