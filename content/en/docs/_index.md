@@ -15,7 +15,7 @@ how to build Unikraft unikernels.*
 
 Unikraft Summer of Code is a **free** two week virtual Unikernel and library
 Operating Systems workshop held by members of the Unikraft community including
-professors, lecturers and PhD students from:
+professors, lecturers, PhD and MSci students from:
 
  * [University POLITEHNICA of Bucharest](http://nets.cs.pub.ro),
  * [Lancaster University](https://net.scc.lancs.ac.uk),
