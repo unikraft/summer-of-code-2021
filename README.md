@@ -3,7 +3,8 @@
 **Unikraft Summer of Code is a Unikernel and library Operating Systems workshop
 held by members of the Unikraft community** including professors, lecturers and
 PhD students from University POLITEHNICA of Bucharest, Lancaster University,
-Manchester University and industry partners NEC Laboratories Europe GmbH.
+Manchester University, University of Liège and industry partners NEC 
+Laboratories Europe GmbH.
 
 In this **free** two week event, you will learn about how to build Unikraft
 unikernels, including zero-to-hero workshops on how to get started using
