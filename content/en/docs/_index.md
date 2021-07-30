@@ -28,6 +28,7 @@ professors, lecturers, PhD and MSci students from:
 
  * [University POLITEHNICA of Bucharest](http://nets.cs.pub.ro),
  * [Lancaster University](https://net.scc.lancs.ac.uk),
+ * [University of Liège](https://www.uliege.be/cms/c_8699436/en/uliege),
  * [Manchester University](https://www.cs.manchester.ac.uk/research/expertise/advanced-processor-technologies/), and
  * industry partners [NEC Laboratories Europe GmbH](http://sysml.neclab.eu).
 
