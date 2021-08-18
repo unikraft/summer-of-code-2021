@@ -32,13 +32,13 @@ Applications that have been ported on top of Unikraft are located in repositorie
 
 An important role of the core Unikraft component is providing support for different platforms and architectures.
 A platform is the virtualization / runtime environment used to run the resulting unikernel image.
-An arhitecture details the CPU and memory specifics that will run the resulting image.
+An architecture details the CPU and memory specifics that will run the resulting image.
 
 As this is a rather complicated setup, a companion tool ([kraft](https://github.com/unikraft/kraft)) was designed and implemented to provide the interface for configuring, building and running unikernel images based on Unikraft.
 The recommended way of building and running Unikraft is via `kraft`.
 
 We are going to build the [helloworld](https://github.com/unikraft/app-helloworld) application and the [httpreply](https://github.com/unikraft/app-httpreply) application using `kraft`.
-We'are also going to use the lower-level configuration and build system (based on [Kconfig](https://www.kernel.org/doc/html/latest/kbuild/kconfig-language.html) and Makefile) to get a grasp of how everything works.
+We are also going to use the lower-level configuration and build system (based on [Kconfig](https://www.kernel.org/doc/html/latest/kbuild/kconfig-language.html) and Makefile) to get a grasp of how everything works.
 The lower-level system will be detailed further in session 02: Behind the Scenes.
 
 ## 00. Manual kraft Installation
@@ -496,7 +496,7 @@ $ kraft build
 #### Run
 
 ```
-$ kraft run -p PLAT -m ARCH
+$ kraft run -p kvm -m x86_64
 [...]
 Powered by
 o.   .o       _ _               __ _
@@ -507,7 +507,67 @@ oOo oOO| | | | |   (| | | (_) |  _) :_
                    Tethys 0.5.0~b8be82b
 Listening on port 8123...
 ```
-Use `Ctrl+c` to stop the HTTP server.
+Use `Ctrl+c` to stop the HTTP server running as a unikernel virtual machine.
+
+#### Connecting to the HTTP Server
+
+The server listens on port `8123` but we can't access it, as the virtual machine doesn't have a (virtual) network connection to the host system and it doesn't have an IP address.
+So we have to create a connection and assign an IP address.
+
+We use a virtual bridge to create a connection between the VM and the host system.
+We assign address `172.44.0.1/24` to the bridge interface (pointing to the host) and we assign address `172.44.0.2/24` to the virtual machine, by passing boot arguments.
+
+We run the commands below to create and assign the IP address to the bridge `virbr0`:
+```
+$ sudo brctl addbr virbr0
+$ sudo ip a a  172.44.0.1/24 dev virbr0
+$ sudo ip l set dev virbr0 up
+```
+
+We can check the proper configuration:
+```
+$ ip a s virbr0
+420: virbr0: <BROADCAST,MULTICAST,UP,LOWER_UP> mtu 1500 qdisc noqueue state UNKNOWN group default qlen 1000
+    link/ether 3a:3e:88:e6:a1:e4 brd ff:ff:ff:ff:ff:ff
+    inet 172.44.0.1/24 scope global virbr0
+       valid_lft forever preferred_lft forever
+    inet6 fe80::383e:88ff:fee6:a1e4/64 scope link
+       valid_lft forever preferred_lft forever
+```
+
+Now we start the virtul machine and pass it the proper arguments to assing the IP address `172.44.0.2/24`:
+```
+$ kraft run -b virbr0 "netdev.ipv4_addr=172.44.0.2 netdev.ipv4_gw_addr=172.44.0.1 netdev.ipv4_subnet_mask=255.255.255.0 --"
+[...]
+0: Set IPv4 address 172.44.0.2 mask 255.255.255.0 gw 172.44.0.1
+en0: Added
+en0: Interface is up
+Powered by
+o.   .o       _ _               __ _
+Oo   Oo  ___ (_) | __ __  __ _ ' _) :_
+oO   oO ' _ `| | |/ /  _)' _` | |_|  _)
+oOo oOO| | | | |   (| | | (_) |  _) :_
+ OoOoO ._, ._:_:_,\_._,  .__,_:_, \___)
+                   Tethys 0.5.0~b8be82b
+Listening on port 8123...
+```
+The boot message confirms the assigning of the `172.44.0.2/24` IP address to the virtual machine.
+It's listening on por 8123 for HTTP connections on that IP address.
+We use `wget` to validate it's working properly and we are able to get the `index.html` file:
+```
+$ wget 172.44.0.2:8123
+--2021-08-18 16:47:38--  http://172.44.0.2:8123/
+Connecting to 172.44.0.2:8123... connected.
+HTTP request sent, awaiting response... 200 OK
+[...]
+2021-08-18 16:47:38 (41.5 MB/s) - ‘index.html’ saved [160]
+```
+
+Cleaning up means closing the virtual machine (and the HTTP server) and disabling and deleting the bridge interface:
+```
+$ sudo ip l set dev virbr0 down
+$ sudo brctl delbr virbr0
+```
 
 ### The Manual Way
 
@@ -613,6 +673,56 @@ To close the running QEMU process, use the `Ctrl+a x` key combination.
 **Note**: We didn't go into configuring a functional network connection and actually querying the HTTP server.
 This is a bit more complicated and is outside the scope of this session.
 
+```
+sudo qemu-system-x86_64 -netdev bridge,id=en0,br=virbr0 -device virtio-net-pci,netdev=en0 -append "netdev.ipv4_addr=172.44.0.2 netdev.ipv4_gw_addr=172.44.0.1 netdev.ipv4_subnet_mask=255.255.255.0 --" -kernel build/02-httpreply_kvm-x86_64 -nographic
+```
+
+#### Connecting to the HTTP Server
+
+Similarly to kraft, in order to connect to the HTTP server, we use a virtual bridge to create a connection between the VM and the host system.
+We assign address `172.44.0.1/24` to the bridge interface (pointing to the host) and we assign address `172.44.0.2/24` to the virtual machine, by passing boot arguments.
+
+We run the commands below to create and assign the IP address to the bridge `virbr0`:
+```
+$ sudo brctl addbr virbr0
+$ sudo ip a a  172.44.0.1/24 dev virbr0
+$ sudo ip l set dev virbr0 up
+```
+
+Now we start the virtul machine and pass it the proper arguments to assing the IP address `172.44.0.2/24`:
+```
+$ sudo qemu-system-x86_64 -netdev bridge,id=en0,br=virbr0 -device virtio-net-pci,netdev=en0 -append "netdev.ipv4_addr=172.44.0.2 netdev.ipv4_gw_addr=172.44.0.1 netdev.ipv4_subnet_mask=255.255.255.0 --" -kernel build/02-httpreply_kvm-x86_64 -nographic
+0: Set IPv4 address 172.44.0.2 mask 255.255.255.0 gw 172.44.0.1
+en0: Added
+en0: Interface is up
+Powered by
+o.   .o       _ _               __ _
+Oo   Oo  ___ (_) | __ __  __ _ ' _) :_
+oO   oO ' _ `| | |/ /  _)' _` | |_|  _)
+oOo oOO| | | | |   (| | | (_) |  _) :_
+ OoOoO ._, ._:_:_,\_._,  .__,_:_, \___)
+                   Tethys 0.5.0~b8be82b
+Listening on port 8123...
+[...]
+```
+The boot message confirms the assigning of the `172.44.0.2/24` IP address to the virtual machine.
+It's listening on por 8123 for HTTP connections on that IP address.
+We use `wget` to validate it's working properly and we are able to get the `index.html` file:
+```
+$ wget 172.44.0.2:8123
+--2021-08-18 16:47:38--  http://172.44.0.2:8123/
+Connecting to 172.44.0.2:8123... connected.
+HTTP request sent, awaiting response... 200 OK
+[...]
+2021-08-18 16:47:38 (41.5 MB/s) - ‘index.html’ saved [160]
+```
+
+Cleaning up means closing the virtual machine (and the HTTP server) and disabling and deleting the bridge interface:
+```
+$ sudo ip l set dev virbr0 down
+$ sudo brctl delbr virbr0
+```
+
 ## Summary
 
 `kraft`is an extremely useful tool for quickly deploying unikernel images.
@@ -635,7 +745,7 @@ Things to consider:
 * You will need some network client utility such as `netcat`.
 * You will need the Lightweight TCP/IP stack library (lwip): https://github.com/unikraft/lib-lwip
 * You will have to update the build and support files in the `work/01-echo-back/` directory.
-* If you want to run the application without kraft, the KVM launch script and network setup is already included inside `work/01-echo-back/launch.sh`.
+* If you want to run the application without `kraft`, the KVM launch script and network setup is already included inside `work/01-echo-back/launch.sh`.
 
 To test if your application works you can try sending it messages like so:
 ```
