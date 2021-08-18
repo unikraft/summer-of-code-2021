@@ -132,7 +132,7 @@ This is where the fun part begins - we get to build our first unikernel.
 
 ### One Command to Rule Them All
 
-kraft makes it easy to download, configure, build existing component into unikernel images and then run those images.
+kraft makes it easy to download, configure, build existing components into unikernel images and then run those images.
 The `kraft up` command makes it easy to do that with one swoop.
 Let's do that for the `helloworld` application (listed with `kraft list`):
 ```
@@ -214,7 +214,7 @@ We will go through the same steps above, running a separate command for each ste
 
 #### Initialize
 
-First, we go into first demo's directory, one that's currently empty:
+First, we go into the first demo's directory, one that's currently empty:
 ```
 $ cd demo/01-hello-world
 $ ls
@@ -266,7 +266,7 @@ $ kraft configure
    01-hello-world_kvm-arm64
    01-hello-world_xen-arm64
 ```
-We have 6 options (2 arhitectures x 3 platforms).
+We have 6 options (2 architectures x 3 platforms).
 Once we select one, the configuration will be updated.
 
 The alternate way (non-interactive) is to pass arguments to `kraft configure` to select the desired platform and architecture.
@@ -315,14 +315,14 @@ $ kraft run -p kvm -m x86_64
 This command is useful in the case we have multiple images built (for differing platforms and architectures).
 We can then select which one to run.
 
-For exemple, we can use the commands below to configure, build and run a helloworld image for the `linuxu` platform.
+For example, we can use the commands below to configure, build and run a helloworld image for the `linuxu` platform.
 ```
 kraft configure -p linuxu -m x86_64
 kraft build
 kraft run -p linuxu -m x86_64
 ```
 
-You can now alter between running the `linuxu` and the `kvm` built images by using `kraft run` with the appropiate arguments.
+You can now alter between running the `linuxu` and the `kvm` built images by using `kraft run` with the appropriate arguments.
 
 ### More on kraft
 
@@ -341,7 +341,7 @@ For most of the use cases (development, testing, evaluating, using) of Unikraft,
 
 We will go through the same steps as above:
 
-1. Download / Initialize the helloworld appplication.
+1. Download / Initialize the helloworld application.
 1. Configure the application, resulting in a `.config` file.
 1. Build the required components, resulting in the `build/hello_kvm-x86_64` unikernel image.
 1. Run the image, with the "Hello world!" message getting printed.
@@ -389,7 +389,7 @@ $ cat -n Makefile
 ```
 The underlying build / configuration system expects the Unikernel (`UK_ROOT`) to be located at `../../unikraft` from the current directory, which is very likely not the case.
 Recall that the build system makes use of some important environment variables, namely `UK_WORKDIR`, `UK_ROOT` and `UK_LIBS`.
-So, in order to properly inform the build system of our current location we will have to manually set these by prefixing whatever build command we send with the hardcoded values of where our `Unikraft` work directory is.
+So, in order to properly inform the build system of our current location, we will have to manually set these by prefixing whatever build command we send with the hardcoded values of where our `Unikraft` work directory is.
 ```
 $ UK_WORKDIR=~/.unikraft UK_ROOT=~/.unikraft/unikraft UK_LIBS=~/.unikraft/libs make menuconfig
 ```
@@ -535,7 +535,7 @@ $ ip a s virbr0
        valid_lft forever preferred_lft forever
 ```
 
-Now we start the virtul machine and pass it the proper arguments to assing the IP address `172.44.0.2/24`:
+Now we start the virtual machine and pass it the proper arguments to assign the IP address `172.44.0.2/24`:
 ```
 $ kraft run -b virbr0 "netdev.ipv4_addr=172.44.0.2 netdev.ipv4_gw_addr=172.44.0.1 netdev.ipv4_subnet_mask=255.255.255.0 --"
 [...]
@@ -552,7 +552,7 @@ oOo oOO| | | | |   (| | | (_) |  _) :_
 Listening on port 8123...
 ```
 The boot message confirms the assigning of the `172.44.0.2/24` IP address to the virtual machine.
-It's listening on por 8123 for HTTP connections on that IP address.
+It's listening on port 8123 for HTTP connections on that IP address.
 We use `wget` to validate it's working properly and we are able to get the `index.html` file:
 ```
 $ wget 172.44.0.2:8123
@@ -615,7 +615,7 @@ $(MAKECMDGOALS):
 	@$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS) $(MAKECMDGOALS)
 ```
 
-For the HTTP server, however, we neeed the `lwip` library, and we have to add it to the `LIBS` variable in the Makefile.
+For the HTTP server, however, we need the `lwip` library, and we have to add it to the `LIBS` variable in the Makefile.
 We add it by first downloading it on our system in `$(UK_WORKDIR)/libs/`:
 ```
 $ git clone https://github.com/unikraft/lib-lwip ~/.unikraft/libs/lwip
@@ -623,7 +623,7 @@ fatal: destination path '~/.unikraft/libs/lwip' already exists and is not an emp
 ```
 The library is already cloned. That is because `kraft` took care of it for us behind the scenes in our previous automatic build.
 
-Next step is to add this library in the `Makefile`:
+The next step is to add this library in the `Makefile`:
 ```
 UK_ROOT ?= $(HOME)/.unikraft/unikraft
 UK_LIBS ?= $(HOME)/.unikraft/libs
@@ -727,13 +727,13 @@ $ sudo brctl delbr virbr0
 
 `kraft`is an extremely useful tool for quickly deploying unikernel images.
 It abstracts away many factors that would normally increase the difficulty of such tasks.
-Through just a simple set of a few commands we can build and run a set of fast and secure unikernel images with low memory footprint.
+Through just a simple set of a few commands, we can build and run a set of fast and secure unikernel images with low memory footprint.
 
 ## Practical Work
 
 ## 01. Echo-back Server
 
-You will have to implement a simple echo-back server in C for the KVM platofrm.
+You will have to implement a simple echo-back server in C for the KVM platform.
 The application will have to be able to open a socket on `172.44.0.2:1234` and send back to the client whatever the client sends to the server.
 If the client closes the connection, the server will automatically close.
 
@@ -745,7 +745,7 @@ Things to consider:
 * You will need some network client utility such as `netcat`.
 * You will need the Lightweight TCP/IP stack library (lwip): https://github.com/unikraft/lib-lwip
 * You will have to update the build and support files in the `work/01-echo-back/` directory.
-* If you want to run the application without `kraft`, the KVM launch script and network setup is already included inside `work/01-echo-back/launch.sh`.
+* If you want to run the application without `kraft`, the KVM launch script and network setup are already included inside `work/01-echo-back/launch.sh`.
 
 To test if your application works you can try sending it messages like so:
 ```
@@ -765,7 +765,7 @@ To test if this works, use the same methodology as before, but ensure that the e
 
 ## 03. Tutorial: Mount 9pfs
 
-In this tutorial we will see what we would need to do if we wanted to have a filesystem available.
+In this tutorial, we will see what we would need to do if we wanted to have a filesystem available.
 To make it easy, we will use the `9pfs` filesystem, as well as the `newlib` library.
 The latter is used so that we have available an API that would enable us to interact with this filesystem (functions such as `lseek`, `open`).
 
