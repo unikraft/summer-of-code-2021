@@ -3,23 +3,21 @@ title: "Session 07: Syscall Shim"
 linkTitle: "07. Syscall Shim"
 ---
 
-In this session we are going to understand how we can run applications using the binary compatibility
-layer as well as the inner workings of the system call shim layer.
+In this session we are going to understand how we can run applications using the binary compatibility layer as well as the inner workings of the system call shim layer.
 
-One of the obstacles when trying to use Unikraft could be the porting effort of your application. One
-way we can avoid this is through binary compatibility. Binary compatibility is the posibility to take
-already compiled binaries and run them on top of Unikraft without porting effort and at the same time
-keeping the benefits of unikernels. In our case, we support binaries compiled for the Linux kernel.
+One of the obstacles when trying to use Unikraft could be the porting effort of your application.
+One way we can avoid this is through binary compatibility.
+Binary compatibility is the posibility to take already compiled binaries and run them on top of Unikraft without porting effort and at the same time keeping the benefits of unikernels.
+In our case, we support binaries compiled for the Linux kernel.
 
-In order to achieve binary compatibility with the Linux kernel, we had to find a way to have support
-for system calls, for this, the system call shim layer was created. The system call shim layer provides
-Linux-style mappings of system call numbers to actual system call handler functions.
+In order to achieve binary compatibility with the Linux kernel, we had to find a way to have support for system calls, for this, the system call shim layer was created.
+The system call shim layer provides Linux-style mappings of system call numbers to actual system call handler functions.
 
 ## Reminders
 
 /* TODO */ - see what other sessions offer - maybe some debug information and also some build info
 
-## 01. The process of loading and running an application with binary compatibility
+## 01. The Process of Loading and Running an Application with Binary Compatibility
 
 For Unikraft to achieve binary compatibility there are two main objectives that need to be met:
 
@@ -34,10 +32,11 @@ As an example, if we have an helloworld binary, we can pass it to the unikernel 
 sudo qemu-guest -kernel build/unikernel_image -initrd helloworld_binary
 ```
 
-After the unikernel gets the binary the next step is to load it into memory. The dominant format for
-executables is the Executable and Linkable File Format or ELF, so, in order to run executables we need
-an ELF loader. The job of the Loader is to load the executable into the main memory. It does so by reading the program headers located in the ELF formatted executable and acting accordingly. For example, you can see
-the program headers of a program by running `readelf -l binary`:
+After the unikernel gets the binary the next step is to load it into memory.
+The dominant format for executables is the Executable and Linkable File Format or ELF, so, in order to run executables we need an ELF loader.
+The job of the Loader is to load the executable into the main memory.
+It does so by reading the program headers located in the ELF formatted executable and acting accordingly.
+For example, you can see the program headers of a program by running `readelf -l binary`:
 
 ```
 $ readelf -l helloworld_binary
@@ -78,19 +77,16 @@ Program Headers:
    07     .tdata .init_array .fini_array .data.rel.ro .dynamic .got
 ```
 
-As an overview of the whole process, when we want to run an application on Unikraft using binary
-compatibility, the first step is to pass the application to the unikernel as an initial ram disk. Once
-the unikernel gets the application, the loader reads the executable segments and loads them accordingly.
+As an overview of the whole process, when we want to run an application on Unikraft using binary compatibility, the first step is to pass the application to the unikernel as an initial ram disk.
+Once the unikernel gets the application, the loader reads the executable segments and loads them accordingly.
 After the program is loaded, the last step is to jump to its entry point and start executing.
 
-The loader that we currently have implemented in Unikraft only supports executables that are static
-(so all the libraries are part of the executables) and also position-independent. A position independent
-binary is a binary that can run correctly independent of the address at which it was loaded.
+The loader that we currently have implemented in Unikraft only supports executables that are static (so all the libraries are part of the executables) and also position-independent.
+A position independent binary is a binary that can run correctly independent of the address at which it was loaded.
 
-## 02. Syscall shim
+## 02. Syscall Shim
 
-As stated previously the system call shim layer is the layer that we use in order to achieve the same
-system call behaviour as the Linux kernel.
+As stated previously the system call shim layer is the layer that we use in order to achieve the same system call behaviour as the Linux kernel.
 
 Let's take a code snippet that does a system call from a binary:
 
@@ -102,12 +98,11 @@ mov	eax,4		; system call number (sys_write)
 syscall		    ; call kernel
 ```
 
-In this case, when the `syscall` instruction gets executed, we have to reach the write function inside
-our unikernel. In our case, when the `syscall` instruction gets called there are a few steps taken until
-we reach the ***system call*** inside Unikraft:
+In this case, when the `syscall` instruction gets executed, we have to reach the write function inside our unikernel.
+In our case, when the `syscall` instruction gets called there are a few steps taken until we reach the ***system call*** inside Unikraft:
 
-1. After the `syscall` instruction gets executed we reach the `ukplat_syscall_handler`. This function
-has an intermediate role, printing some debug messages and passing the correct parameters further down.
+1. After the `syscall` instruction gets executed we reach the `ukplat_syscall_handler`.
+This function has an intermediate role, printing some debug messages and passing the correct parameters further down.
 The next function that gets called is the `uk_syscall6_r` function.
 
 ```
@@ -124,8 +119,7 @@ void ukplat_syscall_handler(struct __regs *r)
 }
 ```
 
-2. The `uk_syscall6_r` is the function that redirects the flow of the program to the actual ***system call***
-function inside the kernel.
+2. The `uk_syscall6_r` is the function that redirects the flow of the program to the actual ***system call*** function inside the kernel.
 
 ```
 switch (nr) {
@@ -138,13 +132,11 @@ switch (nr) {
     ...
 ```
 
-All the above functions are generated, so the only thing that we have to do when we want to register
-a system call to the system call shim layer is to use the correct macros.
+All the above functions are generated, so the only thing that we have to do when we want to register a system call to the system call shim layer is to use the correct macros.
 
-There are two definition macros that we can use in order to add a system call to the system call shim
-layer: `UK_SYSCALL_DEFINE` and `UK_SYSCALL_R_DEFINE`. Apart from using the macro to define the function
-we also have to register the system call by adding it to `UK_PROVIDED_SYSCALLS-y` withing the corresponding
-`Makefile.uk` file. Let's see how this is done with an example for the write system call:
+There are two definition macros that we can use in order to add a system call to the system call shim layer: `UK_SYSCALL_DEFINE` and `UK_SYSCALL_R_DEFINE`.
+Apart from using the macro to define the function we also have to register the system call by adding it to `UK_PROVIDED_SYSCALLS-y` withing the corresponding `Makefile.uk` file.
+Let's see how this is done with an example for the write system call:
 
 We have the following deffinition of the write system call:
 
@@ -180,8 +172,8 @@ UK_SYSCALL_DEFINE(ssize_t, write, int, fd, const void *, buf, size_t, count)
 }
 ```
 
-The last step is to add the system call to `UK_PROVIDED_SYSCALLS-y` in the `Makefile.uk` file. The format
-is:
+The last step is to add the system call to `UK_PROVIDED_SYSCALLS-y` in the `Makefile.uk` file.
+The format is:
 
 `UK_PROVIDED_SYSCALLS-$(CONFIG_<YOURLIB>) += <syscall_name>-<number_of_arguments>`
 
@@ -191,9 +183,7 @@ So, in our case:
 
 ## Summary
 
-The binary compatibility layer is a very important part of the Unikraft unikernel because it helps us
-run applications that were not build for Unikraft but in the same time keeps the classic benefits
-of Unikraft: speed, security and small memory footprint.
+The binary compatibility layer is a very important part of the Unikraft unikernel because it helps us run applications that were not build for Unikraft but in the same time keeps the classic benefits of Unikraft: speed, security and small memory footprint.
 
 ## Practical Work
 
@@ -201,14 +191,15 @@ For the practical work we will need the following prerequisites:
 
 * **gcc version at least 8.4.0**
 
-* **the elfloader application** - this is the implementation of our loader which is build like a normal
-Unikraft application. You can clone the loader [here](https://github.com/skuenzer/app-elfloader/tree/usoc21). This cloned repo should go into the `apps` folder in your Unikraft directory structure.
+* **the elfloader application** - this is the implementation of our loader which is build like a normal Unikraft application.
+You can clone the loader [here](https://github.com/skuenzer/app-elfloader/tree/usoc21).
+This cloned repo should go into the `apps` folder in your Unikraft directory structure.
 
 * **the configuration file** - you can find the config files in the `demo/01` and `demo/03` folder of
 this session.
 
-* **lwip, zydis, libelf libs** - we have to clone all the repos coresponding to the previously mentioned
-libraries into the libs folder. All of them have to be on the `staging` branch.
+* **lwip, zydis, libelf libs** - we have to clone all the repos coresponding to the previously mentioned libraries into the libs folder.
+All of them have to be on the `staging` branch.
     * [lwip](https://github.com/unikraft/lwip.git)
     * [zydis](https://github.com/unikraft/lib-zydis.git)
     * [libelf](https://github.com/unikraft/lib-libelf.git)
@@ -227,22 +218,21 @@ So, the final directory structure for this session should look like this:
 └── unikraft[usoc21]
 ```
 
-### 01. Compiling the elfloader application
+### 01. Compiling the Elfloader Application
 
-The goal of this task is to make sure that our setup is correct. The first step is to copy the
-correct config file into our application.
+The goal of this task is to make sure that our setup is correct.
+The first step is to copy the correct config file into our application.
 
 ```
 student:~/apps/app-elfloader$ cp demo/01/config .config
 ```
 
-To check that the config file is the correct one, run `make menuconfig`, then select `library configuration`
-and it should look like this:
+To check that the config file is the correct one, run `make menuconfig`, then select `library configuration` and it should look like this:
 
 ![Libraries configuration](images/config-image)
 
-If everything is correct, we can run `make` and the image for our unikernel should be compiled. In the
-`build` folder you should have the `elfloader_kvm-x86_64` binary.
+If everything is correct, we can run `make` and the image for our unikernel should be compiled.
+In the `build` folder you should have the `elfloader_kvm-x86_64` binary.
 
 To also test if it runs correctly:
 
@@ -261,17 +251,15 @@ oOo oOO| | | | |   (| | | (_) |  _) :_
 [    0.105192] ERR:  <0x3f20000> [appelfloader] No image found (initrd parameter missing?)
 ```
 
-Because we did not pass an initial ramdisk, the loader does not have anything to load, so that's where
-the error comes from.
+Because we did not pass an initial ramdisk, the loader does not have anything to load, so that's where the error comes from.
 
-### 02. Compile a static-pie executable and run it on top of Unikraft
+### 02. Compile a Static-Pie Executable and Run It On Top of Unikraft
 
-The next step to our purpose of running an executable on top of Unikraft is to get an executable
-with the correct format, that is, a static executable that also contains position independent code.
+The next step to our purpose of running an executable on top of Unikraft is to get an executable with the correct format, that is, a static executable that also contains position independent code.
 
-We can now go to the `apps/app-elfloader/example/helloworld` directory. We can see that the directory
-has a `helloworld.c` (a simple helloworld program) and a `Makefile`. If we inspect the `Makefile` we
-can notice that the program will be compiled as a static-pie executable:
+We can now go to the `apps/app-elfloader/example/helloworld` directory.
+We can see that the directory has a `helloworld.c` (a simple helloworld program) and a `Makefile`.
+If we inspect the `Makefile` we can notice that the program will be compiled as a static-pie executable:
 
 ``` Makefile
 RM = rm -f
@@ -316,8 +304,8 @@ student:~/apps/app-elfloader/example/helloworld$ checksec helloworld
 
 We can see that the `helloworld` executable is a static-pie executable.
 
-Now, the last part is to pass this executable to our unikernel. We can use the `-i` option to pass
-the initial ramdisk to the virtual machine.
+Now, the last part is to pass this executable to our unikernel.
+We can use the `-i` option to pass the initial ramdisk to the virtual machine.
 
 ```
 student:~/apps/app-elfloader$ qemu-guest -k build/elfloader_kvm-x86_64 -i example/helloworld/helloworld
@@ -336,11 +324,10 @@ Hello world!
 
 We can see that the binary is succesfully loaded and executed.
 
-### 03. Let's dive deeper.
+### 03. Let's Dive Deeper.
 
-Now that we saw how we can run an executable on top of Unikraft though binary compatibility, let's take
-a look at what happens behind the scenes. For this we have to compile the unikernel with the debug
-printing.
+Now that we saw how we can run an executable on top of Unikraft though binary compatibility, let's take a look at what happens behind the scenes.
+For this we have to compile the unikernel with the debug printing.
 
 Copy the config_debug file to our application folder:
 
@@ -354,7 +341,6 @@ student:~/apps/app-elfloader$ make clean
 ...
 student:~/apps/app-elfloader$ make
 ```
-
 Now, let's rerun the previously compiled executable on top of Unikraft:
 
 ```
@@ -377,15 +363,15 @@ oOo oOO| | | | |   (| | | (_) |  _) :_
 [    0.167843] dbg:  <0x3f20000> [appelfloader] build/elfloader_kvm-x86_64: ELF object type: 3
 .....
 ```
-We now have a more detailed output to see exactly what happens. The debug output is divided as follows:
+We now have a more detailed output to see exactly what happens.
+The debug output is divided as follows:
 
 1. Debug information that comes from when the unikernel is executing.
 2. Debug information that comes from when the binary is executing.
 
 When the unikernel is executing (so our loader application) there are two phases:
 
-1. The loading phase - copies the contents of the binary at certain memory zones, as specified by the
-ELF header. You can see the loading phase in the debug output:
+1. The loading phase - copies the contents of the binary at certain memory zones, as specified by the ELF header. You can see the loading phase in the debug output:
 
 ```
 [appelfloader] Load image...
@@ -410,9 +396,8 @@ ELF header. You can see the loading phase in the debug output:
 [appelfloader] Jump to program entry point at 0x3809940...
 ```
 
-From this point forward, the binary that we passed in the initial ramdisk starts executing. Now all the
-debug messages come from an operation that happened in the binary. We can also now see the syscall shim
-layer in action:
+From this point forward, the binary that we passed in the initial ramdisk starts executing. Now all the debug messages come from an operation that happened in the binary.
+We can also now see the syscall shim layer in action:
 
 ```
 [libsyscall_shim] Binary system call request "write" (1) at ip:0x3851c21 (arg0=0x1, arg1=0x3c01640, ...)
@@ -422,11 +407,11 @@ Hello world!
 In the above case, the binary made a `write` system call in order to write ***Hello world!*** to our
 `stdin`.
 
-### 04. Solve the missing syscall
+### 04. Solve the Missing Syscall
 
-For the last part of today's session we will try to run another binary on top of Unikraft. You can find
-the C program in the `04-missing-syscall` directory. Try compiling it as static-pie and then run it
-on top of Unikraft.
+For the last part of today's session we will try to run another binary on top of Unikraft.
+You can find the C program in the `04-missing-syscall` directory.
+Try compiling it as static-pie and then run it on top of Unikraft.
 
 ```
 [libsyscall_shim] Binary system call request "getcpu" (309) at ip:0x3851926 (arg0=0x3f1fc14, arg1=0x0, ...)
@@ -436,14 +421,12 @@ Here we are in the binary, calling getcpu
 Getcpu returned: -1
 ```
 
-Your task is to print a debug message betweem `Here we are in the binary` and `Getcpu returned` and
-also make the `sched_getcpu()` return 0.
+Your task is to print a debug message betweem `Here we are in the binary` and `Getcpu returned` and also make the `sched_getcpu()` return 0.
 
 Hint 1: http://docs.unikraft.org/developers-app.html#syscall-shim-layer
 
-Hint 2: check the `brk.c`, `Makefile.uk` and `exportsyms.uk` file in the app-elfloader directory. You
-do not have to use `UK_LLSYSCALL_R_DEFINE`, instead, use the two other macros previously described
-in the session (eg. `UK_SYSCALL_DEFINE` and `UK_SYSCALL_R_DEFINE`).
+Hint 2: check the `brk.c`, `Makefile.uk` and `exportsyms.uk` file in the app-elfloader directory.
+You do not have to use `UK_LLSYSCALL_R_DEFINE`, instead, use the two other macros previously described in the session (eg. `UK_SYSCALL_DEFINE` and `UK_SYSCALL_R_DEFINE`).
 
 ## Further Reading
 
