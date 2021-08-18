@@ -7,9 +7,12 @@ In this session we are going to understand the basic layout of the Unikraft work
 We are also going to take a look at how we can build basic applications and how we can extend their functionality and support by adding ported external libraries.
 
 ## 00. Manual kraft installation
+
 First of all, make sure you have all the dependencies installed:
 ```
-apt-get install -y --no-install-recommends build-essential libncurses-dev libyaml-dev flex git wget socat bison unzip uuid-runtime;
+apt-get install -y --no-install-recommends build-essential \
+        libncurses-dev libyaml-dev flex git wget socat bison \
+        unzip uuid-runtime
 ```
 
 We begin by cloning the kraft repository on our  machine:
@@ -46,7 +49,9 @@ UK_APPS - The directory of all the template applications [default: $UK_WORKDIR/a
 After successfully running the above commands, you now have kraft installed on your system and we are ready to build some unikernels!
 
 ## 01. Building the Helloworld Application
+
 ### Automatic build through ```kraft```
+
 This is where the fun part begins - we get to build our first unikernel!
 We will start by using ```kraft``` so that it can automatically do the heavy lifting for us.
 
@@ -89,9 +94,9 @@ kraft build
 ```
 
 Note that this builds the final unikernel image through the stable branch of the unikraft core source code.
-If you desire to build it on another branch you should use the ```-Xv``` additional option.
+If you want to build it on another branch you should use the ```-Xv``` additional option.
 
-And that’s it! Our final unikernel binary is ready to be launched from the ```build/``` directory.
+And that's it! Our final unikernel binary is ready to be launched from the ```build/``` directory.
 We could simply tell kraft to run it for us through the following command:
 ```
 kraft run -p linuxu -m x86_64
@@ -110,19 +115,21 @@ If you want to know about a certain command, just follow it with the ```-h``` op
 For example, if I wanted to know more about the configure command, I would type ```kraft configure -h```.
 
 ### Manually building the ```helloworld``` application
-Let’s now learn how to build the app manually, without ```kraft```!
+Let's now learn how to build the app manually, without ```kraft```!
+While kraft is the recommended way, since it is simpler and has a nicer interface, the manual approach may still be useful if you want full control over the configuration and build process.
+More on this in session `02: Behind the Scenes`.
 
-First, get out of the current build’s directory and make a new one:
+First, get out of the current build's directory and make a new one:
 ```
 cd ../ && mkdir 01-hello-world-manual && cd 01-hello-world-manual
 ```
 
-Now, clone the remote git repository:
+Now, clone the remote Git repository:
 ```
 git clone https://github.com/unikraft/app-helloworld.git .
 ```
 
-In order to tell the build system how we want our final unikernel image to be built we can use the built-in ```ncurses menu```:
+In order to tell the build system how we want our final unikernel image to be built we can use the built-in `ncurses menu`:
 ```
 make menuconfig
 ```
@@ -134,9 +141,9 @@ Makefile:9: recipe for target 'menuconfig' failed
 make: *** [menuconfig] Error 2
 ```
 
-The reason this happens is because the build system assumes we are inside ```~/.unikraft/apps/app-helloworld-manual```, which is not the case.
-If you remember correctly, the build system makes use of some important environment variables, namely ```UK_WORKDIR```, ```UK_ROOT``` and ```UK_LIBS```.
-In order to properly inform the build system of our current location we will have to manually set these by prefixing whatever build command we send with the hardcoded values of where our ```Unikraft``` work directory is.
+The reason this happens is because the build system assumes we are inside `~/.unikraft/apps/app-helloworld-manual`, which is not the case.
+If you remember correctly, the build system makes use of some important environment variables, namely `UK_WORKDIR`, `UK_ROOT` and `UK_LIBS`.
+In order to properly inform the build system of our current location we will have to manually set these by prefixing whatever build command we send with the hardcoded values of where our `Unikraft` work directory is.
 ```
 $ UK_WORKDIR=~/.unikraft UK_ROOT=~/.unikraft/unikraft UK_LIBS=~/.unikraft/libs  make menuconfig
 ```
@@ -323,7 +330,7 @@ Now, after connecting to the server, whatever you enter in standard input, shoul
 
 ## 02. ROT-13
 Update the previously built application, to echo back a ```rot-13``` encoded message.
-To do this, you will have to create custom function inside ```lwip``` (~/.unikraft/libs/lwip/```) that you application (from the new directory work/02-rot13) can call in order to encode the string.
+To do this, you will have to create custom function inside ```lwip``` (~/.unikraft/libs/lwip/```) that your application (from the new directory work/02-rot13) can call in order to encode the string.
 For example, you could implement the function ```void rot13(char *msg);``` inside ```~/.unikraft/libs/lwip/sockets.c``` and add its header inside ```~/.unikraft/libs/lwip/include/sys/socket.h```.
 
 The required resources are the exact same as in the previous exercise, you will just have to update ```lwip```!
@@ -331,7 +338,7 @@ To test if this works, use the same methodology as before, but ensure that the e
 
 ## 03. Tutorial: Mount 9pfs
 In this tutorial we will see what we would need to do if we wanted to have a filesystem available.
-To make it easy, we will use the ```9pfs``` filesystem, as well as ```newlib``` as a lightweight library.
+To make it easy, we will use the ```9pfs``` filesystem, as well as the ```newlib``` library.
 The latter is used so that we have available an ```API``` that would enable us to interact with this filesystem (functions such as ```lseek```, ```open```).
 
 We will need to download ```newlib```:
@@ -361,7 +368,7 @@ And so, ```fs0``` will contain whatever files you create, read from or write to 
 For now, just make sure it successfully builds. If it does, move on to the next work item.
 
 ## 04. Store Strings
-For the final work item, you will have to update the source code from the second work item, so that it stores in a file the received string before sending the encoded one back to the client.
+For the final work item, you will have to update the source code from the second task, so that it stores in a file the received string before sending the encoded one back to the client.
 In order to achieve this, you must have the previous work item completed
 
 The available resources are the exact same, you will simply have to modify ```main.c```.
