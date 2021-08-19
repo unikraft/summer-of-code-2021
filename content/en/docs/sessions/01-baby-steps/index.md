@@ -1,7 +1,6 @@
 ---
 title: "Session 01: Baby Steps"
 linkTitle: "01. Baby Steps"
-date: 2021-07-22
 ---
 
 In this session we are going to understand the basic layout of the Unikraft working directory, its environment variables, as well as what the most common Unikraft specific files mean.
