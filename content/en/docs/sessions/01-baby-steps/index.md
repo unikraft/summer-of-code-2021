@@ -214,11 +214,12 @@ We will go through the same steps above, running a separate command for each ste
 
 #### Initialize
 
-First, we go into the first demo's directory, one that's currently empty:
+First, let's create a directory that will host the application.
+We enter the `demo/` directory of the current session and we create the `01-hello-world/` directory:
 ```
-$ cd demo/01-hello-world
-$ ls
-$
+$ cd demo/
+$ mkdir 01-hello-world
+$ cd 01-hello-world/
 ```
 
 Now, we initialize the application by using the template for the helloworld app and see that it's populated with files belonging to the app:
@@ -466,9 +467,12 @@ The latter involves understanding how to integrate ported external libraries, su
 
 ### Using kraft
 
-Just like before, we begin by switching to the correct directory.
+Just as before, let's create a directory that will host the application.
+We enter the `demo/` directory of the current session and we create the `01-hello-world/` directory:
 ```
-$ cd ../02-httpreply
+$ cd demo/
+$ mkdir 02-httpreply
+$ cd 02-httpreply/
 ```
 
 Now, we go through the steps above.
