@@ -75,7 +75,7 @@ It's very likely that running the command above will result in the following err
 GitHub rate limit exceeded.  You can tell kraft to use a personal access token by setting the UK_KRAFT_GITHUB_TOKEN environmental variable.
 ```
 
-If this is the case, first create a GitHub personal access token by following [these instructions](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-tokeny).
+If this is the case, first create a GitHub personal access token by following [these instructions](https://docs.github.com/en/github/authenticating-to-github/keeping-your-account-and-data-secure/creating-a-personal-access-token).
 Then, use the following command:
 ```
 $ UK_KRAFT_GITHUB_TOKEN=<your_GitHub_token_here> kraft list update
@@ -124,7 +124,7 @@ UK_LIBS - The directory of all the external Unikraft libraries [default: $UK_WOR
 UK_APPS - The directory of all the template applications [default: $UK_WORKDIR/apps]
 ```
 
-After successfully running the above commands, we now have kraft installed on your system and we can get to building and running unikernels.
+After successfully running the above commands, kraft is now installed on our system and we can get to building and running unikernels.
 
 ## 01. Building and Running the Helloworld Application
 
@@ -184,7 +184,7 @@ In the snippet above, we selected parts of the output showing what `kraft` does 
 
 All that magic is done using one command.
 
-A closer inspection of the `hello/` folder reveals it is a clone of the [app-helloworld repository](https://github.com/unikraft/app-helloworld) and it stores the resulting configuration file (`.config`) and resulting build folder (and images) (`build/):
+A closer inspection of the `hello/` folder reveals it is a clone of the [app-helloworld repository](https://github.com/unikraft/app-helloworld) and it stores the resulting configuration file (`.config`) and resulting build folder (and images) (`build/`):
 ```
 $ ls -Fa hello/
 ./  ../  build/  CODING_STYLE.md  .config  Config.uk  CONTRIBUTING.md  COPYING.md  .git/  kraft.yaml  main.c  MAINTAINERS.md  Makefile  Makefile.uk  monkey.h  README.md
@@ -334,7 +334,7 @@ For example, if I wanted to know more about the configure command, I would type 
 ### Manually Building the helloworld Application
 
 Let's now learn how to build the app manually, without `kraft`.
-We won't go into much detail, this will be handled more thoroughly in session 02: Behind the Scenes.
+We won't go into too much detail, this will be handled more thoroughly in session 02: Behind the Scenes.
 
 The manual approach is more complicated (albeit giving you potentially more control) than kraft.
 For most of the use cases (development, testing, evaluating, using) of Unikraft, we recommend you use kraft.
@@ -393,7 +393,7 @@ So, in order to properly inform the build system of our current location, we wil
 ```
 $ UK_WORKDIR=~/.unikraft UK_ROOT=~/.unikraft/unikraft UK_LIBS=~/.unikraft/libs make menuconfig
 ```
-Note: This menu is also available through the `kraft menuconfig` command, which rids you of the hassle of manually setting the environment variables.
+**Note**: This menu is also available through the `kraft menuconfig` command, which rids you of the hassle of manually setting the environment variables.
 
 We are met with the following configuration menu. Let's pick the architecture:
 
@@ -799,7 +799,7 @@ For now, just make sure it successfully builds. If it does, move on to the next 
 ## 04. Store Strings
 
 For the final work item, you will have to update the source code from the second task, so that it stores in a file the received string before sending the encoded one back to the client.
-In order to achieve this, you must have the previous work item completed
+In order to achieve this, you must have the previous work item completed.
 
 The available resources are the exact same, you will simply have to modify `main.c`.
 
