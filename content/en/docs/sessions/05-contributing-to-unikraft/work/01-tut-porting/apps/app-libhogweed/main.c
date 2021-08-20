@@ -6,6 +6,5 @@
 
 int main()
 {
-	int verbose = 1;
-	run_all_libhogweed_tests(verbose);
+	// TODO
 }
