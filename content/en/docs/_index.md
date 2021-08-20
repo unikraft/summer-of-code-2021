@@ -46,3 +46,5 @@ and September 3, 2021, 4pm-8pm CEST. And an 8 hours hackathon on September 4,
 2021, 9am-5pm CEST. It will be online and in English. Topics include building
 unikernels, benchmarking, debugging, porting applications, virtualization and
 platform specifics.
+
+*USoC21 and Unikraft are supported by the [UNICORE Project](https://unicore-project.eu/), EU Horizon 2020 grant agreement No 825377.*
