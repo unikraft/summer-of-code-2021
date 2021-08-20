@@ -1,5 +1,7 @@
 ### Invisible option for dependencies
-config APPHOGWEED_DEPENDENCIES
+config APPKDTREE_DEPENDENCIES
 	bool
 	default y
 	select LIBNEWLIBC
+	select LIBKDTREE
+	select BUILD_TESTS

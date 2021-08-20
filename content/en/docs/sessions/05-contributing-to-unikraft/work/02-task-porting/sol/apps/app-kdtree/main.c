@@ -6,5 +6,5 @@
 
 int main()
 {
-
+	libkdtree_test_main();
 }

@@ -2,9 +2,9 @@
 #
 #  libkdtree Makefile.uk
 #
-#  Authors: USoC 2021
+#  Authors: Laurentiu Barbulescu <lrbarbulescu@gmail.com>
 #
-#  Copyright (c) 2021, NEC Europe Ltd., NEC Corporation. All rights reserved.
+#  Copyright (c) 2021, University Politehnica of Bucharest. All rights reserved.
 #
 #  Redistribution and use in source and binary forms, with or without
 #  modification, are permitted provided that the following conditions
@@ -35,31 +35,25 @@
 ################################################################################
 # Library registration
 ################################################################################
-# TODO_2
-$(eval $(call addlib_s,libname,CHECK_IF_SELECTED))
+$(eval $(call addlib_s,libkdtree,$(CONFIG_LIBKDTREE)))
 
 ################################################################################
 # Original sources
 ################################################################################
-# TODO_3
-LIBKDTREE_VERSION = 
-LIBKDTREE_URL = 
-# TODO_3
-$(eval $(call fetch,libname,$(LIBKDTREE_URL)))
+LIBKDTREE_VERSION = 0.5.7
+LIBKDTREE_URL = http://nuclear.mutantstargoat.com/sw/kdtree/files/kdtree-$(LIBKDTREE_VERSION).tar.gz
+$(eval $(call fetch,libkdtree,$(LIBKDTREE_URL)))
 
 ################################################################################
 # Helpers
 ################################################################################
-# TODO_4
-LIBKDTREE_EXTRACTED = $(LIBKDTREE_ORIGIN)/TODO_4_PATH
+LIBKDTREE_EXTRACTED = $(LIBKDTREE_ORIGIN)/kdtree-$(LIBKDTREE_VERSION)
 
 ################################################################################
 # Library includes
 ################################################################################
-# TODO_5
-LIBKDTREE_COMMON_INCLUDES-y     += -I$(TODO_5_PATH)
-# TODO_12
-# LIBKDTREE_COMMON_INCLUDES-y     += -I$(TODO_12_PATH)
+LIBKDTREE_COMMON_INCLUDES-y     += -I$(LIBKDTREE_BASE)/include
+LIBKDTREE_COMMON_INCLUDES-y     += -I$(LIBKDTREE_EXTRACTED)/
 
 CINCLUDES-$(CONFIG_LIBKDTREE)   += $(LIBKDTREE_COMMON_INCLUDES-y)
 CXXINCLUDES-$(CONFIG_LIBKDTREE) += $(LIBKDTREE_COMMON_INCLUDES-y)
@@ -70,7 +64,6 @@ LIBKDTREE_CXXINCLUDES += -I$(LIBKDTREE_EXTRACTED)
 ################################################################################
 # Global flags
 ################################################################################
-# TODO_8
 # Suppress flags
 LIBKDTREE_SUPPRESS_FLAGS +=
 LIBKDTREE_CFLAGS-y   += $(LIBKDTREE_SUPPRESS_FLAGS)
@@ -84,22 +77,28 @@ LIBKDTREE_CXXFLAGS-y += $(LIBKDTREE_DEFINES)
 ################################################################################
 # LIBKDTREE code
 ################################################################################
-# TODO_6
-LIBKDTREE_SRCS-y += $(LIBKDTREE_EXTRACTED)/TODO_6_PATH
+LIBKDTREE_SRCS-y += $(LIBKDTREE_EXTRACTED)/kdtree.c
 
 ################################################################################
 # LIBKDTREE tests
 ################################################################################
-# TODO_10
-# LIBKDTREE_SRCS-$(CONFIG_TEST_Y) += TODO_10_TEST_PATH
+LIBKDTREE_SRCS-$(CONFIG_TEST_1) += $(LIBKDTREE_EXTRACTED)/examples/test.c
+LIBKDTREE_TEST_FLAGS-$(CONFIG_TEST_1) += -Dmain=test1_main
 
-# TODO_10
-# LIBKDTREE_SRCS-$(CONFIG_TEST_Z) += TODO_10_TEST_PATH
+LIBKDTREE_SRCS-$(CONFIG_TEST_2) += $(LIBKDTREE_EXTRACTED)/examples/test2.c
+LIBKDTREE_TEST2_FLAGS-$(CONFIG_TEST_1) += -Dmain=test2_main
 
-# TODO_12
-# LIBKDTREE_SRCS-$(CONFIG_BUILD_TESTS) += TODO_12_GLUE_PATH
-
+LIBKDTREE_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBKDTREE_BASE)/test_suite_glue.c
 ################################################################################
 # LIBKDTREE prepare
 ################################################################################
-# TODO_7
+# Run ./configure
+$(LIBKDTREE_EXTRACTED)/config.status: $(LIBKDTREE_BUILD)/.origin
+	$(call verbose_cmd,CONFIG,libkdtree: $(notdir $@), \
+		cd $(LIBKDTREE_EXTRACTED) && ./configure)
+
+LIBKDTREE_PREPARED_DEPS = $(LIBKDTREE_EXTRACTED)/config.status
+
+$(LIBKDTREE_BUILD)/.prepared: $(LIBKDTREE_PREPARED_DEPS)
+
+UK_PREPARE += $(LIBKDTREE_BUILD)/.prepared
