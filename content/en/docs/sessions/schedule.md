@@ -18,7 +18,7 @@ The complete schedule for USoC'21 is (all times in CEST - Central European Summe
 | Thu, 26.08.2021 | 4pm-8pm | [Session 04: Complex Applications]({{<ref "/docs/sessions/04-complex-applications" >}} "04. Complex Applications") | Costi, Vlad |
 | Fri, 27.08.2021 | 4pm-4:30pm<br/> 4:30pm-8pm | Tech Talk: Virtual Memory in Unikraft<br/> [Session 05: Contributing to Unikraft]({{<ref "/docs/sessions/05-contributing-to-unikraft" >}} "05. Contributing to Unikraft") | Ștefan<br/> Vlad, RazvanD |
 | Mon, 30.08.2021 | 4pm-8pm | [Session 06: Testing Unikraft]({{<ref "/docs/sessions/06-testing-unikraft" >}} "06. Testing Unikraft") | CristiB, Alex |
-| Tue, 31.08.2021 | 4pm-4:30pm<br/> 4:30pm-8pm | Tech Talk<br/> [Session 07: Syscall Shim]({{<ref "/docs/sessions/07-syscall-shim" >}} "07. Syscall Shim") | Gaulthier<br/> RazvanD, Alex |
+| Tue, 31.08.2021 | 4pm-4:30pm<br/> 4:30pm-8pm | Tech Talk: Memory Deduplication with Unikraft<br/> [Session 07: Syscall Shim]({{<ref "/docs/sessions/07-syscall-shim" >}} "07. Syscall Shim") | Gaulthier<br/> RazvanD, Alex |
 | Wed, 01.09.2021 | 4pm-8pm | [Session 08: Basic App Porting]({{<ref "/docs/sessions/08-basic-app-porting" >}} "08. Basic App Porting") | Cezar, RazvanD |
 | Thu, 02.09.2021 | 4pm-4:30pm<br/> 4:30pm-8pm | Tech Talk<br/> [Session 09: Advanced App Porting]({{<ref "/docs/sessions/09-advanced-app-porting" >}} "09. Advanced App Porting") | Hugo<br/> Vlad, Cezar |
 | Fri, 03.09.2021 | 4pm-8pm | [Session 10: High Performance]({{<ref "/docs/sessions/10-high-performance" >}} "10. High Performance") | Alex, RazvanD |
