@@ -45,6 +45,7 @@ Let's focus for now on a already ported library: [lib-libhogweed](https://github
 Let's examine its core components.
 Open the sources present in `work/01-tut-porting/libs/libhogweed/` and follow the bookmars marked with `USOC_X`, where `X` is the index of the item in the list.
 
+
 ### Glue Code
 
 In some cases, not all the dependencies of an external library are already present in the Unikraft project, so the solution is to add them manually, as glue code, to the library's sources.
@@ -56,9 +57,9 @@ Moreover, we can create a test framework which can periodically check all of the
 
 Moving back to `libhogweed`, a practical example of the second case is the `run_all_libhogweed_tests(int v)` function from `work/01-tut-porting/libs/libhogweed/testutils_glue.c`, line #674, which calls every selected(we will see later how we can make selectable config variables) test module and exits with `EXIT_SUCCESS` only if it passes over all the tests.
 For exposing this API, we should also make a header file with all of the test modules, as well as our wrapper function.
-````
-! Check `work/01-tut-porting/libs/libhogweed/include/testutils_glue.h`.
-````
+
+**Note**: Check `work/01-tut-porting/libs/libhogweed/include/testutils_glue.h`.
+
 
 ### Config.uk
 
@@ -92,6 +93,7 @@ menuconfig TESTSUITE
 ````
 Each test case have its own variable in order to allow testing just some tests from the whole suite.
 
+
 ### Makefile.uk
 1. Register the library to Unikraft's build system:
 ````
@@ -110,7 +112,7 @@ LIBHOGWEED_URL=https://ftp.gnu.org/gnu/nettle/nettle-$(LIBHOGWEED_VERSION).tar.g
 LIBHOGWEED_SUBDIR=nettle-$(LIBHOGWEED_VERSION)
 LIBHOGWEED_EXTRACTED = $(LIBHOGWEED_ORIGIN)/nettle-$(LIBHOGWEED_VERSION)
 ````
-There are some useful default variables:
+There are some useful default variables, for example:
 - `$LIBNAME_ORIGIN`: represents the path where the original library is downloaded and extracted during the build process;
 - `$LIBNAME_BASE`: represents the path of the ported library sources(the path appended to the `$LIBS` variable).
 
@@ -146,13 +148,12 @@ LIBHOGWEED_SRCS-y += $(LIBHOGWEED_EXTRACTED)/testsuite/rsa-compute-root-test.c
 LIBHOGWEED_RSA-COMPUTE-ROOT-TEST_FLAGS-y += -Dtest_main=rsa_compute_root_test
 endif
 ````
-There are situations when the test cases have each a `main()` function. In order to wrap all the tests into one single main function, we have to modify their main function name by using preprocessing symbols.
-
-````
-! A good practice is to include a test only if the config variable corresponding to that test is set.
-````
+There are situations when the test cases have each a `main()` function.
+In order to wrap all the tests into one single main function, we have to modify their main function name by using preprocessing symbols.
 
 You can read more about compile flags in [the main documentation](http://docs.unikraft.org/developers-app.html#makefile-uk).
+
+**Note**: A good practice is to include a test only if the config variable corresponding to that test is set.
 
 8. This step is very customizabile, being like a script executed before starting to compile the unikernel.
 In general, and in this case too, the libraries build their own config file through a provided executable, usually named `configure`:
@@ -177,49 +178,53 @@ For this task, you can use the setup from `work/01-tut-porting/`.
 Complete the TODO's from `work/01-tut-porting/apps/app-libhogweed`: add the `libhogweed` library as dependency in its `Makefile` and call from `main.c` the function exposed by the library for running all its tests.
 
 Modify the number of selected tests, rebuild, and run again the application.
-````
-! After you modify the selected tests, properclean the sources.
-````
 
-## 04. Practical Work
+**Note**: After you modify the selected tests, properclean the sources.
+
+## Summary
+
+- We need a large library pool in order to make the Unikraft project compatible with as many applications as possible.
+- There are also many ways in which you can contribute to the Unikraft project, and you can find them in [the issues section](https://github.com/unikraft/unikraft/issues) of the main repository.
+
+## Practical Work
 
 Moving to a more hands on experience, let's port a new library!
-Let's suppose that we need kd tree support and that we found a C library that does what we need: http://nuclear.mutantstargoat.com/sw/kdtree/.
+Let's suppose that we need kd tree support and that we found a `C` library, [`kdtree`](http://nuclear.mutantstargoat.com/sw/kdtree/), that does what we need.
 After downloading and inspecting this library, we can see that it also has a set of examples, which can be used by us to test if we ported this library properly.
 
 Follow the TODO's from `work/02-task-porting/src/libs/kdtree/` and complete the porting process!
 
-### 4.1. Declare Library Identifier
+### 01. Declare Library Identifier
 
 Let's start declaring a new config variable in the `Config.uk` file.
 As stated before, this variable will represent the library's identifier.
 
-### 4.2. Register it to the Build System
+### 02. Register it to the Build System
 
 Now let's use it, in the `Makefile.uk` file.
 If the variable declared previously is set, register the library to the build system.
 
-### 4.3. Set its URL
+### 03. Set its URL
 
 Having it registered, set the URL from where it will be automatically downloaded at build time, and fetch it.
 
-### 4.4 Helper Variables
+### 04 Helper Variables
 
 Make a variable with the path of the default folder name obtained by extracting the library's archive.
 
-### 4.5. Headers Location
+### 05. Headers Location
 
 Add the directory which contains the library's headers.
 
-### 4.6. Add Sources
+### 06. Add Sources
 
 Add the sources of the library
 
-### 4.7. Additional Requirements
+### 07. Additional Requirements
 
 Check the original `README` to see if the library needs to be configured first, and add the proper rule if so.
 
-### 4.8. Intermediary Check
+### 08. Intermediary Check
 
 Until now we have registered the library and its sources, and if it doesn't have any more unresolved dependencies we should be able to compile an unikernel with it.
 Using the `work/02-task-porting/src/apps/app-kdtree` application, try to build an unikernel with our ported library as dependency!
@@ -231,42 +236,32 @@ If needed, provide additional flags in order to suppress compile warnings genera
 - You can readme, but the solution isn't here.
 ````
 
-### 4.9. Add Test Config Variables
+### 09. Add Test Config Variables
 
 Now let's make a wrapper for the provided test cases.
 Decomment lines #7-#15 from `work/02-task-porting/src/libs/kdtree/Config.uk` and complete the `TODO_9` by adding new config variables for each test case.
 
-### 4.10. Register Test Sources
+### 10. Register Test Sources
 
 Moving back to `work/02-task-porting/src/libs/kdtree/Makefile.uk`, register the c sources to the build system.
 
-````
-! Inspect the functions from the tests.
-````
+**Note**: Inspect the functions from the tests.
 
-### 4.11. Wrapper Glue
+### 11. Wrapper Glue
 
 Integrate all the test functions into a glue main.
 Also, update the `work/02-task-porting/src/libs/kdtree/include/test_suite_glue.h` header accordingly.
 
-````
-! You can use `work/02-task-porting/src/libs/kdtree/test_suite_glue.c`.
-````
+**Note**: You can use `work/02-task-porting/src/libs/kdtree/test_suite_glue.c`.
 
-### 4.12. Register Glue Code
+### 12. Register Glue Code
 
 Register both the glue test wrapper source and its header in `Makefile.uk`.
 
-### 4.13. Final Verification
+### 13. Final Verification
 
 Test the resulted library by calling the test function from the `work/02-task-porting/src/apps/app-kdtree` application.
 
-
-## 05. Summary
-
-- We need a large library pool in order to make the Unikraft project compatible with as many applications as possible.
-- There are also many ways in which you can contribute to the Unikraft project, and you can find them in [the issues section](https://github.com/unikraft/unikraft/issues) of the main repository.
-
-## 06. Further Reading
+## Further Reading
 
 You can get more in depth informations for the contributing process from [the main documentation](http://docs.unikraft.org/developers-app.html#).
