@@ -26,6 +26,8 @@ Also, in session 02 we saw that there are two types of libraries:
 - internal: which define parts of the kernel(schedulers, file systems, etc.);
 - external: which define user-space level functionalities.
 
+The external libraries should be placed in the `$UK_LIBS` folder, which is by default `$UK_WORKDIR/libs`, and the applications should be placed in the `$UK_APPS` folder, which is by default `$UK_WORKDIR/apps`.
+
 ## 01. Git Structure
 
 The [organiation's github](https://github.com/unikraft) contains [the main Unikraft repository](https://github.com/unikraft/unikraft) and separate repositories for external libraries, as well as already ported apps.
@@ -109,7 +111,6 @@ LIBHOGWEED_URL=https://ftp.gnu.org/gnu/nettle/nettle-$(LIBHOGWEED_VERSION).tar.g
 
 3. Declare helper variables for the most used paths:
 ````
-LIBHOGWEED_SUBDIR=nettle-$(LIBHOGWEED_VERSION)
 LIBHOGWEED_EXTRACTED = $(LIBHOGWEED_ORIGIN)/nettle-$(LIBHOGWEED_VERSION)
 ````
 There are some useful default variables, for example:
@@ -131,6 +132,7 @@ LIBHOGWEED_SUPPRESS_FLAGS += -Wno-unused-parameter \
         -Wno-unused-variable -Wno-unused-value -Wno-unused-function \
         -Wno-missing-field-initializers -Wno-implicit-fallthrough \
         -Wno-sign-compare
+
 LIBHOGWEED_CFLAGS-y   += $(LIBHOGWEED_SUPPRESS_FLAGS) \
         -Wno-pointer-to-int-cast -Wno-int-to-pointer-cast
 LIBHOGWEED_CXXFLAGS-y += $(LIBHOGWEED_SUPPRESS_FLAGS)
@@ -174,12 +176,14 @@ We can also do things like generating headers using the original building system
 
 Let's check the integrity of this library using its test suite through the exposed wrapper function.
 
-For this task, you can use the setup from `work/01-tut-porting/`.
-Complete the TODO's from `work/01-tut-porting/apps/app-libhogweed`: add the `libhogweed` library as dependency in its `Makefile` and call from `main.c` the function exposed by the library for running all its tests.
+For this task, you have to move, [or clone](https://github.com/unikraft/lib-libhogweed), the library in the `$UK_LIBS` folder and the `work/01-tut-porting/apps/app-libhogweed` application in the `$UK_APPS` folder.
+Complete the TODO's from the application: add the `libhogweed` library as dependency in its `Makefile` and call from `main.c` the function exposed by the library for running the test suite.
 
-Modify the number of selected tests, rebuild, and run again the application.
+**Note**: The [`libhogweed`](https://github.com/unikraft/lib-libhogweed) library depends on [`newlib`](https://github.com/unikraft/lib-newlib).
 
-**Note**: After you modify the selected tests, properclean the sources.
+Disable some tests, rebuild, and run again the checker application.
+
+**Note**: After you modify the selected tests, `properclean` the sources.
 
 ## Summary
 
@@ -192,75 +196,87 @@ Moving to a more hands on experience, let's port a new library!
 Let's suppose that we need kd tree support and that we found a `C` library, [`kdtree`](http://nuclear.mutantstargoat.com/sw/kdtree/), that does what we need.
 After downloading and inspecting this library, we can see that it also has a set of examples, which can be used by us to test if we ported this library properly.
 
-Follow the TODO's from `work/02-task-porting/src/libs/kdtree/` and complete the porting process!
+Move the skeleton of this library, `work/02-task-porting/src/libs/kdtree/`, in the `$UK_LIBS` folder and complete the porting process by following the TODO's!
 
 ### 01. Declare Library Identifier
 
-Let's start declaring a new config variable in the `Config.uk` file.
+Let's start by declaring a new config variable in the `Config.uk` file.
 As stated before, this variable will represent the library's identifier.
 
 ### 02. Register it to the Build System
 
-Now let's use it, in the `Makefile.uk` file.
-If the variable declared previously is set, register the library to the build system.
+For the next steps, the working file will be `Makefile.uk` from the library's skeleton.
+Let's use the previously declared variable: register the library to the build system only if the variable is set.
 
 ### 03. Set its URL
 
-Having it registered, set the URL from where it will be automatically downloaded at build time, and fetch it.
+Having the library registered, set the `URL` from where it will be downloaded at build time, and explicitly fetch it.
 
 ### 04 Helper Variables
 
-Make a variable with the path of the default folder name obtained by extracting the library's archive.
+Make a variable with the path of the default folder obtained by extracting the original library's archive.
 
 ### 05. Headers Location
 
-Add the directory which contains the library's headers.
+Add the directory which contains the library's header.
+
+````
+! Hint: Inspect $LIBKDTREE_EXTRACTED.
+````
 
 ### 06. Add Sources
 
-Add the sources of the library
+Add the library's `C` sources.
+
+````
+! Hint: Inspect $LIBKDTREE_EXTRACTED.
+````
 
 ### 07. Additional Requirements
 
-Check the original `README` to see if the library needs to be configured first, and add the proper rule if so.
+Check the original library's `README` to see if it needs to be configured first, and add the proper rule if so.
 
 ### 08. Intermediary Check
 
-Until now we have registered the library and its sources, and if it doesn't have any more unresolved dependencies we should be able to compile an unikernel with it.
-Using the `work/02-task-porting/src/apps/app-kdtree` application, try to build an unikernel with our ported library as dependency!
+Until now we have registered the library and its sources, and we should be able to compile an unikernel with it *if it doesn't have any more unresolved dependencies*.
+Move the `work/02-task-porting/src/apps/app-kdtree` application to `$UK_APPS` and use it to build an unikernel with our ported library as dependency!
 
-If needed, provide additional flags in order to suppress compile warnings generated by this library.
+If needed, provide additional flags in order to suppress the compile warnings generated by this library.
+
+**Note**: You can leave the application's main empty.
+
 ````
-! HINTS
-- You can leave the application's main empty.
-- You can readme, but the solution isn't here.
+! HINT: You can readme, but the solution isn't here.
 ````
 
 ### 09. Add Test Config Variables
 
-Now let's make a wrapper for the provided test cases.
-Decomment lines #7-#15 from `work/02-task-porting/src/libs/kdtree/Config.uk` and complete the `TODO_9` by adding new config variables for each test case.
+Now let's make a wrapper for the test cases provided as examples.
+Decomment lines #7-#15 from the library's `Config.uk` and complete `TODO_9` by adding new config variables for each test case.
 
 ### 10. Register Test Sources
 
-Moving back to `work/02-task-porting/src/libs/kdtree/Makefile.uk`, register the c sources to the build system.
+Moving back to the library's `Makefile.uk`, register the tests sources to the build system.
 
 **Note**: Inspect the functions from the tests.
+**Note**: Don't forget to uncomment the lines.
 
 ### 11. Wrapper Glue
 
 Integrate all the test functions into a glue main.
-Also, update the `work/02-task-porting/src/libs/kdtree/include/test_suite_glue.h` header accordingly.
+Also, update the library's `include/test_suite_glue.h` header accordingly.
 
-**Note**: You can use `work/02-task-porting/src/libs/kdtree/test_suite_glue.c`.
+**Note**: You can use `test_suite_glue.c` from the library's skeleton.
 
 ### 12. Register Glue Code
 
 Register both the glue test wrapper source and its header in `Makefile.uk`.
 
+**Note**: Don't forget to uncomment the lines.
+
 ### 13. Final Verification
 
-Test the resulted library by calling the test function from the `work/02-task-porting/src/apps/app-kdtree` application.
+Test the resulted library by calling the test function from the `app-kdtree` application.
 
 ## Further Reading
 
