@@ -46,7 +46,7 @@ $(eval $(call addlib_s,libhogweed,$(CONFIG_LIBHOGWEED)))
 LIBHOGWEED_VERSION=3.6
 LIBHOGWEED_URL=https://ftp.gnu.org/gnu/nettle/nettle-$(LIBHOGWEED_VERSION).tar.gz
 LIBHOGWEED_PATCHDIR=$(LIBHOGWEED_BASE)/patches
-# USOC_3
+
 LIBHOGWEED_SUBDIR=nettle-$(LIBHOGWEED_VERSION)
 $(eval $(call fetch,libhogweed,$(LIBHOGWEED_URL)))
 #$(eval $(call patch,libhogweed,$(LIBHOHWEED_PATCHDIR),$(LIBHOGWEED_SUBDIR)))
