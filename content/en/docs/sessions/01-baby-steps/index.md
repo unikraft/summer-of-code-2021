@@ -660,7 +660,7 @@ $ make
 
 To run the KVM image, we use the `qemu-system-x86_64` command:
 ```
-$ qemu-system-x86_64 -kernel build/02-httpreply_kvm-x86_64 -nographic
+$ qemu-system-x86_64 -kernel build/02-httpreply-manual_kvm-x86_64 -nographic
 [...]
 Powered by
 o.   .o       _ _               __ _
@@ -677,7 +677,7 @@ To close the running QEMU process, use the `Ctrl+a x` key combination.
 This is a bit more complicated and is outside the scope of this session.
 
 ```
-sudo qemu-system-x86_64 -netdev bridge,id=en0,br=virbr0 -device virtio-net-pci,netdev=en0 -append "netdev.ipv4_addr=172.44.0.2 netdev.ipv4_gw_addr=172.44.0.1 netdev.ipv4_subnet_mask=255.255.255.0 --" -kernel build/02-httpreply_kvm-x86_64 -nographic
+sudo qemu-system-x86_64 -netdev bridge,id=en0,br=virbr0 -device virtio-net-pci,netdev=en0 -append "netdev.ipv4_addr=172.44.0.2 netdev.ipv4_gw_addr=172.44.0.1 netdev.ipv4_subnet_mask=255.255.255.0 --" -kernel build/02-httpreply-manual_kvm-x86_64 -nographic
 ```
 
 #### Connecting to the HTTP Server
@@ -694,7 +694,7 @@ $ sudo ip l set dev virbr0 up
 
 Now we start the virtul machine and pass it the proper arguments to assing the IP address `172.44.0.2/24`:
 ```
-$ sudo qemu-system-x86_64 -netdev bridge,id=en0,br=virbr0 -device virtio-net-pci,netdev=en0 -append "netdev.ipv4_addr=172.44.0.2 netdev.ipv4_gw_addr=172.44.0.1 netdev.ipv4_subnet_mask=255.255.255.0 --" -kernel build/02-httpreply_kvm-x86_64 -nographic
+$ sudo qemu-system-x86_64 -netdev bridge,id=en0,br=virbr0 -device virtio-net-pci,netdev=en0 -append "netdev.ipv4_addr=172.44.0.2 netdev.ipv4_gw_addr=172.44.0.1 netdev.ipv4_subnet_mask=255.255.255.0 --" -kernel build/02-httpreply-manual_kvm-x86_64 -nographic
 0: Set IPv4 address 172.44.0.2 mask 255.255.255.0 gw 172.44.0.1
 en0: Added
 en0: Interface is up
