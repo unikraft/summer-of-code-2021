@@ -86,7 +86,7 @@ A position independent binary is a binary that can run correctly independent of 
 
 ## 02. Syscall Shim
 
-As stated previously the system call shim layer is the layer that we use in order to achieve the same system call behaviour as the Linux kernel.
+As stated previously, the system call shim layer is what we use in order to achieve the same system call behaviour as the Linux kernel.
 
 Let's take a code snippet that does a system call from a binary:
 
@@ -326,7 +326,7 @@ We can see that the binary is succesfully loaded and executed.
 
 ### 03. Let's Dive Deeper.
 
-Now that we saw how we can run an executable on top of Unikraft though binary compatibility, let's take a look at what happens behind the scenes.
+Now that we saw how we can run an executable on top of Unikraft through binary compatibility, let's take a look at what happens behind the scenes.
 For this we have to compile the unikernel with the debug printing.
 
 Copy the config_debug file to our application folder:
@@ -423,12 +423,11 @@ Getcpu returned: -1
 
 Your task is to print a debug message betweem `Here we are in the binary` and `Getcpu returned` and also make the `sched_getcpu()` return 0.
 
-Hint 1: http://docs.unikraft.org/developers-app.html#syscall-shim-layer
+**Hint 1**: [Syscall Shim Layer](http://docs.unikraft.org/developers-app.html#syscall-shim-layer)
 
-Hint 2: check the `brk.c`, `Makefile.uk` and `exportsyms.uk` file in the app-elfloader directory.
+**Hint 2**: Check the `brk.c`, `Makefile.uk` and `exportsyms.uk` files in the `app-elfloader` directory.
 You do not have to use `UK_LLSYSCALL_R_DEFINE`, instead, use the two other macros previously described in the session (eg. `UK_SYSCALL_DEFINE` and `UK_SYSCALL_R_DEFINE`).
 
 ## Further Reading
 
-https://dtrugman.medium.com/elf-loaders-libraries-and-executables-on-linux-e5cfce318f94
->>>>>>> Add session content for 07:Binary compatibility and syscall shim
+[Elf Loaders, Libraries and Executables on Linux](https://dtrugman.medium.com/elf-loaders-libraries-and-executables-on-linux-e5cfce318f94)
