@@ -709,7 +709,7 @@ Listening on port 8123...
 [...]
 ```
 The boot message confirms the assigning of the `172.44.0.2/24` IP address to the virtual machine.
-It's listening on por 8123 for HTTP connections on that IP address.
+It's listening on port 8123 for HTTP connections on that IP address.
 We use `wget` to validate it's working properly and we are able to get the `index.html` file:
 ```
 $ wget 172.44.0.2:8123
