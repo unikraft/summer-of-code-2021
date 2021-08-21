@@ -9,10 +9,10 @@ if LIBKDTREE
 		default n
 		
 	if BUILD_TESTS
-		config TEST1
+		config TEST_1
 			bool "Test 1"
 			default y
-		config TEST2
+		config TEST_2
 			bool "Test 2"
 			default y
 	endif
