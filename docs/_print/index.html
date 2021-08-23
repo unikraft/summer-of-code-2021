@@ -326,7 +326,7 @@ $(MAKECMDGOALS):
         @$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS) $(MAKECMDGOALS)
 </code></pre><h5 id=configure-3>Configure</h5><p>Now, we configure it through <code>make menuconfig</code>.</p><p><img src=/docs/sessions/01-baby-steps/images/menuconfig_select_lwip.png alt="lwip selection menu"></p><p><img src=/docs/sessions/01-baby-steps/images/menuconfig_select_lwip2.png alt="lwip2 selection menu"></p><p>If you noticed, the menu also automatically selected some other internal components that would be required by <code>lwip</code>.
 Now <code>Save</code> and <code>Exit</code> the configuration and run <code>make</code>.</p><h5 id=build-3>Build</h5><pre><code>$ make
-</code></pre><h5 id=run-3>Run</h5><p>To run the KVM image, we use the <code>qemu-system-x86_64</code> command:</p><pre><code>$ qemu-system-x86_64 -kernel build/02-httpreply-manual_kvm-x86_64 -nographic
+</code></pre><h5 id=run-3>Run</h5><p>To run the KVM image, we use the <code>qemu-system-x86_64</code> command:</p><pre><code>$ qemu-system-x86_64 -kernel build/02-httpreply_kvm-x86_64 -nographic
 [...]
 Powered by
 o.   .o       _ _               __ _
@@ -337,12 +337,12 @@ oOo oOO| | | | |   (| | | (_) |  _) :_
                    Tethys 0.5.0~b8be82b
 Listening on port 8123...
 </code></pre><p>To close the running QEMU process, use the <code>Ctrl+a x</code> key combination.</p><p><strong>Note</strong>: We didn&rsquo;t go into configuring a functional network connection and actually querying the HTTP server.
-This is a bit more complicated and is outside the scope of this session.</p><pre><code>sudo qemu-system-x86_64 -netdev bridge,id=en0,br=virbr0 -device virtio-net-pci,netdev=en0 -append &quot;netdev.ipv4_addr=172.44.0.2 netdev.ipv4_gw_addr=172.44.0.1 netdev.ipv4_subnet_mask=255.255.255.0 --&quot; -kernel build/02-httpreply-manual_kvm-x86_64 -nographic
+This is a bit more complicated and is outside the scope of this session.</p><pre><code>sudo qemu-system-x86_64 -netdev bridge,id=en0,br=virbr0 -device virtio-net-pci,netdev=en0 -append &quot;netdev.ipv4_addr=172.44.0.2 netdev.ipv4_gw_addr=172.44.0.1 netdev.ipv4_subnet_mask=255.255.255.0 --&quot; -kernel build/02-httpreply_kvm-x86_64 -nographic
 </code></pre><h5 id=connecting-to-the-http-server-1>Connecting to the HTTP Server</h5><p>Similarly to kraft, in order to connect to the HTTP server, we use a virtual bridge to create a connection between the VM and the host system.
 We assign address <code>172.44.0.1/24</code> to the bridge interface (pointing to the host) and we assign address <code>172.44.0.2/24</code> to the virtual machine, by passing boot arguments.</p><p>We run the commands below to create and assign the IP address to the bridge <code>virbr0</code>:</p><pre><code>$ sudo brctl addbr virbr0
 $ sudo ip a a  172.44.0.1/24 dev virbr0
 $ sudo ip l set dev virbr0 up
-</code></pre><p>Now we start the virtul machine and pass it the proper arguments to assing the IP address <code>172.44.0.2/24</code>:</p><pre><code>$ sudo qemu-system-x86_64 -netdev bridge,id=en0,br=virbr0 -device virtio-net-pci,netdev=en0 -append &quot;netdev.ipv4_addr=172.44.0.2 netdev.ipv4_gw_addr=172.44.0.1 netdev.ipv4_subnet_mask=255.255.255.0 --&quot; -kernel build/02-httpreply-manual_kvm-x86_64 -nographic
+</code></pre><p>Now we start the virtul machine and pass it the proper arguments to assing the IP address <code>172.44.0.2/24</code>:</p><pre><code>$ sudo qemu-system-x86_64 -netdev bridge,id=en0,br=virbr0 -device virtio-net-pci,netdev=en0 -append &quot;netdev.ipv4_addr=172.44.0.2 netdev.ipv4_gw_addr=172.44.0.1 netdev.ipv4_subnet_mask=255.255.255.0 --&quot; -kernel build/02-httpreply_kvm-x86_64 -nographic
 0: Set IPv4 address 172.44.0.2 mask 255.255.255.0 gw 172.44.0.1
 en0: Added
 en0: Interface is up
@@ -356,7 +356,7 @@ oOo oOO| | | | |   (| | | (_) |  _) :_
 Listening on port 8123...
 [...]
 </code></pre><p>The boot message confirms the assigning of the <code>172.44.0.2/24</code> IP address to the virtual machine.
-It&rsquo;s listening on port 8123 for HTTP connections on that IP address.
+It&rsquo;s listening on por 8123 for HTTP connections on that IP address.
 We use <code>wget</code> to validate it&rsquo;s working properly and we are able to get the <code>index.html</code> file:</p><pre><code>$ wget 172.44.0.2:8123
 --2021-08-18 16:47:38--  http://172.44.0.2:8123/
 Connecting to 172.44.0.2:8123... connected.
