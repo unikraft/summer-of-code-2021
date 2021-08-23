@@ -38,7 +38,7 @@ A platform is the virtualization / runtime environment used to run the resulting
 An architecture details the CPU and memory specifics that will run the resulting image.</p><p>As this is a rather complicated setup, a companion tool (<a href=https://github.com/unikraft/kraft>kraft</a>) was designed and implemented to provide the interface for configuring, building and running unikernel images based on Unikraft.
 The recommended way of building and running Unikraft is via <code>kraft</code>.</p><p>We are going to build the <a href=https://github.com/unikraft/app-helloworld>helloworld</a> application and the <a href=https://github.com/unikraft/app-httpreply>httpreply</a> application using <code>kraft</code>.
 We are also going to use the lower-level configuration and build system (based on <a href=https://www.kernel.org/doc/html/latest/kbuild/kconfig-language.html>Kconfig</a> and Makefile) to get a grasp of how everything works.
-The lower-level system will be detailed further in session 02: Behind the Scenes.</p><h2 id=00-manual-kraft-installation>00. Manual kraft Installation</h2><p>Let&rsquo;s start with installing kraft (and validating the installation).</p><p>First of all, make sure you have all the dependencies installed:</p><pre><code>$ sudo apt-get install -y --no-install-recommends build-essential \
+The lower-level system will be detailed further in session 02: Behind the Scenes.</p><h2 id=demos>Demos</h2><h3 id=00-manual-kraft-installation>00. Manual kraft Installation</h3><p>Let&rsquo;s start with installing kraft (and validating the installation).</p><p>First of all, make sure you have all the dependencies installed:</p><pre><code>$ sudo apt-get install -y --no-install-recommends build-essential \
         libncurses-dev libyaml-dev flex git wget socat bison \
         unzip uuid-runtime
 </code></pre><p>We begin by cloning the kraft repository on our machine:</p><pre><code>git clone https://github.com/unikraft/kraft.git
@@ -78,7 +78,7 @@ This is the usual layout of the <code>~/.unikraft/</code> directory:</p><pre><co
 </code></pre><p>Apart from the general <code>UK_WORKDIR</code> environment variable that points to the overall directory, there are also environment variables available for the above subdirectories:</p><pre><code>UK_ROOT - The directory for Unikraft's core source code [default: $UK_WORKDIR/unikraft]
 UK_LIBS - The directory of all the external Unikraft libraries [default: $UK_WORKDIR/libs]
 UK_APPS - The directory of all the template applications [default: $UK_WORKDIR/apps]
-</code></pre><p>After successfully running the above commands, kraft is now installed on our system and we can get to building and running unikernels.</p><h2 id=01-building-and-running-the-helloworld-application>01. Building and Running the Helloworld Application</h2><p>This is where the fun part begins - we get to build our first unikernel.</p><h3 id=one-command-to-rule-them-all>One Command to Rule Them All</h3><p>kraft makes it easy to download, configure, build existing components into unikernel images and then run those images.
+</code></pre><p>After successfully running the above commands, kraft is now installed on our system and we can get to building and running unikernels.</p><h3 id=01-building-and-running-the-helloworld-application>01. Building and Running the Helloworld Application</h3><p>This is where the fun part begins - we get to build our first unikernel.</p><h4 id=one-command-to-rule-them-all>One Command to Rule Them All</h4><p>kraft makes it easy to download, configure, build existing components into unikernel images and then run those images.
 The <code>kraft up</code> command makes it easy to do that with one swoop.
 Let&rsquo;s do that for the <code>helloworld</code> application (listed with <code>kraft list</code>):</p><pre><code>$ kraft up -t helloworld hello
  100.00% :::::::::::::::::::::::::::::::::::::::: |       21 /       21 |:  app/helloworld@0.5
@@ -125,8 +125,8 @@ $ kraft run
                    Tethys 0.5.0~b8be82b
 Hello world!
 Arguments:  &quot;/home/razvan/hello/build/hello_kvm-x86_64&quot; &quot;console=ttyS0&quot;
-</code></pre><h3 id=doing-it-step-by-step-using-kraft>Doing it Step-by-Step Using kraft</h3><p>The above <code>kraft up</code> command seems like magic and it&rsquo;s not very clear what&rsquo;s really happening.
-Let&rsquo;s break that down into subcommands and really get a good grip of the configure, build and run process.</p><p>We will go through the same steps above, running a separate command for each step:</p><ol><li>Download / Initialize the helloworld appplication.</li><li>Configure the application, resulting in a <code>.config</code> file.</li><li>Build the required components, resulting in the <code>build/hello_kvm-x86_64</code> unikernel image.</li><li>Run the image, with the &ldquo;Hello world!&rdquo; message getting printed.</li></ol><h4 id=initialize>Initialize</h4><p>First, let&rsquo;s create a directory that will host the application.
+</code></pre><h4 id=doing-it-step-by-step-using-kraft>Doing it Step-by-Step Using kraft</h4><p>The above <code>kraft up</code> command seems like magic and it&rsquo;s not very clear what&rsquo;s really happening.
+Let&rsquo;s break that down into subcommands and really get a good grip of the configure, build and run process.</p><p>We will go through the same steps above, running a separate command for each step:</p><ol><li>Download / Initialize the helloworld appplication.</li><li>Configure the application, resulting in a <code>.config</code> file.</li><li>Build the required components, resulting in the <code>build/hello_kvm-x86_64</code> unikernel image.</li><li>Run the image, with the &ldquo;Hello world!&rdquo; message getting printed.</li></ol><h5 id=initialize>Initialize</h5><p>First, let&rsquo;s create a directory that will host the application.
 We enter the <code>demo/</code> directory of the current session and we create the <code>01-hello-world/</code> directory:</p><pre><code>$ cd demo/
 $ mkdir 01-hello-world
 $ cd 01-hello-world/
@@ -136,7 +136,7 @@ CODING_STYLE.md  Config.uk  CONTRIBUTING.md  COPYING.md  kraft.yaml  main.c  MAI
 </code></pre><p>The <code>kraft.yaml</code> file is the most important file.
 It stores kraft-speficic configuration for the app and it&rsquo;s used by kraft when configuring, building and running the application.
 Other files are important as well, but they are used behind the scenes by kraft.
-We will detail them later in the session and in session 02: Behind the Scenes.</p><h4 id=configure>Configure</h4><p>A unikernel image may be targeted for multiple platforms and architectures.
+We will detail them later in the session and in session 02: Behind the Scenes.</p><h5 id=configure>Configure</h5><p>A unikernel image may be targeted for multiple platforms and architectures.
 The available platforms and applications are listed in the <code>kraft.yaml</code> file:</p><pre><code>$ cat kraft.yaml
 specification: '0.4'
 
@@ -162,7 +162,7 @@ And we can target <code>linuxu</code>, <code>kvm</code> or <code>xen</code> plat
 </code></pre><p>We have 6 options (2 architectures x 3 platforms).
 Once we select one, the configuration will be updated.</p><p>The alternate way (non-interactive) is to pass arguments to <code>kraft configure</code> to select the desired platform and architecture.
 For example, if we want to use x86_64 and KVM, we use:</p><pre><code>$ kraft configure -p kvm -m x86_64
-</code></pre><h4 id=build>Build</h4><p>Everything is set up now, all we have left to do is tell the build system to do its magic:</p><pre><code>$ kraft build
+</code></pre><h5 id=build>Build</h5><p>Everything is set up now, all we have left to do is tell the build system to do its magic:</p><pre><code>$ kraft build
 [...]
 Successfully built unikernels:
 
@@ -170,7 +170,7 @@ Successfully built unikernels:
   =&gt; build/01-hello-world_kvm-x86_64.dbg (with symbols)
 
 To instantiate, use: kraft run
-</code></pre><p>This results in the creation of two unikernel image files:</p><ol><li><code>build/01-hello-world_kvm-x86_64</code> - the main image file</li><li><code>build/01-hello-world_kvm-x86_64.dbg</code> - the image file with debug information (useful for debugging, duh!)</li></ol><p>And that&rsquo;s it! Our final unikernel binary is ready to be launched from the <code>build/</code> directory.</p><h4 id=run>Run</h4><p>To run an already-built unikernel image, we use <code>kraft run</code>:</p><pre><code>$ kraft run
+</code></pre><p>This results in the creation of two unikernel image files:</p><ol><li><code>build/01-hello-world_kvm-x86_64</code> - the main image file</li><li><code>build/01-hello-world_kvm-x86_64.dbg</code> - the image file with debug information (useful for debugging, duh!)</li></ol><p>And that&rsquo;s it! Our final unikernel binary is ready to be launched from the <code>build/</code> directory.</p><h5 id=run>Run</h5><p>To run an already-built unikernel image, we use <code>kraft run</code>:</p><pre><code>$ kraft run
 [...]
 
                    Tethys 0.5.0~b8be82b
@@ -181,16 +181,16 @@ Hello world!
 We can then select which one to run.</p><p>For example, we can use the commands below to configure, build and run a helloworld image for the <code>linuxu</code> platform.</p><pre><code>kraft configure -p linuxu -m x86_64
 kraft build
 kraft run -p linuxu -m x86_64
-</code></pre><p>You can now alter between running the <code>linuxu</code> and the <code>kvm</code> built images by using <code>kraft run</code> with the appropriate arguments.</p><h3 id=more-on-kraft>More on kraft</h3><p>Of course, this is the most basic way you can use <code>kraft</code>, but there are many other options.
+</code></pre><p>You can now alter between running the <code>linuxu</code> and the <code>kvm</code> built images by using <code>kraft run</code> with the appropriate arguments.</p><h4 id=more-on-kraft>More on kraft</h4><p>Of course, this is the most basic way you can use <code>kraft</code>, but there are many other options.
 To see every option <code>kraft</code> has to offer, you can simply type <code>kraft -h</code>.
 If you want to know about a certain command, just follow it with the <code>-h</code> option.
-For example, if I wanted to know more about the configure command, I would type <code>kraft configure -h</code>.</p><h3 id=manually-building-the-helloworld-application>Manually Building the helloworld Application</h3><p>Let&rsquo;s now learn how to build the app manually, without <code>kraft</code>.
+For example, if I wanted to know more about the configure command, I would type <code>kraft configure -h</code>.</p><h4 id=manually-building-the-helloworld-application>Manually Building the helloworld Application</h4><p>Let&rsquo;s now learn how to build the app manually, without <code>kraft</code>.
 We won&rsquo;t go into too much detail, this will be handled more thoroughly in session 02: Behind the Scenes.</p><p>The manual approach is more complicated (albeit giving you potentially more control) than kraft.
-For most of the use cases (development, testing, evaluating, using) of Unikraft, we recommend you use kraft.</p><p>We will go through the same steps as above:</p><ol><li>Download / Initialize the helloworld application.</li><li>Configure the application, resulting in a <code>.config</code> file.</li><li>Build the required components, resulting in the <code>build/hello_kvm-x86_64</code> unikernel image.</li><li>Run the image, with the &ldquo;Hello world!&rdquo; message getting printed.</li></ol><h4 id=initialize-1>Initialize</h4><p>First, get out of the current build&rsquo;s directory and make a new one:</p><pre><code>$ cd ../ &amp;&amp; mkdir 01-hello-world-manual &amp;&amp; cd 01-hello-world-manual
+For most of the use cases (development, testing, evaluating, using) of Unikraft, we recommend you use kraft.</p><p>We will go through the same steps as above:</p><ol><li>Download / Initialize the helloworld application.</li><li>Configure the application, resulting in a <code>.config</code> file.</li><li>Build the required components, resulting in the <code>build/hello_kvm-x86_64</code> unikernel image.</li><li>Run the image, with the &ldquo;Hello world!&rdquo; message getting printed.</li></ol><h5 id=initialize-1>Initialize</h5><p>First, get out of the current build&rsquo;s directory and make a new one:</p><pre><code>$ cd ../ &amp;&amp; mkdir 01-hello-world-manual &amp;&amp; cd 01-hello-world-manual
 </code></pre><p>Now, clone the remote Git repository:</p><pre><code>$ git clone https://github.com/unikraft/app-helloworld.git .
 $ ls
 CODING_STYLE.md  Config.uk  CONTRIBUTING.md  COPYING.md  kraft.yaml  main.c  MAINTAINERS.md  Makefile  Makefile.uk  monkey.h  README.md
-</code></pre><h4 id=configure-1>Configure</h4><p>To configure the build process (and the resulting unikernel image) we access a text-user interface menu by using:</p><pre><code>$ make menuconfig
+</code></pre><h5 id=configure-1>Configure</h5><p>To configure the build process (and the resulting unikernel image) we access a text-user interface menu by using:</p><pre><code>$ make menuconfig
 </code></pre><p>Looks like we are met with an error:</p><pre><code>$ make menuconfig
 Makefile:9: recipe for target 'menuconfig' failed
 make: *** [menuconfig] Error 2
@@ -208,7 +208,7 @@ make: *** [menuconfig] Error 2
 Recall that the build system makes use of some important environment variables, namely <code>UK_WORKDIR</code>, <code>UK_ROOT</code> and <code>UK_LIBS</code>.
 So, in order to properly inform the build system of our current location, we will have to manually set these by prefixing whatever build command we send with the hardcoded values of where our <code>Unikraft</code> work directory is.</p><pre><code>$ UK_WORKDIR=~/.unikraft UK_ROOT=~/.unikraft/unikraft UK_LIBS=~/.unikraft/libs make menuconfig
 </code></pre><p><strong>Note</strong>: This menu is also available through the <code>kraft menuconfig</code> command, which rids you of the hassle of manually setting the environment variables.</p><p>We are met with the following configuration menu. Let&rsquo;s pick the architecture:</p><p><img src=/docs/sessions/01-baby-steps/images/menuconfig_select_arch.png alt="arch selection menu"></p><p><img src=/docs/sessions/01-baby-steps/images/menuconfig_select_arch2.png alt="arch selection menu2"></p><p><img src=/docs/sessions/01-baby-steps/images/menuconfig_select_arch3.png alt="arch selection menu3"></p><p>Now, press <code>Exit</code> (or hit the <code>Esc</code> key twice) until you return to the initial menu.</p><p>We have now set our desired architecture, let&rsquo;s now proceed with the platform.
-We will choose both <code>linuxu</code> and <code>kvm</code>:</p><p><img src=/docs/sessions/01-baby-steps/images/menuconfig_select_plat.png alt="plat selection menu"></p><p><img src=/docs/sessions/01-baby-steps/images/menuconfig_select_plat2.png alt="plat selection menu2"></p><p><code>Save</code> and exit the configuration menu by repeatedly selecting <code>Exit</code>.</p><h3 id=build-1>Build</h3><p>Now let&rsquo;s build the final image (recall the environment variables):</p><pre><code>$ UK_WORKDIR=~/.unikraft UK_ROOT=~/.unikraft/unikraft UK_LIBS=~/.unikraft/libs  make
+We will choose both <code>linuxu</code> and <code>kvm</code>:</p><p><img src=/docs/sessions/01-baby-steps/images/menuconfig_select_plat.png alt="plat selection menu"></p><p><img src=/docs/sessions/01-baby-steps/images/menuconfig_select_plat2.png alt="plat selection menu2"></p><p><code>Save</code> and exit the configuration menu by repeatedly selecting <code>Exit</code>.</p><h5 id=build-1>Build</h5><p>Now let&rsquo;s build the final image (recall the environment variables):</p><pre><code>$ UK_WORKDIR=~/.unikraft UK_ROOT=~/.unikraft/unikraft UK_LIBS=~/.unikraft/libs  make
 [...]
   LD      01-hello-world-manual_linuxu-x86_64.dbg
   SCSTRIP 01-hello-world-manual_kvm-x86_64
@@ -216,7 +216,7 @@ We will choose both <code>linuxu</code> and <code>kvm</code>:</p><p><img src=/do
   SCSTRIP 01-hello-world-manual_linuxu-x86_64
   LN      01-hello-world-manual_kvm-x86_64.dbg.gdb.py
   LN      01-hello-world-manual_linuxu-x86_64.dbg.gdb.py
-</code></pre><p>Our final binaries are located inside the <code>build/</code> directory.</p><h3 id=run-1>Run</h3><p>Let&rsquo;s run the <code>linuxu</code> image by doing a Linux-like executable running:</p><pre><code>$ ./build/01-hello-world-manual_linuxu-x86_64  # The linuxu image
+</code></pre><p>Our final binaries are located inside the <code>build/</code> directory.</p><h5 id=run-1>Run</h5><p>Let&rsquo;s run the <code>linuxu</code> image by doing a Linux-like executable running:</p><pre><code>$ ./build/01-hello-world-manual_linuxu-x86_64  # The linuxu image
 Powered by
 o.   .o       _ _               __ _
 Oo   Oo  ___ (_) | __ __  __ _ ' _) :_
@@ -235,15 +235,15 @@ oOo oOO| | | | |   (| | | (_) |  _) :_
                    Tethys 0.5.0~b8be82b
 Hello world!
 Arguments:  &quot;build/hello_kvm-x86_64&quot;
-</code></pre><h2 id=02-building-and-running-the-httpreply-application>02. Building and Running the httpreply Application</h2><p>This is where we will take a look at how to build a basic HTTP Server both through <code>kraft</code> and manually.
-The latter involves understanding how to integrate ported external libraries, such as <code>lwip</code>.</p><h3 id=using-kraft>Using kraft</h3><p>Just as before, let&rsquo;s create a directory that will host the application.
+</code></pre><h3 id=02-building-and-running-the-httpreply-application>02. Building and Running the httpreply Application</h3><p>This is where we will take a look at how to build a basic HTTP Server both through <code>kraft</code> and manually.
+The latter involves understanding how to integrate ported external libraries, such as <code>lwip</code>.</p><h4 id=using-kraft>Using kraft</h4><p>Just as before, let&rsquo;s create a directory that will host the application.
 We enter the <code>demo/</code> directory of the current session and we create the <code>01-hello-world/</code> directory:</p><pre><code>$ cd demo/
 $ mkdir 02-httpreply
 $ cd 02-httpreply/
-</code></pre><p>Now, we go through the steps above.</p><h4 id=initialize-2>Initialize</h4><p>Retrieve the already existing template for <code>httpreply</code>:</p><pre><code>$ kraft init -t httpreply
-</code></pre><h4 id=configure-2>Configure</h4><p>Configure the building of a KVM unikernel image for x86_64:</p><pre><code>$ kraft configure -p kvm -m x86_64
-</code></pre><h4 id=build-2>Build</h4><pre><code>$ kraft build
-</code></pre><h4 id=run-2>Run</h4><pre><code>$ kraft run -p kvm -m x86_64
+</code></pre><p>Now, we go through the steps above.</p><h5 id=initialize-2>Initialize</h5><p>Retrieve the already existing template for <code>httpreply</code>:</p><pre><code>$ kraft init -t httpreply
+</code></pre><h5 id=configure-2>Configure</h5><p>Configure the building of a KVM unikernel image for x86_64:</p><pre><code>$ kraft configure -p kvm -m x86_64
+</code></pre><h5 id=build-2>Build</h5><pre><code>$ kraft build
+</code></pre><h5 id=run-2>Run</h5><pre><code>$ kraft run -p kvm -m x86_64
 [...]
 Powered by
 o.   .o       _ _               __ _
@@ -253,7 +253,7 @@ oOo oOO| | | | |   (| | | (_) |  _) :_
  OoOoO ._, ._:_:_,\_._,  .__,_:_, \___)
                    Tethys 0.5.0~b8be82b
 Listening on port 8123...
-</code></pre><p>Use <code>Ctrl+c</code> to stop the HTTP server running as a unikernel virtual machine.</p><h4 id=connecting-to-the-http-server>Connecting to the HTTP Server</h4><p>The server listens on port <code>8123</code> but we can&rsquo;t access it, as the virtual machine doesn&rsquo;t have a (virtual) network connection to the host system and it doesn&rsquo;t have an IP address.
+</code></pre><p>Use <code>Ctrl+c</code> to stop the HTTP server running as a unikernel virtual machine.</p><h5 id=connecting-to-the-http-server>Connecting to the HTTP Server</h5><p>The server listens on port <code>8123</code> but we can&rsquo;t access it, as the virtual machine doesn&rsquo;t have a (virtual) network connection to the host system and it doesn&rsquo;t have an IP address.
 So we have to create a connection and assign an IP address.</p><p>We use a virtual bridge to create a connection between the VM and the host system.
 We assign address <code>172.44.0.1/24</code> to the bridge interface (pointing to the host) and we assign address <code>172.44.0.2/24</code> to the virtual machine, by passing boot arguments.</p><p>We run the commands below to create and assign the IP address to the bridge <code>virbr0</code>:</p><pre><code>$ sudo brctl addbr virbr0
 $ sudo ip a a  172.44.0.1/24 dev virbr0
@@ -288,9 +288,9 @@ HTTP request sent, awaiting response... 200 OK
 2021-08-18 16:47:38 (41.5 MB/s) - ‘index.html’ saved [160]
 </code></pre><p>Cleaning up means closing the virtual machine (and the HTTP server) and disabling and deleting the bridge interface:</p><pre><code>$ sudo ip l set dev virbr0 down
 $ sudo brctl delbr virbr0
-</code></pre><h3 id=the-manual-way>The Manual Way</h3><h4 id=initialize-3>Initialize</h4><p>First, move into a new directory and clone the <code>httpreply</code> repo there.</p><pre><code>$ cd .. &amp;&amp; mkdir 02-httpreply-manual &amp;&amp; cd 02-httpreply-manual
+</code></pre><h4 id=the-manual-way>The Manual Way</h4><h5 id=initialize-3>Initialize</h5><p>First, move into a new directory and clone the <code>httpreply</code> repo there.</p><pre><code>$ cd .. &amp;&amp; mkdir 02-httpreply-manual &amp;&amp; cd 02-httpreply-manual
 $ git clone https://github.com/unikraft/app-httpreply .
-</code></pre><h4 id=adding-a-makefile>Adding a Makefile</h4><p>Unlike before, you can notice that this time we are missing the regular <code>Makefile</code>.
+</code></pre><h5 id=adding-a-makefile>Adding a Makefile</h5><p>Unlike before, you can notice that this time we are missing the regular <code>Makefile</code>.
 Let&rsquo;s start by copying the <code>Makefile</code> from helloworld:</p><pre><code>$ cp ../01-hello-world/Makefile .
 </code></pre><p>This is how it looks like:</p><pre><code>$ cat Makefile
 UK_ROOT ?= $(PWD)/../../unikraft
@@ -324,9 +324,9 @@ all:
 
 $(MAKECMDGOALS):
         @$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS) $(MAKECMDGOALS)
-</code></pre><h4 id=configure-3>Configure</h4><p>Now, we configure it through <code>make menuconfig</code>.</p><p><img src=/docs/sessions/01-baby-steps/images/menuconfig_select_lwip.png alt="lwip selection menu"></p><p><img src=/docs/sessions/01-baby-steps/images/menuconfig_select_lwip2.png alt="lwip2 selection menu"></p><p>If you noticed, the menu also automatically selected some other internal components that would be required by <code>lwip</code>.
-Now <code>Save</code> and <code>Exit</code> the configuration and run <code>make</code>.</p><h4 id=build-3>Build</h4><pre><code>$ make
-</code></pre><h4 id=run-3>Run</h4><p>To run the KVM image, we use the <code>qemu-system-x86_64</code> command:</p><pre><code>$ qemu-system-x86_64 -kernel build/02-httpreply_kvm-x86_64 -nographic
+</code></pre><h5 id=configure-3>Configure</h5><p>Now, we configure it through <code>make menuconfig</code>.</p><p><img src=/docs/sessions/01-baby-steps/images/menuconfig_select_lwip.png alt="lwip selection menu"></p><p><img src=/docs/sessions/01-baby-steps/images/menuconfig_select_lwip2.png alt="lwip2 selection menu"></p><p>If you noticed, the menu also automatically selected some other internal components that would be required by <code>lwip</code>.
+Now <code>Save</code> and <code>Exit</code> the configuration and run <code>make</code>.</p><h5 id=build-3>Build</h5><pre><code>$ make
+</code></pre><h5 id=run-3>Run</h5><p>To run the KVM image, we use the <code>qemu-system-x86_64</code> command:</p><pre><code>$ qemu-system-x86_64 -kernel build/02-httpreply-manual_kvm-x86_64 -nographic
 [...]
 Powered by
 o.   .o       _ _               __ _
@@ -337,12 +337,12 @@ oOo oOO| | | | |   (| | | (_) |  _) :_
                    Tethys 0.5.0~b8be82b
 Listening on port 8123...
 </code></pre><p>To close the running QEMU process, use the <code>Ctrl+a x</code> key combination.</p><p><strong>Note</strong>: We didn&rsquo;t go into configuring a functional network connection and actually querying the HTTP server.
-This is a bit more complicated and is outside the scope of this session.</p><pre><code>sudo qemu-system-x86_64 -netdev bridge,id=en0,br=virbr0 -device virtio-net-pci,netdev=en0 -append &quot;netdev.ipv4_addr=172.44.0.2 netdev.ipv4_gw_addr=172.44.0.1 netdev.ipv4_subnet_mask=255.255.255.0 --&quot; -kernel build/02-httpreply_kvm-x86_64 -nographic
-</code></pre><h4 id=connecting-to-the-http-server-1>Connecting to the HTTP Server</h4><p>Similarly to kraft, in order to connect to the HTTP server, we use a virtual bridge to create a connection between the VM and the host system.
+This is a bit more complicated and is outside the scope of this session.</p><pre><code>sudo qemu-system-x86_64 -netdev bridge,id=en0,br=virbr0 -device virtio-net-pci,netdev=en0 -append &quot;netdev.ipv4_addr=172.44.0.2 netdev.ipv4_gw_addr=172.44.0.1 netdev.ipv4_subnet_mask=255.255.255.0 --&quot; -kernel build/02-httpreply-manual_kvm-x86_64 -nographic
+</code></pre><h5 id=connecting-to-the-http-server-1>Connecting to the HTTP Server</h5><p>Similarly to kraft, in order to connect to the HTTP server, we use a virtual bridge to create a connection between the VM and the host system.
 We assign address <code>172.44.0.1/24</code> to the bridge interface (pointing to the host) and we assign address <code>172.44.0.2/24</code> to the virtual machine, by passing boot arguments.</p><p>We run the commands below to create and assign the IP address to the bridge <code>virbr0</code>:</p><pre><code>$ sudo brctl addbr virbr0
 $ sudo ip a a  172.44.0.1/24 dev virbr0
 $ sudo ip l set dev virbr0 up
-</code></pre><p>Now we start the virtul machine and pass it the proper arguments to assing the IP address <code>172.44.0.2/24</code>:</p><pre><code>$ sudo qemu-system-x86_64 -netdev bridge,id=en0,br=virbr0 -device virtio-net-pci,netdev=en0 -append &quot;netdev.ipv4_addr=172.44.0.2 netdev.ipv4_gw_addr=172.44.0.1 netdev.ipv4_subnet_mask=255.255.255.0 --&quot; -kernel build/02-httpreply_kvm-x86_64 -nographic
+</code></pre><p>Now we start the virtul machine and pass it the proper arguments to assing the IP address <code>172.44.0.2/24</code>:</p><pre><code>$ sudo qemu-system-x86_64 -netdev bridge,id=en0,br=virbr0 -device virtio-net-pci,netdev=en0 -append &quot;netdev.ipv4_addr=172.44.0.2 netdev.ipv4_gw_addr=172.44.0.1 netdev.ipv4_subnet_mask=255.255.255.0 --&quot; -kernel build/02-httpreply-manual_kvm-x86_64 -nographic
 0: Set IPv4 address 172.44.0.2 mask 255.255.255.0 gw 172.44.0.1
 en0: Added
 en0: Interface is up
@@ -356,7 +356,7 @@ oOo oOO| | | | |   (| | | (_) |  _) :_
 Listening on port 8123...
 [...]
 </code></pre><p>The boot message confirms the assigning of the <code>172.44.0.2/24</code> IP address to the virtual machine.
-It&rsquo;s listening on por 8123 for HTTP connections on that IP address.
+It&rsquo;s listening on port 8123 for HTTP connections on that IP address.
 We use <code>wget</code> to validate it&rsquo;s working properly and we are able to get the <code>index.html</code> file:</p><pre><code>$ wget 172.44.0.2:8123
 --2021-08-18 16:47:38--  http://172.44.0.2:8123/
 Connecting to 172.44.0.2:8123... connected.
@@ -367,16 +367,16 @@ HTTP request sent, awaiting response... 200 OK
 $ sudo brctl delbr virbr0
 </code></pre><h2 id=summary>Summary</h2><p><code>kraft</code>is an extremely useful tool for quickly deploying unikernel images.
 It abstracts away many factors that would normally increase the difficulty of such tasks.
-Through just a simple set of a few commands, we can build and run a set of fast and secure unikernel images with low memory footprint.</p><h2 id=practical-work>Practical Work</h2><h2 id=01-echo-back-server>01. Echo-back Server</h2><p>You will have to implement a simple echo-back server in C for the KVM platform.
+Through just a simple set of a few commands, we can build and run a set of fast and secure unikernel images with low memory footprint.</p><h2 id=practical-work>Practical Work</h2><h3 id=01-echo-back-server>01. Echo-back Server</h3><p>You will have to implement a simple echo-back server in C for the KVM platform.
 The application will have to be able to open a socket on <code>172.44.0.2:1234</code> and send back to the client whatever the client sends to the server.
 If the client closes the connection, the server will automatically close.</p><p>Enter the <code>work/01-echo-back/</code> directory.
 Check the source code file (<code>main.c</code>) and support files.
 Work on the contents to have a viable echo-back server implementation.
 Things to consider:</p><ul><li>You will need some network client utility such as <code>netcat</code>.</li><li>You will need the Lightweight TCP/IP stack library (lwip): <a href=https://github.com/unikraft/lib-lwip>https://github.com/unikraft/lib-lwip</a></li><li>You will have to update the build and support files in the <code>work/01-echo-back/</code> directory.</li><li>If you want to run the application without <code>kraft</code>, the KVM launch script and network setup are already included inside <code>work/01-echo-back/launch.sh</code>.</li></ul><p>To test if your application works you can try sending it messages like so:</p><pre><code>$ nc 172.44.0.2 1234
-</code></pre><p>After connecting to the server, whatever you enter in standard input, should be echoed back to you.</p><h2 id=02-rot-13>02. ROT-13</h2><p>Update the previously built application, to echo back a <code>rot-13</code> encoded message.
+</code></pre><p>After connecting to the server, whatever you enter in standard input, should be echoed back to you.</p><h3 id=02-rot-13>02. ROT-13</h3><p>Update the previously built application, to echo back a <code>rot-13</code> encoded message.
 To do this, you will have to create a custom function inside <code>lwip</code> (<code>~/.unikraft/libs/lwip/</code>) that your application (from the new directory <code>work/02-rot13</code>) can call in order to encode the string.
 For example, you could implement the function <code>void rot13(char *msg);</code> inside <code>~/.unikraft/libs/lwip/sockets.c</code> and add its header inside <code>~/.unikraft/libs/lwip/include/sys/socket.h</code>.</p><p>The required resources are the exact same as in the previous exercise, you will just have to update <code>lwip</code>.
-To test if this works, use the same methodology as before, but ensure that the echoed back string is encoded.</p><h2 id=03-tutorial-mount-9pfs>03. Tutorial: Mount 9pfs</h2><p>In this tutorial, we will see what we would need to do if we wanted to have a filesystem available.
+To test if this works, use the same methodology as before, but ensure that the echoed back string is encoded.</p><h3 id=03-tutorial-mount-9pfs>03. Tutorial: Mount 9pfs</h3><p>In this tutorial, we will see what we would need to do if we wanted to have a filesystem available.
 To make it easy, we will use the <code>9pfs</code> filesystem, as well as the <code>newlib</code> library.
 The latter is used so that we have available an API that would enable us to interact with this filesystem (functions such as <code>lseek</code>, <code>open</code>).</p><p><strong>Note</strong>: the build will fail if <code>unikraft</code> and <code>newlib</code> repositories aren&rsquo;t both on the <code>staging</code> or the <code>stable</code> branches.
 To avoid this situation, go to <code>~/.unikraft/unikraft</code> and checkout branch <code>staging</code>:</p><pre><code>cd ~/.unikraft/unikraft
@@ -385,5 +385,5 @@ git checkout staging
 </code></pre><p>Next, we include it in our <code>Makefile</code>:</p><pre><code>LIBS := $(UK_LIBS)/lwip:$(UK_LIBS)/newlib
 </code></pre><p>And now, for the final step, through <code>make menuconfig</code> make sure you have selected <code>libnewlib</code> as well as <code>9pfs: 9p filesystem</code> inside the <code>Library Configuration</code> menu.
 We will also check these options inside <code>Library Configuration</code> -> <code>vfscore: Configuration</code>:</p><p><img src=/docs/sessions/01-baby-steps/images/menuconfig_select_fs.png alt="fs selection menu"></p><p><img src=/docs/sessions/01-baby-steps/images/menuconfig_select_fs2.png alt="fs2 selection menu"></p><p><img src=/docs/sessions/01-baby-steps/images/menuconfig_select_fs3.png alt="fs3 selection menu"></p><p>What is more, you should also have present in the current directory an additional directory called <code>fs0</code>:</p><pre><code>mkdir fs0
-</code></pre><p>And so, <code>fs0</code> will contain whatever files you create, read from or write to from within your unikernel.</p><p>For now, just make sure it successfully builds. If it does, move on to the next work item.</p><h2 id=04-store-strings>04. Store Strings</h2><p>For the final work item, you will have to update the source code from the second task, so that it stores in a file the received string before sending the encoded one back to the client.
+</code></pre><p>And so, <code>fs0</code> will contain whatever files you create, read from or write to from within your unikernel.</p><p>For now, just make sure it successfully builds. If it does, move on to the next work item.</p><h3 id=04-store-strings>04. Store Strings</h3><p>For the final work item, you will have to update the source code from the second task, so that it stores in a file the received string before sending the encoded one back to the client.
 In order to achieve this, you must have the previous work item completed.</p><p>The available resources are the exact same, you will simply have to modify <code>main.c</code>.</p><p>To test if your application ran successfully, check to see whether the original strings you sent through the client are present in that file or not.</p><h2 id=further-reading>Further Reading</h2><p><a href=http://docs.unikraft.org/index.html>Unikraft Documentation</a></p></div><div class=td-content style=page-break-before:always><h1 id=pg-a7aba59367c86f53527a038cb13a4d73>4 - Session 02: Behind the Scenes</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-7cf16a4b6aedab923e52e136ddacfa59>5 - Session 03: Benchmarking and Debugging</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-cbba34b6d1e7d9a0e83c791f84d7f29d>6 - Session 04: Complex Applications</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-221c0eb25b4f393f30fd7c711495bed2>7 - Session 05: Contributing to Unikraft</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-c8164d0e219bb0f24fd8b32fe7e996e3>8 - Session 06: Testing Unikraft</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-e8257ea2e30401a82888d38de2231d40>9 - Session 07: Syscall Shim</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-0cf305157c0d79c36b53cb269a783170>10 - Session 08: Basic App Porting</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-f352576afa36c9b30f15b2be6533c580>11 - Session 09: Advanced App Porting</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-9026b735a1faa018402aa9ac7ce1ebd9>12 - Session 10: High Performance</h1></div></main></div></div><footer class="bg-dark py-5 row d-print-none"><div class="container-fluid mx-sm-5"><div class=row><div class="col-6 col-sm-4 text-xs-center order-sm-2"><ul class="list-inline mb-0"><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=Discord aria-label=Discord><a class=text-white target=_blank rel="noopener noreferrer" href=https://bit.ly/UnikraftDiscord><i class="fab fa-discord"></i></a></li><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=Twitter aria-label=Twitter><a class=text-white target=_blank rel="noopener noreferrer" href=https://twitter.com/UnikraftSDK><i class="fab fa-twitter"></i></a></li></ul></div><div class="col-6 col-sm-4 text-right text-xs-center order-sm-3"><ul class="list-inline mb-0"><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=GitHub aria-label=GitHub><a class=text-white target=_blank rel="noopener noreferrer" href=https://github.com/unikraft/unikraft><i class="fab fa-github"></i></a></li><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=LinkedIn aria-label=LinkedIn><a class=text-white target=_blank rel="noopener noreferrer" href=https://linkedin.com/company/unikraft-sdk><i class="fab fa-linkedin"></i></a></li></ul></div><div class="col-12 col-sm-4 text-center py-2 order-sm-2"><small class=text-white>&copy; 2021 Unikraft and Open-Source Contributors. All Rights Reserved</small></div></div></div></footer></div><script src=https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js integrity=sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49 crossorigin=anonymous></script><script src=https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js integrity=sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy crossorigin=anonymous></script><script src=/js/main.min.5c74b870c6953931a705f390a49c7e4c0a842ec5c83b24354758dd674343ed0d.js integrity="sha256-XHS4cMaVOTGnBfOQpJx+TAqELsXIOyQ1R1jdZ0ND7Q0=" crossorigin=anonymous></script></body></html>
