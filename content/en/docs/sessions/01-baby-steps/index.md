@@ -40,7 +40,9 @@ We are going to build the [helloworld](https://github.com/unikraft/app-helloworl
 We are also going to use the lower-level configuration and build system (based on [Kconfig](https://www.kernel.org/doc/html/latest/kbuild/kconfig-language.html) and Makefile) to get a grasp of how everything works.
 The lower-level system will be detailed further in session 02: Behind the Scenes.
 
-## 00. Manual kraft Installation
+## Demos
+
+### 00. Manual kraft Installation
 
 Let's start with installing kraft (and validating the installation).
 
@@ -125,11 +127,11 @@ UK_APPS - The directory of all the template applications [default: $UK_WORKDIR/a
 
 After successfully running the above commands, kraft is now installed on our system and we can get to building and running unikernels.
 
-## 01. Building and Running the Helloworld Application
+### 01. Building and Running the Helloworld Application
 
 This is where the fun part begins - we get to build our first unikernel.
 
-### One Command to Rule Them All
+#### One Command to Rule Them All
 
 kraft makes it easy to download, configure, build existing components into unikernel images and then run those images.
 The `kraft up` command makes it easy to do that with one swoop.
@@ -199,7 +201,7 @@ Hello world!
 Arguments:  "/home/razvan/hello/build/hello_kvm-x86_64" "console=ttyS0"
 ```
 
-### Doing it Step-by-Step Using kraft
+#### Doing it Step-by-Step Using kraft
 
 The above `kraft up` command seems like magic and it's not very clear what's really happening.
 Let's break that down into subcommands and really get a good grip of the configure, build and run process.
@@ -211,7 +213,7 @@ We will go through the same steps above, running a separate command for each ste
 1. Build the required components, resulting in the `build/hello_kvm-x86_64` unikernel image.
 1. Run the image, with the "Hello world!" message getting printed.
 
-#### Initialize
+##### Initialize
 
 First, let's create a directory that will host the application.
 We enter the `demo/` directory of the current session and we create the `01-hello-world/` directory:
@@ -233,7 +235,7 @@ It stores kraft-speficic configuration for the app and it's used by kraft when c
 Other files are important as well, but they are used behind the scenes by kraft.
 We will detail them later in the session and in session 02: Behind the Scenes.
 
-#### Configure
+##### Configure
 
 A unikernel image may be targeted for multiple platforms and architectures.
 The available platforms and applications are listed in the `kraft.yaml` file:
@@ -275,7 +277,7 @@ For example, if we want to use x86_64 and KVM, we use:
 $ kraft configure -p kvm -m x86_64
 ```
 
-#### Build
+##### Build
 
 Everything is set up now, all we have left to do is tell the build system to do its magic:
 ```
@@ -295,7 +297,7 @@ This results in the creation of two unikernel image files:
 
 And that's it! Our final unikernel binary is ready to be launched from the `build/` directory.
 
-#### Run
+##### Run
 
 To run an already-built unikernel image, we use `kraft run`:
 ```
@@ -324,14 +326,14 @@ kraft run -p linuxu -m x86_64
 
 You can now alter between running the `linuxu` and the `kvm` built images by using `kraft run` with the appropriate arguments.
 
-### More on kraft
+#### More on kraft
 
 Of course, this is the most basic way you can use `kraft`, but there are many other options.
 To see every option `kraft` has to offer, you can simply type `kraft -h`.
 If you want to know about a certain command, just follow it with the `-h` option.
 For example, if I wanted to know more about the configure command, I would type `kraft configure -h`.
 
-### Manually Building the helloworld Application
+#### Manually Building the helloworld Application
 
 Let's now learn how to build the app manually, without `kraft`.
 We won't go into too much detail, this will be handled more thoroughly in session 02: Behind the Scenes.
@@ -346,7 +348,7 @@ We will go through the same steps as above:
 1. Build the required components, resulting in the `build/hello_kvm-x86_64` unikernel image.
 1. Run the image, with the "Hello world!" message getting printed.
 
-#### Initialize
+##### Initialize
 
 First, get out of the current build's directory and make a new one:
 ```
@@ -360,7 +362,7 @@ $ ls
 CODING_STYLE.md  Config.uk  CONTRIBUTING.md  COPYING.md  kraft.yaml  main.c  MAINTAINERS.md  Makefile  Makefile.uk  monkey.h  README.md
 ```
 
-#### Configure
+##### Configure
 
 To configure the build process (and the resulting unikernel image) we access a text-user interface menu by using:
 ```
@@ -414,7 +416,7 @@ We will choose both `linuxu` and `kvm`:
 
 `Save` and exit the configuration menu by repeatedly selecting `Exit`.
 
-### Build
+##### Build
 
 Now let's build the final image (recall the environment variables):
 ```
@@ -430,7 +432,7 @@ $ UK_WORKDIR=~/.unikraft UK_ROOT=~/.unikraft/unikraft UK_LIBS=~/.unikraft/libs  
 
 Our final binaries are located inside the `build/` directory.
 
-### Run
+##### Run
 
 Let's run the `linuxu` image by doing a Linux-like executable running:
 ```
@@ -459,12 +461,12 @@ Hello world!
 Arguments:  "build/hello_kvm-x86_64"
 ```
 
-## 02. Building and Running the httpreply Application
+### 02. Building and Running the httpreply Application
 
 This is where we will take a look at how to build a basic HTTP Server both through `kraft` and manually.
 The latter involves understanding how to integrate ported external libraries, such as `lwip`.
 
-### Using kraft
+#### Using kraft
 
 Just as before, let's create a directory that will host the application.
 We enter the `demo/` directory of the current session and we create the `01-hello-world/` directory:
@@ -476,27 +478,27 @@ $ cd 02-httpreply/
 
 Now, we go through the steps above.
 
-#### Initialize
+##### Initialize
 
 Retrieve the already existing template for `httpreply`:
 ```
 $ kraft init -t httpreply
 ```
 
-#### Configure
+##### Configure
 
 Configure the building of a KVM unikernel image for x86_64:
 ```
 $ kraft configure -p kvm -m x86_64
 ```
 
-#### Build
+##### Build
 
 ```
 $ kraft build
 ```
 
-#### Run
+##### Run
 
 ```
 $ kraft run -p kvm -m x86_64
@@ -512,7 +514,7 @@ Listening on port 8123...
 ```
 Use `Ctrl+c` to stop the HTTP server running as a unikernel virtual machine.
 
-#### Connecting to the HTTP Server
+##### Connecting to the HTTP Server
 
 The server listens on port `8123` but we can't access it, as the virtual machine doesn't have a (virtual) network connection to the host system and it doesn't have an IP address.
 So we have to create a connection and assign an IP address.
@@ -572,9 +574,9 @@ $ sudo ip l set dev virbr0 down
 $ sudo brctl delbr virbr0
 ```
 
-### The Manual Way
+#### The Manual Way
 
-#### Initialize
+##### Initialize
 
 First, move into a new directory and clone the `httpreply` repo there.
 ```
@@ -582,7 +584,7 @@ $ cd .. && mkdir 02-httpreply-manual && cd 02-httpreply-manual
 $ git clone https://github.com/unikraft/app-httpreply .
 ```
 
-#### Adding a Makefile
+##### Adding a Makefile
 
 Unlike before, you can notice that this time we are missing the regular `Makefile`.
 Let's start by copying the `Makefile` from helloworld:
@@ -639,7 +641,7 @@ $(MAKECMDGOALS):
         @$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS) $(MAKECMDGOALS)
 ```
 
-#### Configure
+##### Configure
 
 Now, we configure it through `make menuconfig`.
 
@@ -650,13 +652,13 @@ Now, we configure it through `make menuconfig`.
 If you noticed, the menu also automatically selected some other internal components that would be required by `lwip`.
 Now `Save` and `Exit` the configuration and run `make`.
 
-#### Build
+##### Build
 
 ```
 $ make
 ```
 
-#### Run
+##### Run
 
 To run the KVM image, we use the `qemu-system-x86_64` command:
 ```
@@ -680,7 +682,7 @@ This is a bit more complicated and is outside the scope of this session.
 sudo qemu-system-x86_64 -netdev bridge,id=en0,br=virbr0 -device virtio-net-pci,netdev=en0 -append "netdev.ipv4_addr=172.44.0.2 netdev.ipv4_gw_addr=172.44.0.1 netdev.ipv4_subnet_mask=255.255.255.0 --" -kernel build/02-httpreply_kvm-x86_64 -nographic
 ```
 
-#### Connecting to the HTTP Server
+##### Connecting to the HTTP Server
 
 Similarly to kraft, in order to connect to the HTTP server, we use a virtual bridge to create a connection between the VM and the host system.
 We assign address `172.44.0.1/24` to the bridge interface (pointing to the host) and we assign address `172.44.0.2/24` to the virtual machine, by passing boot arguments.
@@ -734,7 +736,7 @@ Through just a simple set of a few commands, we can build and run a set of fast 
 
 ## Practical Work
 
-## 01. Echo-back Server
+### 01. Echo-back Server
 
 You will have to implement a simple echo-back server in C for the KVM platform.
 The application will have to be able to open a socket on `172.44.0.2:1234` and send back to the client whatever the client sends to the server.
@@ -757,7 +759,7 @@ $ nc 172.44.0.2 1234
 
 After connecting to the server, whatever you enter in standard input, should be echoed back to you.
 
-## 02. ROT-13
+### 02. ROT-13
 
 Update the previously built application, to echo back a `rot-13` encoded message.
 To do this, you will have to create a custom function inside `lwip` (`~/.unikraft/libs/lwip/`) that your application (from the new directory `work/02-rot13`) can call in order to encode the string.
@@ -766,7 +768,7 @@ For example, you could implement the function `void rot13(char *msg);` inside `~
 The required resources are the exact same as in the previous exercise, you will just have to update `lwip`.
 To test if this works, use the same methodology as before, but ensure that the echoed back string is encoded.
 
-## 03. Tutorial: Mount 9pfs
+### 03. Tutorial: Mount 9pfs
 
 In this tutorial, we will see what we would need to do if we wanted to have a filesystem available.
 To make it easy, we will use the `9pfs` filesystem, as well as the `newlib` library.
@@ -806,7 +808,7 @@ And so, `fs0` will contain whatever files you create, read from or write to from
 
 For now, just make sure it successfully builds. If it does, move on to the next work item.
 
-## 04. Store Strings
+### 04. Store Strings
 
 For the final work item, you will have to update the source code from the second task, so that it stores in a file the received string before sending the encoded one back to the client.
 In order to achieve this, you must have the previous work item completed.
