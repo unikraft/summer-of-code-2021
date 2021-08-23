@@ -30,8 +30,8 @@ The external libraries should be placed in the `$UK_LIBS` folder, which is by de
 
 ## 01. Git Structure
 
-The [organiation's github](https://github.com/unikraft) contains [the main Unikraft repository](https://github.com/unikraft/unikraft) and separate repositories for external libraries, as well as already ported apps.
-In the previous sessions we saw that the Unikraft repository consists of internal libraries, platform code and architecture code.
+The [organization's github](https://github.com/unikraft) contains [the main Unikraft repository](https://github.com/unikraft/unikraft) and separate repositories for external libraries, as well as already ported apps.
+In the previous sessions, we saw that the Unikraft repository consists of internal libraries, platform code and architecture code.
 It doesn't have any external dependencies, in contrast to the external libraries or applications, which can have external dependencies.
 
 External libraries can have more specific purposes.
@@ -43,9 +43,9 @@ In general, this process is done by solving the issue on a separate branch and a
 
 ## 02. Example of External Library
 
-Let's focus for now on a already ported library: [lib-libhogweed](https://github.com/unikraft/lib-libhogweed).
+Let's focus for now on an already ported library: [lib-libhogweed](https://github.com/unikraft/lib-libhogweed).
 Let's examine its core components.
-Open the sources present in `work/01-tut-porting/libs/libhogweed/` and follow the bookmars marked with `USOC_X`, where `X` is the index of the item in the list.
+Open the sources present in `work/01-tut-porting/libs/libhogweed/` and follow the bookmarks marked with `USOC_X`, where `X` is the index of the item in the list.
 
 
 ### Glue Code
@@ -66,7 +66,7 @@ For exposing this API, we should also make a header file with all of the test mo
 ### Config.uk
 
 Here are defined all the config variables, which will be visible in `make menuconfig`.
-Also, these variables can be accesed from `Makefile.uk` or even from `C` sources, by including `"uk/config.h"`, using the prefix `CONFIG_`.
+Also, these variables can be accessed from `Makefile.uk` or even from `C` sources, by including `"uk/config.h"`, using the prefix `CONFIG_`.
 
 Moving to the source code, `work/01-tut-porting/libs/libhogweed/Config.uk`, we have:
 
@@ -93,7 +93,7 @@ menuconfig TESTSUITE
 				default y
 		endif
 ````
-Each test case have its own variable in order to allow testing just some tests from the whole suite.
+Each test case has its own variable in order to allow testing just some tests from the whole suite.
 
 
 ### Makefile.uk
@@ -126,7 +126,7 @@ LIBHOGWEED_COMMON_INCLUDES-y += -I$(LIBHOGWEED_BASE)/include
 ````
 You should include the directories with the default library's headers as well as the directories with the glue headers created by you, if it's the case.
 
-5. Add compile flags, used in general for suppresing some compile warnings and making the build process neater:
+5. Add compile flags, used in general for suppressing some compile warnings and making the build process neater:
 ````
 LIBHOGWEED_SUPPRESS_FLAGS += -Wno-unused-parameter \
         -Wno-unused-variable -Wno-unused-value -Wno-unused-function \
@@ -157,7 +157,7 @@ You can read more about compile flags in [the main documentation](http://docs.un
 
 **Note**: A good practice is to include a test only if the config variable corresponding to that test is set.
 
-8. This step is very customizabile, being like a script executed before starting to compile the unikernel.
+8. This step is very customizable, being like a script executed before starting to compile the unikernel.
 In general, and in this case too, the libraries build their own config file through a provided executable, usually named `configure`:
 ````
 $(LIBHOGWEED_EXTRACTED)/config.h: $(LIBHOGWEED_BUILD)/.origin
@@ -192,7 +192,7 @@ Disable some tests, rebuild, and run again the checker application.
 
 ## Practical Work
 
-Moving to a more hands on experience, let's port a new library!
+Moving to a more hands-on experience, let's port a new library!
 Let's suppose that we need kd tree support and that we found a `C` library, [`kdtree`](http://nuclear.mutantstargoat.com/sw/kdtree/), that does what we need.
 After downloading and inspecting this library, we can see that it also has a set of examples, which can be used by us to test if we ported this library properly.
 
@@ -280,4 +280,4 @@ Test the resulted library by calling the test function from the `app-kdtree` app
 
 ## Further Reading
 
-You can get more in depth informations for the contributing process from [the main documentation](http://docs.unikraft.org/developers-app.html#).
+You can get more in-depth information for the contributing process from [the main documentation](http://docs.unikraft.org/developers-app.html#).
