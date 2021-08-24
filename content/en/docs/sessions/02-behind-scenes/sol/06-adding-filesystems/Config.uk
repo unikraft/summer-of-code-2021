@@ -1,0 +1,7 @@
+menuconfig APPHELLOWORLD_DEPENDENCIES
+        bool "Adding filesystems"
+        default y
+        select PLAT_KVM
+        select LIBNEWLIBC
+        select LIB9PFS
+        select LIBUK9P
