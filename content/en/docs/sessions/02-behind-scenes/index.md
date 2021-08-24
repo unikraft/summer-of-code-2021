@@ -65,7 +65,7 @@ demo/  images/  index.md  sol/
 ### 01. Virtualization
 
 Through virtualization, multiple operating systems (OS) are able to run on the same hardware, independently, thinking that each one of them controls the entire system.
-This can be done using a hypervisor, which is a low-level software that virtualizes the underlying hardware and manages access to the real hardware, either direclty or through the host Operating System.
+This can be done using a hypervisor, which is a low-level software that virtualizes the underlying hardware and manages access to the real hardware, either directly or through the host Operating System.
 There are 2 main virtualized environments: virtual machines and containers, each with pros and cons regarding complexity, size, performance and security.
 Unikernels come somewhere between those 2.
 
@@ -79,7 +79,7 @@ We won't go in depth into them, but it is good to know how they are different:
 * The **Type 1 hypervisor**, also known as **bare-metal hypervisor**, has direct access to the hardware and controls all the operating systems that are running on the system.
   KVM, despite the appearances, is a Type 1 hypervisor.
 * The **Type 2 hypervisor**, also known as **hosted hypervisor**, has to go through the host operating system to reach the hardware.
-  An example of Type 2 hypervisor is VirtualBox
+  An example of Type 2 hypervisor is VirtualBox.
 
 | ![type 1 hypervisor os](/docs/sessions/02-behind-scenes/images/vm1.svg) | ![type 2 hypervisor os](/docs/sessions/02-behind-scenes/images/vm2.svg) |
 | :--:									  | :--:								    |
@@ -87,7 +87,7 @@ We won't go in depth into them, but it is good to know how they are different:
 
 #### Containers
 
-Containers are environments designed to contain and run only one application and its dependecies.
+Containers are environments designed to contain and run only one application and its dependencies.
 This leads to very small sizes.
 The containers are managed by a Container Management Engine, like Docker, and are dependent on the host OS, as they cannot run without it.
 
@@ -103,7 +103,7 @@ Being a special type of operating system, Unikraft can run bare-metal or over a 
 
 | ![type 1 hypervisor uk](/docs/sessions/02-behind-scenes/images/unikraft1.svg) | ![type 2 hypervisor uk](/docs/sessions/02-behind-scenes/images/unikraft2.svg) |
 | :--: | :--: |
-| Unikraft over Type 1 hypervisor                                                  | Unikraft over type 2 hypervisor                           		|
+| Unikraft over Type 1 hypervisor                                                  | Unikraft over Type 2 hypervisor                           		|
 
 The following table makes a comparison between regular Virtual Machines (think of an Ubuntu VM), Containers and Unikernels, represented by Unikraft:
 |                      | Virtual Machines              | Containers                        | Unikernels                  |
@@ -139,11 +139,13 @@ The Unikraft core is comprised of several components:
 * [the architecture code](https://github.com/unikraft/unikraft/tree/staging/arch):
   This defines behaviours and hardware interactions specific to the target architecture (x86_64, ARM, RISC-V).
   For example, for the x86_64 architecture, this component defines the usable registers, data types sizes and how Thread-Local Storage should happen.
-* [the platform code](https://github.com/unikraft/unikraft/tree/staging/plat): this defines interaction with the underlying hardware, depending on whether a hypervisor is present or not, and which hypervisor is present.
+* [the platform code](https://github.com/unikraft/unikraft/tree/staging/plat):
+  This defines interaction with the underlying hardware, depending on whether a hypervisor is present or not, and which hypervisor is present.
   For example, if the KVM hypervisor is present, Unikraft will behave almost as if it runs bare-metal, needing to initialize the hardware components according to the manufacturer specifications.
   The difference from bare-metal is made only at the entry, where some information, like the memory layout, the available console, are supplied by the bootloader (Multiboot) and there's no need to interact with the BIOS or UEFI.
   In the case of Xen, many of the hardware-related operations must be done through hypercalls, thus reducing the direct interaction of Unikraft with the hardware.
- * [internal libraries](https://github.com/unikraft/unikraft/tree/staging/lib): these define behaviour independent of the hardware, like scheduling, networking, memory allocation, basic file systems.
+ * [internal libraries](https://github.com/unikraft/unikraft/tree/staging/lib):
+  These define behaviour independent of the hardware, like scheduling, networking, memory allocation, basic file systems.
   These libraries are the same for every platform or architecture, and rely on the platform code and the architecture code to perform the needed actions.
   The internal libraries differ from the external ones in the implemented functionalities.
   The internal ones define parts of the kernel, while the external ones define user-space level functionalities.
