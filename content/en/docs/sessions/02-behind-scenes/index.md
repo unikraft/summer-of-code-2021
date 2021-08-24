@@ -22,10 +22,41 @@ kraft build
 kraft run
 ```
 
-## Required Tools
+## Required Tools and Resources
 
 For this session, the following tools are needed: `qemu-kvm`, `qemu-system-x86_64`, `qemu-system-aarch64`, `gcc-aarch64-linux-gnu`.
-Install them using ```sudo apt-get install qemu-kvm qemu-system-x86 qemu-system-arm gcc-aarch64-linux-gnu```.
+To install on Debian/Ubuntu use the following command
+
+```
+sudo apt-get -y install qemu-kvm qemu-system-x86 qemu-system-arm gcc-aarch64-linux-gnu
+```
+
+### Support Files
+
+Session support files are available [in the repository](https://github.com/unikraft/summer-of-code-2021).
+If you already cloned the repository, update it and enter the session directory:
+
+```
+$ cd path/to/repository/clone
+
+$ git pull --rebase
+
+$ cd content/en/docs/sessions/02-behind-scenes/
+
+$ ls
+demo/  images/  index.md  sol/
+```
+
+If you haven't cloned the repository yet, clone it and enter the session directory:
+
+```
+$ git clone https://github.com/unikraft/summer-of-code-2021
+
+$ cd summer-of-code-2021/content/en/docs/sessions/02-behind-scenes/
+
+$ ls
+demo/  images/  index.md  sol/
+```
 
 ## Overview
 
@@ -176,6 +207,33 @@ During the build process, all the `Makefile.uk` files (from the Unikraft core an
   It can also be run as an ELF, in Linux, but in this way the true power of Unikraft is not achieved.
 
 ## Work Items
+
+### Support Files
+
+Session support files are available [in the repository](https://github.com/unikraft/summer-of-code-2021).
+If you already cloned the repository, update it and enter the session directory:
+
+```
+$ cd path/to/repository/clone
+
+$ git pull --rebase
+
+$ cd content/en/docs/sessions/02-behind-scenes/
+
+$ ls
+demo/  images/  index.md  sol/
+```
+
+If you haven't cloned the repository yet, clone it and enter the session directory:
+
+```
+$ git clone https://github.com/unikraft/summer-of-code-2021
+
+$ cd summer-of-code-2021/content/en/docs/sessions/02-behind-scenes/
+
+$ ls
+demo/  images/  index.md  sol/
+```
 
 ### 01. Tutorial / Reminder: Building and Running Unikraft
 
