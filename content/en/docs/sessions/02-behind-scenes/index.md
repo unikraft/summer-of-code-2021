@@ -709,3 +709,8 @@ Make sure that after this change, the application can still be built and run.
 
 Delete `Config.uk` and reconfigure / rebuild the app.
 What happens when you run the app?
+
+### 12. Give Us Feedback
+
+We want to know how to make the next sessions better.
+Fo this we need your [feedback](https://forms.gle/awraHJpjLaPDeXzk9).
