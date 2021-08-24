@@ -10,6 +10,19 @@ This session aims to familiarize you with the tools and setup needed to achieve 
 ## Reminders
 
 At this stage, you should be familiar with the steps of configuring, building and running any application within Unikraft and know the main parts of the architecture.
+Below you can see a list of the commands you have used so far.
+
+| Command                                             | Description                                                             |
+|-----------------------------------------------------|-------------------------------------------------------------------------|
+| kraft list                                          | Get a list of all components that are available for use with kraft      |
+| kraft up -t application_name your_application_name  | Download, configure and build existing components into unikernel images |
+| kraft run                                           | Run resulting unikernel image                                           |
+| kraft init -t application_name                      | Initialize the application                                              |
+| kraft configure                                     | Configure platform and architecture(interactive)                        |
+| kraft configure -p platform -m arhitecture          | Configure platform and architecture(non-interactive)                    |
+| kraft build                                         | Build the application                                                   |
+| kraft clean                                         | Clean the application                                                   |
+| make menuconfig                                     | Configure application through the main menu                             |
 
 ## Debugging
 
@@ -47,7 +60,7 @@ Once set, save the configuration and build your images.
 
 For the Linux user space target (`linuxu`) simply point GDB to the resulting debug image, for example:
 
-```properties
+```
 gdb build/app-helloworld_linuxu-x86_64.dbg
 ```
 
@@ -57,32 +70,42 @@ gdb build/app-helloworld_linuxu-x86_64.dbg
 For KVM, you can start the guest with the kernel image that includes debugging information, or the one that does not.
 We recommend creating the guest in a paused state (the `-S` option):
 
-```properties
+```
 qemu-system-x86_64 -s -S -cpu host -enable-kvm -m 128 -nodefaults -no-acpi -display none -serial stdio -device isa-debug-exit -kernel build/app-helloworld_kvm-x86_64.dbg -append verbose
 ```
 
-Note that the `-s` parameter is shorthand for `-gdb tcp::1234`. Now connect GDB by using the debug image with:
+Note that the `-s` parameter is shorthand for `-gdb tcp::1234`.
+To avoid this long `qemu-system-x86` command with a lot of arguments, we can use `qemu-guest`.
 
-```properties
+```
+qemu-guest -P -g 1234 -k build/app-helloworld_kvm-x86_64.dbg
+```
+
+Now connect GDB by using the debug image with:
+
+```
 gdb --eval-command="target remote :1234" build/app-helloworld_kvm-x86_64.dbg
 ```
 
 Unless you're debugging early boot code (until `_libkvmplat_start32`), you’ll need to set a hardware break point:
+Hardware breakpoints have the same effect as the common software breakpoints you are used to, but they are different in the implementation.
+As the name suggests, hardware breakpoints are based on direct hardware support.
+This may limit the number of breakpoints you can set, but makes them especially useful when debugging kernel code.
 
-```properties
+```
 hbreak [location]
 continue
 ```
 
 We’ll now need to set the right CPU architecture:
 
-```properties
+```
 disconnect
 set arch i386:x86-64:intel
 ```
 
 And reconnect:
-```properties
+```
 tar remote localhost:1234
 ```
 
@@ -91,11 +114,28 @@ You can now run `continue` and debug as you would normally.
 #### Xen
 ---
 
+{{% alert title="Running Unikraft in Xen" %}}
+For Xen you first need to create a VM configuration (save it under `helloworld.cfg`):
+
+```
+name          = 'helloworld'
+vcpus         = '1'
+memory        = '4'
+kernel        = 'build/app-helloworld_xen-x86_64.dbg'
+```
+Start the virtual machine with:
+
+`xl create -c helloworld.cfg`
+
+{{% /alert %}}
+
+
+
 For Xen the process is slightly more complicated and depends on Xen's `gdbsx` tool.
 First you'll need to make sure you have the tool on your system.
 Here are sample instructions to do that:
 
-```properties
+```
 [get Xen sources]
 ./configure
 cd tools/debugger/gdbsx/ && make
@@ -104,13 +144,13 @@ cd tools/debugger/gdbsx/ && make
 The `gdbsx` tool will then be under tools/debugger.
 For the actual debugging, you first need to create the guest (we recommend paused state: `xl create -p`), note its domain ID (`xl list`) and execute the debugger backend:
 
-```properties
+```
 gdbsx -a [DOMAIN ID] 64 [PORT]
 ```
 
 You can then connect GDB within a separate console and you;re ready to debug:
 
-```properties
+```
 gdb --eval-command="target remote :[PORT]" build/helloworld_xen-x86_64.dbg
 ```
 
@@ -118,13 +158,18 @@ You should be also able to use the debugging file (`build/app-helloworld_xen-x86
 
 ## Tracepoints
 
+Because Unikraft needs a tracing and performance measurement system, one method to do this is using Unikrat's tracepoint system.
+A tracepoint provides a hook to call a function that you can provide at runtime. 
+You can put tracepoints at important locations in the code.
+They are lightweight hooks that can pass an arbitrary number of parameters, which prototypes are described in a tracepoint declaration placed in a header file.
+
 ### Dependencies
 
 We provide some tools to read and export trace data that were collected with Unikraft's tracepoint system.
 The tools depend on Python3, as well as the click and tabulate modules.
 You can install them by running (Debian/Ubuntu):
 
-```properties
+```
 sudo apt-get install python3 python3-click python3-tabulate
 ```
 
@@ -141,7 +186,7 @@ Because tracepoints may noticeably affect performance, you can alternatively ena
 
 This can be done with the `Makefile.uk` of each library.
 
-```properties
+```
 # Enable tracepoints for a whole library
 LIBNAME_CFLAGS-y += -DUK_DEBUG_TRACE
 LIBNAME_CXXFLAGS-y += -DUK_DEBUG_TRACE
@@ -154,7 +199,7 @@ LIBNAME_FILENAME2_FLAGS-y += -DUK_DEBUG_TRACE
 This can also be done by defining `UK_DEBUG_TRACE` in the head of your source files.
 Please make sure that `UK_DEBUG_TRACE` is defined before `<uk/trace.h>` is included:
 
-```properties
+```
 #ifndef UK_DEBUG_TRACE
 #define UK_DEBUG_TRACE
 #endif
@@ -166,59 +211,13 @@ As soon as tracing is enabled, Unikraft will store samples of each enabled trace
 Currently this is not a circular buffer.
 This means that as soon as it is full, Unikraft will stop collecting further samples.
 
-### Reading Trace Data
-
-Unikraft is storing trace data to an internal buffer that resides in the guest's main memory.
-You can use GDB to read and export it.
-For this purpose, you will need to load the `uk-gdb.py` helper script into your GDB session.
-It adds additional commands that allow you to list and store the trace data.
-We recommend to automatically load the script to GDB.
-For this purpose, add the following line to your `~/.gdbinit`:
-
-```properties
-source /path/to/your/build/uk-gdb.py
-```
-
-In order to collect the data, open GDB with the debug image and connect to your Unikraft instance as described in Section [Using GDB](#using-gdb):
-
-```properties
-gdb build/app-helloworld_linuxu-x86_64.dbg
-```
-
-The `.dbg` image is required because it contains offline data needed for parsing the trace buffer.
-
-As soon as you let run your guest, samples should be stored in Unikraft's trace buffer.
-You can print them by issuing the gdb command `uk trace`:
-
-```properties
-(gdb) uk trace
-```
-
-Alternatively, you can save all trace data to disk with `uk trace save <filename>`:
-
-```properties
-(gdb) uk trace save traces.dat
-```
-
-It may make sense to connect with GDB after the guest execution has been finished (and the trace buffer got filled).
-For this purpose, make sure that your hypervisor is not destroying the instance after guest shut down (on QEMU add `--no-shutdown` and `--no-reboot` parameters).
-
-If you are seeing the error message `Error getting the trace buffer. Is tracing enabled?`, you probably did not enable tracing or Unikraft's trace buffer is empty.
-This can happen when no tracepoint was ever called.
-
-Any saved trace file can be later processed with the `trace.py` script. In our example:
-
-```properties
-support/scripts/uk_trace/trace.py list traces.dat
-```
-
 ### Creating Tracepoints
 
 Instrumenting your code with tracepoints is done by two steps.
 First, you define and register a tracepoint handler with the `UK_TRACEPOINT()` macro.
 Second, you place calls to the generated handler at those places in your code where your want to trace an event:
 
-```properties
+```
 #include <uk/trace.h>
 
 UK_TRACEPOINT(trace_vfs_open, "\"%s\" 0x%x 0%0o", const char*, int, mode_t);
@@ -239,17 +238,102 @@ The given format string `fmt` is a printf-style format which will be used to cre
 This format string is only kept in the debug image and is used by the tools to read and parse the trace data.
 Unikraft's trace buffer stores for each sample a timestamp, the name of the tracepoint, and the given parameters.
 
+
+### Reading Trace Data
+
+Unikraft is storing trace data to an internal buffer that resides in the guest's main memory.
+You can use GDB to read and export it.
+For this purpose, you will need to load the `uk-gdb.py` helper script into your GDB session.
+It adds additional commands that allow you to list and store the trace data.
+We recommend to automatically load the script to GDB.
+For this purpose, add the following line to your `~/.gdbinit`:
+
+```
+source /path/to/your/build/uk-gdb.py
+```
+
+In order to collect the data, open GDB with the debug image and connect to your Unikraft instance as described in Section [Using GDB](#using-gdb):
+
+```
+gdb build/app-helloworld_linuxu-x86_64.dbg
+```
+
+The `.dbg` image is required because it contains offline data needed for parsing the trace buffer.
+
+As soon as you let run your guest, samples should be stored in Unikraft's trace buffer.
+You can print them by issuing the gdb command `uk trace`:
+
+```
+(gdb) uk trace
+```
+
+Alternatively, you can save all trace data to disk with `uk trace save <filename>`:
+
+```
+(gdb) uk trace save traces.dat
+```
+
+It may make sense to connect with GDB after the guest execution has been finished (and the trace buffer got filled).
+For this purpose, make sure that your hypervisor is not destroying the instance after guest shut down (on QEMU add `--no-shutdown` and `--no-reboot` parameters).
+
+If you are seeing the error message `Error getting the trace buffer. Is tracing enabled?`, you probably did not enable tracing or Unikraft's trace buffer is empty.
+This can happen when no tracepoint was ever called.
+
+Any saved trace file can be later processed with the `trace.py` script. In our example:
+
+```
+support/scripts/uk_trace/trace.py list traces.dat
+```
+
 ## Benchmarking
 
+
 ## Uniprof
+
+[Uniprof](https://github.com/sysml/uniprof) is a unikernel profiler and performance debugger that gives developers insight into their unikernel behavior transparently, without having to instrument the unikernel itself.
+Right now works on both x86 and ARM architectures and is available only for Xen platform.
+It can be integrated with [Flame Graph](https://github.com/brendangregg/FlameGraph) and in this way you can see all the stack traces into a user-friendly interface.
+Right now you can see an example of integration between Unikraft and Uniprof [here](https://github.com/gabrielmocanu/Uniprof-FlameGraph).
 
 ## Summary
 
 ## Practical Work
 
-### 01. Work Item 1
+### 01. Tutorial. Use GDB in Unikraft
 
-### 02. Work Item 2
+For this tutorial, we will just start the `app-helloworld` application and inspect it with the help of GDB.
+
+First make sure you have the following file structure in your working directory:
+
+```
+workdir
+|_______apps
+|	|_______helloworld
+|_______libs
+|_______unikraft
+```
+
+#### Linuxu
+
+For the image for the **linuxu** platform we can use GDB directly with the binary already created.
+
+```
+gdb build/app-helloworld_linuxu-x86_64.dbg
+```
+
+#### KVM
+
+To avoid using a command with a lot of parameters that you noticed above in the **KVM** section, we can use `qemu-guest`.
+
+
+```
+qemu-guest -P -g 1234 -k build/app-helloworld_kvm-x86_64.dbg
+```
+
+
+
+
+### 02. Why does this doesn't work?
 
 ### 03. Work Item 3
 
