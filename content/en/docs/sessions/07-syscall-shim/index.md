@@ -189,7 +189,7 @@ The binary compatibility layer is a very important part of the Unikraft unikerne
 
 For the practical work we will need the following prerequisites:
 
-* **gcc version at least 8.4.0**
+* **gcc version 8.4.0** - installation guide [here](https://linuxize.com/post/how-to-install-gcc-compiler-on-ubuntu-18-04/)
 
 * **the elfloader application** - this is the implementation of our loader which is build like a normal Unikraft application.
 You can clone the loader [here](https://github.com/skuenzer/app-elfloader/tree/usoc21).
@@ -255,7 +255,7 @@ Because we did not pass an initial ramdisk, the loader does not have anything to
 
 ### 02. Compile a Static-Pie Executable and Run It On Top of Unikraft
 
-The next step to our purpose of running an executable on top of Unikraft is to get an executable with the correct format, that is, a static executable that also contains position independent code.
+The next step to our purpose of running an executable on top of Unikraft is to get an executable with the correct format, that is, a static executable that also contains position independent code. 
 
 We can now go to the `apps/app-elfloader/example/helloworld` directory.
 We can see that the directory has a `helloworld.c` (a simple helloworld program) and a `Makefile`.
@@ -302,7 +302,7 @@ student:~/apps/app-elfloader/example/helloworld$ checksec helloworld
 
 ```
 
-We can see that the `helloworld` executable is a static-pie executable.
+We can see above from the `ldd` and `checksec` output that the `helloworld` executable is a static-pie executable.
 
 Now, the last part is to pass this executable to our unikernel.
 We can use the `-i` option to pass the initial ramdisk to the virtual machine.
