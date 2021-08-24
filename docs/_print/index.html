@@ -326,7 +326,7 @@ $(MAKECMDGOALS):
         @$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS) $(MAKECMDGOALS)
 </code></pre><h5 id=configure-3>Configure</h5><p>Now, we configure it through <code>make menuconfig</code>.</p><p><img src=/docs/sessions/01-baby-steps/images/menuconfig_select_lwip.png alt="lwip selection menu"></p><p><img src=/docs/sessions/01-baby-steps/images/menuconfig_select_lwip2.png alt="lwip2 selection menu"></p><p>If you noticed, the menu also automatically selected some other internal components that would be required by <code>lwip</code>.
 Now <code>Save</code> and <code>Exit</code> the configuration and run <code>make</code>.</p><h5 id=build-3>Build</h5><pre><code>$ make
-</code></pre><h5 id=run-3>Run</h5><p>To run the KVM image, we use the <code>qemu-system-x86_64</code> command:</p><pre><code>$ qemu-system-x86_64 -kernel build/02-httpreply_kvm-x86_64 -nographic
+</code></pre><h5 id=run-3>Run</h5><p>To run the KVM image, we use the <code>qemu-system-x86_64</code> command:</p><pre><code>$ qemu-system-x86_64 -kernel build/02-httpreply-manual_kvm-x86_64 -nographic
 [...]
 Powered by
 o.   .o       _ _               __ _
@@ -337,12 +337,12 @@ oOo oOO| | | | |   (| | | (_) |  _) :_
                    Tethys 0.5.0~b8be82b
 Listening on port 8123...
 </code></pre><p>To close the running QEMU process, use the <code>Ctrl+a x</code> key combination.</p><p><strong>Note</strong>: We didn&rsquo;t go into configuring a functional network connection and actually querying the HTTP server.
-This is a bit more complicated and is outside the scope of this session.</p><pre><code>sudo qemu-system-x86_64 -netdev bridge,id=en0,br=virbr0 -device virtio-net-pci,netdev=en0 -append &quot;netdev.ipv4_addr=172.44.0.2 netdev.ipv4_gw_addr=172.44.0.1 netdev.ipv4_subnet_mask=255.255.255.0 --&quot; -kernel build/02-httpreply_kvm-x86_64 -nographic
+This is a bit more complicated and is outside the scope of this session.</p><pre><code>sudo qemu-system-x86_64 -netdev bridge,id=en0,br=virbr0 -device virtio-net-pci,netdev=en0 -append &quot;netdev.ipv4_addr=172.44.0.2 netdev.ipv4_gw_addr=172.44.0.1 netdev.ipv4_subnet_mask=255.255.255.0 --&quot; -kernel build/02-httpreply-manual_kvm-x86_64 -nographic
 </code></pre><h5 id=connecting-to-the-http-server-1>Connecting to the HTTP Server</h5><p>Similarly to kraft, in order to connect to the HTTP server, we use a virtual bridge to create a connection between the VM and the host system.
 We assign address <code>172.44.0.1/24</code> to the bridge interface (pointing to the host) and we assign address <code>172.44.0.2/24</code> to the virtual machine, by passing boot arguments.</p><p>We run the commands below to create and assign the IP address to the bridge <code>virbr0</code>:</p><pre><code>$ sudo brctl addbr virbr0
 $ sudo ip a a  172.44.0.1/24 dev virbr0
 $ sudo ip l set dev virbr0 up
-</code></pre><p>Now we start the virtul machine and pass it the proper arguments to assing the IP address <code>172.44.0.2/24</code>:</p><pre><code>$ sudo qemu-system-x86_64 -netdev bridge,id=en0,br=virbr0 -device virtio-net-pci,netdev=en0 -append &quot;netdev.ipv4_addr=172.44.0.2 netdev.ipv4_gw_addr=172.44.0.1 netdev.ipv4_subnet_mask=255.255.255.0 --&quot; -kernel build/02-httpreply_kvm-x86_64 -nographic
+</code></pre><p>Now we start the virtul machine and pass it the proper arguments to assing the IP address <code>172.44.0.2/24</code>:</p><pre><code>$ sudo qemu-system-x86_64 -netdev bridge,id=en0,br=virbr0 -device virtio-net-pci,netdev=en0 -append &quot;netdev.ipv4_addr=172.44.0.2 netdev.ipv4_gw_addr=172.44.0.1 netdev.ipv4_subnet_mask=255.255.255.0 --&quot; -kernel build/02-httpreply-manual_kvm-x86_64 -nographic
 0: Set IPv4 address 172.44.0.2 mask 255.255.255.0 gw 172.44.0.1
 en0: Added
 en0: Interface is up
@@ -356,7 +356,7 @@ oOo oOO| | | | |   (| | | (_) |  _) :_
 Listening on port 8123...
 [...]
 </code></pre><p>The boot message confirms the assigning of the <code>172.44.0.2/24</code> IP address to the virtual machine.
-It&rsquo;s listening on por 8123 for HTTP connections on that IP address.
+It&rsquo;s listening on port 8123 for HTTP connections on that IP address.
 We use <code>wget</code> to validate it&rsquo;s working properly and we are able to get the <code>index.html</code> file:</p><pre><code>$ wget 172.44.0.2:8123
 --2021-08-18 16:47:38--  http://172.44.0.2:8123/
 Connecting to 172.44.0.2:8123... connected.
@@ -386,4 +386,245 @@ git checkout staging
 </code></pre><p>And now, for the final step, through <code>make menuconfig</code> make sure you have selected <code>libnewlib</code> as well as <code>9pfs: 9p filesystem</code> inside the <code>Library Configuration</code> menu.
 We will also check these options inside <code>Library Configuration</code> -> <code>vfscore: Configuration</code>:</p><p><img src=/docs/sessions/01-baby-steps/images/menuconfig_select_fs.png alt="fs selection menu"></p><p><img src=/docs/sessions/01-baby-steps/images/menuconfig_select_fs2.png alt="fs2 selection menu"></p><p><img src=/docs/sessions/01-baby-steps/images/menuconfig_select_fs3.png alt="fs3 selection menu"></p><p>What is more, you should also have present in the current directory an additional directory called <code>fs0</code>:</p><pre><code>mkdir fs0
 </code></pre><p>And so, <code>fs0</code> will contain whatever files you create, read from or write to from within your unikernel.</p><p>For now, just make sure it successfully builds. If it does, move on to the next work item.</p><h3 id=04-store-strings>04. Store Strings</h3><p>For the final work item, you will have to update the source code from the second task, so that it stores in a file the received string before sending the encoded one back to the client.
-In order to achieve this, you must have the previous work item completed.</p><p>The available resources are the exact same, you will simply have to modify <code>main.c</code>.</p><p>To test if your application ran successfully, check to see whether the original strings you sent through the client are present in that file or not.</p><h2 id=further-reading>Further Reading</h2><p><a href=http://docs.unikraft.org/index.html>Unikraft Documentation</a></p></div><div class=td-content style=page-break-before:always><h1 id=pg-a7aba59367c86f53527a038cb13a4d73>4 - Session 02: Behind the Scenes</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-7cf16a4b6aedab923e52e136ddacfa59>5 - Session 03: Benchmarking and Debugging</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-cbba34b6d1e7d9a0e83c791f84d7f29d>6 - Session 04: Complex Applications</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-221c0eb25b4f393f30fd7c711495bed2>7 - Session 05: Contributing to Unikraft</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-c8164d0e219bb0f24fd8b32fe7e996e3>8 - Session 06: Testing Unikraft</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-e8257ea2e30401a82888d38de2231d40>9 - Session 07: Syscall Shim</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-0cf305157c0d79c36b53cb269a783170>10 - Session 08: Basic App Porting</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-f352576afa36c9b30f15b2be6533c580>11 - Session 09: Advanced App Porting</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-9026b735a1faa018402aa9ac7ce1ebd9>12 - Session 10: High Performance</h1></div></main></div></div><footer class="bg-dark py-5 row d-print-none"><div class="container-fluid mx-sm-5"><div class=row><div class="col-6 col-sm-4 text-xs-center order-sm-2"><ul class="list-inline mb-0"><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=Discord aria-label=Discord><a class=text-white target=_blank rel="noopener noreferrer" href=https://bit.ly/UnikraftDiscord><i class="fab fa-discord"></i></a></li><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=Twitter aria-label=Twitter><a class=text-white target=_blank rel="noopener noreferrer" href=https://twitter.com/UnikraftSDK><i class="fab fa-twitter"></i></a></li></ul></div><div class="col-6 col-sm-4 text-right text-xs-center order-sm-3"><ul class="list-inline mb-0"><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=GitHub aria-label=GitHub><a class=text-white target=_blank rel="noopener noreferrer" href=https://github.com/unikraft/unikraft><i class="fab fa-github"></i></a></li><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=LinkedIn aria-label=LinkedIn><a class=text-white target=_blank rel="noopener noreferrer" href=https://linkedin.com/company/unikraft-sdk><i class="fab fa-linkedin"></i></a></li></ul></div><div class="col-12 col-sm-4 text-center py-2 order-sm-2"><small class=text-white>&copy; 2021 Unikraft and Open-Source Contributors. All Rights Reserved</small></div></div></div></footer></div><script src=https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js integrity=sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49 crossorigin=anonymous></script><script src=https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js integrity=sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy crossorigin=anonymous></script><script src=/js/main.min.5c74b870c6953931a705f390a49c7e4c0a842ec5c83b24354758dd674343ed0d.js integrity="sha256-XHS4cMaVOTGnBfOQpJx+TAqELsXIOyQ1R1jdZ0ND7Q0=" crossorigin=anonymous></script></body></html>
+In order to achieve this, you must have the previous work item completed.</p><p>The available resources are the exact same, you will simply have to modify <code>main.c</code>.</p><p>To test if your application ran successfully, check to see whether the original strings you sent through the client are present in that file or not.</p><h2 id=further-reading>Further Reading</h2><p><a href=http://docs.unikraft.org/index.html>Unikraft Documentation</a></p></div><div class=td-content style=page-break-before:always><h1 id=pg-a7aba59367c86f53527a038cb13a4d73>4 - Session 02: Behind the Scenes</h1><h2 id=reminders>Reminders</h2><h3 id=kraft>Kraft</h3><p><a href=https://github.com/unikraft/kraft>Kraft</a> is the tool developed by the Unikraft team, to make application deployment easier.
+To automatically download, configure, build and run an application, for example Helloworld, run</p><pre><code>$ kraft list update
+$ kraft up -t helloworld@staging ./my-first-unikernel
+</code></pre><p>If you are already working with cloned / forked repositories from Unikraft, kraft can also help you configure, build and run you application.
+<code>kraft up</code> can be broken down into the following commands:</p><pre><code>$ kraft configure
+$ kraft build
+$ kraft run
+</code></pre><h2 id=required-tools-and-resources>Required Tools and Resources</h2><p>For this session, the following tools are needed: <code>qemu-kvm</code>, <code>qemu-system-x86_64</code>, <code>qemu-system-aarch64</code>, <code>gcc-aarch64-linux-gnu</code>.
+To install on Debian/Ubuntu use the following command</p><pre><code>$ sudo apt-get -y install qemu-kvm qemu-system-x86 qemu-system-arm gcc-aarch64-linux-gnu
+</code></pre><h3 id=support-files>Support Files</h3><p>Session support files are available <a href=https://github.com/unikraft/summer-of-code-2021>in the repository</a>.
+If you already cloned the repository, update it and enter the session directory:</p><pre><code>$ cd path/to/repository/clone
+
+$ git pull --rebase
+
+$ cd content/en/docs/sessions/02-behind-scenes/
+
+$ ls
+demo/  images/  index.md  sol/
+</code></pre><p>If you haven&rsquo;t cloned the repository yet, clone it and enter the session directory:</p><pre><code>$ git clone https://github.com/unikraft/summer-of-code-2021
+
+$ cd summer-of-code-2021/content/en/docs/sessions/02-behind-scenes/
+
+$ ls
+demo/  images/  index.md  sol/
+</code></pre><h2 id=overview>Overview</h2><h3 id=01-virtualization>01. Virtualization</h3><p>Through virtualization, multiple operating systems (OS) are able to run on the same hardware, independently, thinking that each one of them controls the entire system.
+This can be done using a hypervisor, which is a low-level software that virtualizes the underlying hardware and manages access to the real hardware, either direclty or through the host Operating System.
+There are 2 main virtualized environments: virtual machines and containers, each with pros and cons regarding complexity, size, performance and security.
+Unikernels come somewhere between those 2.</p><h4 id=virtual-machines>Virtual Machines</h4><p>Virtual machines represent an abstraction of the hardware, over which an operating system can run, thinking that it is alone on the system and that it controls the hardware below it.
+Virtual machines rely on hypervisors to run properly.
+Those hypervisors can be classified in 2 categories: Type 1 and Type 2.
+We won&rsquo;t go in depth into them, but it is good to know how they are different:</p><ul><li>The <strong>Type 1 hypervisor</strong>, also known as <strong>bare-metal hypervisor</strong>, has direct access to the hardware and controls all the operating systems that are running on the system.
+KVM, despite the appearances, is a Type 1 hypervisor.</li><li>The <strong>Type 2 hypervisor</strong>, also known as <strong>hosted hypervisor</strong>, has to go through the host operating system to reach the hardware.
+An example of Type 2 hypervisor is VirtualBox</li></ul><table><thead><tr><th style=text-align:center><img src=/docs/sessions/02-behind-scenes/images/vm1.svg alt="type 1 hypervisor os"></th><th style=text-align:center><img src=/docs/sessions/02-behind-scenes/images/vm2.svg alt="type 2 hypervisor os"></th></tr></thead><tbody><tr><td style=text-align:center>Operating systems over type 1 hypervisor</td><td style=text-align:center>Operating systems over type 2 hypervisor</td></tr></tbody></table><h4 id=containers>Containers</h4><p>Containers are environments designed to contain and run only one application and its dependecies.
+This leads to very small sizes.
+The containers are managed by a Container Management Engine, like Docker, and are dependent on the host OS, as they cannot run without it.</p><table><thead><tr><th style=text-align:center><img src=/docs/sessions/02-behind-scenes/images/container.svg alt=containers></th></tr></thead><tbody><tr><td style=text-align:center>Containers</td></tr></tbody></table><h4 id=unikraft>Unikraft</h4><p>Unikraft has a size comparable with that of a container, while it retains the power of a virtual machine, meaning it can directly control the hardware components (virtualized, or not, if running bare-metal).
+This gives it an advantage over classical Operating Systems.
+Being a special type of operating system, Unikraft can run bare-metal or over a hypervisor.</p><table><thead><tr><th style=text-align:center><img src=/docs/sessions/02-behind-scenes/images/unikraft1.svg alt="type 1 hypervisor uk"></th><th style=text-align:center><img src=/docs/sessions/02-behind-scenes/images/unikraft2.svg alt="type 2 hypervisor uk"></th></tr></thead><tbody><tr><td style=text-align:center>Unikraft over Type 1 hypervisor</td><td style=text-align:center>Unikraft over type 2 hypervisor</td></tr></tbody></table><p>The following table makes a comparison between regular Virtual Machines (think of an Ubuntu VM), Containers and Unikernels, represented by Unikraft:</p><table><thead><tr><th style=text-align:center></th><th style=text-align:center>Virtual Machines</th><th style=text-align:center>Containers</th><th style=text-align:center>Unikernels</th></tr></thead><tbody><tr><td style=text-align:center><strong>Time performance</strong></td><td style=text-align:center>Slowest of the 3</td><td style=text-align:center>Fast</td><td style=text-align:center>Fast</td></tr><tr><td style=text-align:center><strong>Memory footprint</strong></td><td style=text-align:center>Heavy</td><td style=text-align:center>Depends on the number of features</td><td style=text-align:center>Light</td></tr><tr><td style=text-align:center><strong>Security</strong></td><td style=text-align:center>Very secure</td><td style=text-align:center>Least secure of the 3</td><td style=text-align:center>Very secure</td></tr><tr><td style=text-align:center><strong>Features</strong></td><td style=text-align:center>Everything you would think of</td><td style=text-align:center>Depends on the needs</td><td style=text-align:center>Only the absolute necessary</td></tr></tbody></table><h3 id=02-linuxu-and-kvm>02. linuxu and KVM</h3><p>Unikraft can be run in 2 ways:</p><ul><li>As a virtual machine, using QEMU/KVM or Xen.
+It acts as an operating system, having the responsibility to configure the hardware components that it needs (clocks, additional processors, etc).
+This mode gives Unikraft direct and total control over hardware components, allowing advanced functionalities.</li><li>As a <code>linuxu</code> build, in which it behaves as a Linux user-space application.
+This severely limits its performance, as everything Unikraft does must go through the Linux kernel, via system calls.
+This mode should be used only for development and debugging.</li></ul><p>When Unikraft is running using QEMU/KVM, it can either be run on an emulated system or a (para)virtualized one.
+Technically, KVM means virtualization support is enabled.
+If using QEMU in emulated mode, KVM is not used.
+To keep things simple, we will use interchangeably the terms QEMU, KVM or QEMU/KVM to refer to this use (either virtualized, or emulated).</p><p>Emulation is slower, but it allows using CPU architectures different from the local one (you can run ARM code on a x86 machine).
+Using (para)virtualisation, aka hardware acceleration, greater speed is achieved and more hardware components are visible to Unikraft.</p><h3 id=03-unikraft-core>03. Unikraft Core</h3><p>The Unikraft core is comprised of several components:</p><ul><li><a href=https://github.com/unikraft/unikraft/tree/staging/arch>the architecture code</a>:
+This defines behaviours and hardware interactions specific to the target architecture (x86_64, ARM, RISC-V).
+For example, for the x86_64 architecture, this component defines the usable registers, data types sizes and how Thread-Local Storage should happen.</li><li><a href=https://github.com/unikraft/unikraft/tree/staging/plat>the platform code</a>: this defines interaction with the underlying hardware, depending on whether a hypervisor is present or not, and which hypervisor is present.
+For example, if the KVM hypervisor is present, Unikraft will behave almost as if it runs bare-metal, needing to initialize the hardware components according to the manufacturer specifications.
+The difference from bare-metal is made only at the entry, where some information, like the memory layout, the available console, are supplied by the bootloader (Multiboot) and there&rsquo;s no need to interact with the BIOS or UEFI.
+In the case of Xen, many of the hardware-related operations must be done through hypercalls, thus reducing the direct interaction of Unikraft with the hardware.</li><li><a href=https://github.com/unikraft/unikraft/tree/staging/lib>internal libraries</a>: these define behaviour independent of the hardware, like scheduling, networking, memory allocation, basic file systems.
+These libraries are the same for every platform or architecture, and rely on the platform code and the architecture code to perform the needed actions.
+The internal libraries differ from the external ones in the implemented functionalities.
+The internal ones define parts of the kernel, while the external ones define user-space level functionalities.
+For example, <strong>uknetdev</strong> and <strong>lwip</strong> are 2 libraries that define networking components.
+<a href=https://github.com/unikraft/unikraft/tree/staging/lib/uknetdev>Uknetdev</a> is an internal library that interacts with the network card and defines how packages are sent using it.
+<a href=https://github.com/unikraft/lib-lwip>Lwip</a> is an external library that defines networking protocols, like IP, TCP, UDP.
+This library knows that the packages are somehow sent over the NIC, but it is not concerned how.
+That is the job of the kernel.</li></ul><h3 id=04-libc-in-unikraft>04. libc in Unikraft</h3><p>The Unikraft core provides only the bare minimum components to interact with the hardware and manage resources.
+A software layer, similar to the standard C library in a general-purpose OS, is required to make it easy to run applications on top of Unikraft.</p><p>Unikraft has multiple variants of a libc-like component:</p><ul><li><a href=https://github.com/unikraft/unikraft/tree/staging/lib/nolibc>nolibc</a> is a minimalistic libc, part of the core Unikraft code, that contains only the functionality needed for the core (strings, qsort, etc).</li><li><a href=https://github.com/unikraft/unikraft/tree/staging/lib/isrlib>isrlib</a> is the interrupt-context safe variant of nolibc.
+It is used for interrupt handling code.</li><li><a href=https://github.com/unikraft/lib-newlib>newlibc</a> is the most complete libc currently available for Unikraft, but it still lacks some functionalities, like multithreading.
+Newlibc was designed for embedded environments.</li><li><a href=https://github.com/unikraft/lib-musl>musl</a> is, theoretically, the best libc that will be used by Unikraft, but it&rsquo;s currently in testing.</li></ul><p>Nolibc and isrlib are part of the Unikraft core.
+Newlibc and musl are external libraries, from the point of view of Unikraft, and they must be included to the build, as shown in <a href=/docs/sessions/01-baby-steps>Session 01: Baby Steps</a>.</p><h3 id=05-configuring-unikraft---configuk>05. Configuring Unikraft - Config.uk</h3><p>Unikraft is a configurable operating system, where each component can be modified, configured, according to the user’s needs.
+This configuration is done using a version of Kconfig, through the <strong>Config.uk</strong> files.
+In these files, options are added to enable libraries, applications and different components of the Unikraft core.
+The user can then apply those configuration options, using <code>make menuconfig</code>, which generates an internal configuration file that can be understood by the build system, <strong>.config</strong>.
+Once configured, the Unikraft image can be built, using <code>make</code>, and run, using the appropriate method (Linux ELF loader, qemu-kvm, xen, others).</p><p>Configuration can be done in 3 ways:</p><ul><li><p>Manually, using</p><pre><code>$ make menuconfig
+</code></pre></li><li><p>Adding a dependency in <strong>Config.uk</strong> for a component, so that the dependency gets automatically selected when the component is enabled.
+This is done using <code>depends on</code> and <code>select</code> keywords in <strong>Config.uk</strong>.
+The configuration gets loaded and the <strong>.config</strong> file is generated by running</p><pre><code>$ make menuconfig
+</code></pre><p>This type of configuration removes some configuration steps, but not all of them.</p></li><li><p>Writing the desired configuration in <strong>kraft.yaml</strong>.
+The configuration gets loaded and the <strong>.config</strong> file is generated by running</p><pre><code>$ kraft configure
+</code></pre></li></ul><p>In this session, we will use the first and the last configuration options.</p><h3 id=06-the-build-system---basics>06. The Build System - basics</h3><p>Once the application is configured, in <strong>.config</strong>, symbols are defined (eg. <code>CONFIG_ARCH_X86_64</code>).
+Those symbols are usable both in the C code, to include certain functionalities only if they were selected in the configuring process, and in the actual building process, to include / exclude source files, or whole libraries.
+This last thing is done in <strong>Makefile.uk</strong>, where source code files are added to libraries.
+During the build process, all the <code>Makefile.uk</code> files (from the Unikraft core and external libraries) are evaluated, and the selected files are compiled and linked, to form the Unikraft image.</p><table><thead><tr><th style=text-align:center><img src=/docs/sessions/02-behind-scenes/images/build_uk.svg alt="unikraft build"></th></tr></thead><tbody><tr><td style=text-align:center>The build process of Unikraft</td></tr></tbody></table><h2 id=summary>Summary</h2><ul><li>Unikraft is a special type of operating system, that can be configured to match the needs of a specific application.</li><li>This configuration is made possible by a system based on Kconfig, that uses <strong>Config.uk</strong> files to add possible configurations, and <strong>.config</strong> files to store the specific configuration for a build.</li><li>The configuration step creates symbols that are visible in both Makefiles and source code.</li><li>Each component has its own <strong>Makefile.uk</strong>, where source files can be added, removed, or be made dependent on the configuration.</li><li>Unikraft has an internal libc, but it can use others, more complex and complete, like newlib and musl.</li><li>Being an operating system, it needs to be run by a hypervisor, like KVM, xen, to work at full capacity.
+It can also be run as an ELF, in Linux, but in this way the true power of Unikraft is not achieved.</li></ul><h2 id=work-items>Work Items</h2><h3 id=support-files-1>Support Files</h3><p>Session support files are available <a href=https://github.com/unikraft/summer-of-code-2021>in the repository</a>.
+If you already cloned the repository, update it and enter the session directory:</p><pre><code>$ cd path/to/repository/clone
+
+$ git pull --rebase
+
+$ cd content/en/docs/sessions/02-behind-scenes/
+
+$ ls
+demo/  images/  index.md  sol/
+</code></pre><p>If you haven&rsquo;t cloned the repository yet, clone it and enter the session directory:</p><pre><code>$ git clone https://github.com/unikraft/summer-of-code-2021
+
+$ cd summer-of-code-2021/content/en/docs/sessions/02-behind-scenes/
+
+$ ls
+demo/  images/  index.md  sol/
+</code></pre><h3 id=01-tutorial--reminder-building-and-running-unikraft>01. Tutorial / Reminder: Building and Running Unikraft</h3><p>We want to build the Helloworld application, using the Kconfig-based system, for the <strong>linuxu</strong> and <strong>KVM</strong> platforms, for the <strong>ARM</strong> and <strong>x86</strong> architectures, and then run them.</p><p>If you don&rsquo;t have the unikraft and app-helloworld repositories cloned already, do so, by running the following commands:</p><pre><code>$ git clone https://github.com/unikraft/unikraft
+$ cd apps
+$ git clone https://github.com/unikraft/app-helloworld helloworld/
+</code></pre><p>As you can see from the commands above, it is recommended to have the following file structure in your working directory:</p><pre><code>workdir
+|_______apps
+|	|_______helloworld
+|_______libs
+|_______unikraft
+</code></pre><p>Make sure that <code>UK_ROOT</code> and <code>UK_LIBS</code> are set correctly in the <code>Makefile</code> file, in the <code>helloworld</code> folder.
+If you are not sure if they are set correctly, set them like this:</p><pre><code>UK_ROOT ?= $(PWD)/../../unikraft
+UK_LIBS ?= $(PWD)/../../libs
+</code></pre><h4 id=linuxu-x86_64>Linuxu, x86_64</h4><p>First, we will the image for the <strong>linuxu</strong> platform.
+As the resulting image will be an ELF, we can only run the <strong>x86</strong> Unikraft image.
+We follow the steps:</p><ol><li><p>While in the <code>helloworld</code> folder, run</p><pre><code>$ make menuconfig
+</code></pre></li><li><p>From <code>Architecture Selection</code>, select <code>Architecture</code> -> <code>x86 compatible</code>.</p></li><li><p>From <code>Platform Configuration</code>, select <code>Linux user space</code>.</p></li><li><p>Save, exit and run</p><pre><code>$ make
+</code></pre></li><li><p>The resulting image, <code>app-helloworld_linuxu-x86_64</code> will be present in the <code>build/</code> folder.
+Run it.</p><pre><code>$ ./build/app-helloworld_linuxu-x86_64
+</code></pre></li></ol><h4 id=kvm-x86_64>KVM, x86_64</h4><p>Next, we will build the image for the <strong>kvm</strong> platform.
+Before starting the process, make sure that you have the necessary tools, listed in the <a href=/docs/sessions/02-behind-scenes/#required-tools>Required Tools</a> section.
+We follow the steps:</p><ol><li><p>Run</p><pre><code>$ make menuconfig
+</code></pre></li><li><p>We will leave the architecture as is, for now.</p></li><li><p>From <code>Platform Configuration</code>, select <code>KVM guest</code>.</p></li><li><p>Save, exit and run</p><pre><code>$ make
+</code></pre></li><li><p>Load the resulting image in QEMU by using</p><pre><code>$ sudo qemu-system-x86_64 -kernel ./build/app-helloworld_kvm-x86_64 -serial stdio
+</code></pre></li></ol><p>Besides <code>-serial stdio</code>, no other option is needed to run the Helloworld application.
+Other, more complex applications, will require more options given to qemu.</p><p>We have run Unikraft in the emulation mode, with the command from above.
+We can also run it in the virtualization mode, by adding the <code>-enable-kvm</code> option.
+You may receive a warning, <code>host doesn't support requested feature:</code>.
+This is because kvm uses a generic cpu model.
+You can instruct kvm to use your local cpu model, by adding <code>-cpu host</code> to the command.</p><p>The final command will look like this:</p><pre><code>$ sudo qemu-system-x86_64 -enable-kvm -cpu host -kernel ./build/app-helloworld_kvm-x86_64 -serial stdio
+</code></pre><p>While we are here, we can check some differences between emulation and virtualization.
+Record the time needed by each image to run, using <code>time</code>, like this:</p><pre><code>$ time sudo qemu-system-x86_64 -kernel ./build/app-helloworld_kvm-x86_64 -serial stdio
+$ time sudo qemu-system-x86_64 -enable-kvm -cpu host -kernel ./build/app-helloworld_kvm-x86_64 -serial stdio
+</code></pre><p>Because <code>helloworld</code> is a simple application, the <strong>real</strong> running time will be similar.
+The differences are where each image runs most of its time: in user space, or in kernel space.
+Find an explaination to those differences.</p><h4 id=kvm-arm>KVM, ARM</h4><p>To configure Unikraft for the ARM architecture, go to the configuration menu, like before, and select, from <code>Architecture Selection</code>, <code>Armv8 compatible</code>.
+Save and exit the configuration.
+As a new architecture is selected, you have to clean the previously compiled files:</p><pre><code>$ make clean
+</code></pre><p>After cleaning, build the image:</p><pre><code>$ make
+</code></pre><p>To run Unikraft, use the following command:</p><pre><code>$ sudo qemu-system-aarch64 -machine virt -cpu cortex-a57 -kernel ./build/app-helloworld_kvm-arm64 -serial stdio
+</code></pre><p>Note that now we need to provide a machine and a cpu model to be emulated, as there are no defaults available.
+If you want to find information about other machines, run</p><pre><code>$ sudo qemu-system-aarch64 -machine help
+</code></pre><h3 id=02-tutorial-make-it-speak>02. Tutorial: Make It Speak</h3><p>The goal of this exercise is to enable the internal debugging library for Unikraft (<code>ukdebug</code>) and make it display messages up to the <em>info</em> level.
+We also want to identify which hardware components are initialized for both x86 and ARM, and where.</p><h4 id=arm>ARM</h4><p>Considering that the last exercise ended with an ARM image, we will start now with that configuration.
+We need to enable <code>ukdebug</code> in the configuration menu.
+It is located in the <code>Library Configuration</code> menu.
+But, for this exercise, besides enabling a component, we must modify it.</p><p>Enter the <code>ukdebug</code> configuration menu.
+We need to have <code>Enable kernel messages (uk_printk)</code> checked.
+Also, we need to change the option below it, <code>Kernel message level</code>, from <code>Show critical and error messages (default)</code> to <code>Show all types of messages</code>.
+To make thing prettier, also enable the <code>Colored output</code> option.
+Save and exit the configuration, then build and run the image.</p><p>We have a bunch of initializations happening, before seeing the &ldquo;Hello world!&rdquo; message.
+Let&rsquo;s break them down. We start with the platform internal library, <code>libkvmplat</code>.
+Here, the hardware components are initialized, like the Serial module, <code>PL001 UART</code>, and the <code>GIC</code>, which is the interrupt controller.
+After that, the memory address space is defined, and the booting process starts, by replacing the current stack with a larger one, that is part of the defined address space.
+Lastly, before calling the main function of the application, the software components of Unikraft are initialized, like timers, interrupts, and bus handlers.
+The execution ends in in the platform library, with the shutdown command.</p><h4 id=x86_64>x86_64</h4><p>For the x86 part, just change the architecture in the configuration interface.
+Recall that, after changing the architecture, we have to clean the previously compiled files:</p><pre><code>$ make clean
+</code></pre><p>Build Unikraft:</p><pre><code>$ make
+</code></pre><p>And run in under QEMU/KVM.
+The output differs.
+We can see that, in the case of x86, the platform library initializes less components, or it is less verbose than the ARM one.
+But the timer and bus initialization is more verbose.
+We see what timer is used, the i8254 one.
+Also, we see that the PCI bus is used.</p><p>If you are wondering what the Constructors are, they will be covered in <a href=/docs/sessions/06-testing-unikraft/>Session 06: Testing Unikraft</a></p><h3 id=03-more-messages>03. More Messages</h3><p>Sometimes we need a more detailed output.
+For this, <code>ukdebug</code> has the option to show <em>debug</em> level messages.
+Enable them and run Unikraft, for either ARM or x86 architectures, or both.</p><h3 id=04-going-through-the-code>04. Going through the Code</h3><p>Having the output of <code>ukdebug</code>, go through the Unikraft code, in the <code>unikraft</code> folder.
+Find the components that you have seen in the outputs, in the platform library, and where the kernel messages are sent.
+The platform library, even though is called a library, is not in the <code>lib</code> subfolder.
+It is placed in the <code>plat</code> folder.
+Explore the code, at your own pace.
+Can you also find where the main function is called?</p><h3 id=05-i-have-an-important-message>05. I Have an Important Message</h3><p>Send an important kernel message, that everyone needs to see, right before the main function is called.
+Try different message levels (critical, error, warning, info, debug), to see how they differ.</p><p>Note: sending a critical kernel message will not affect how Unikraft runs after the message.</p><h3 id=06-tutorial--reminder-adding-filesystems-to-an-application>06. Tutorial / Reminder: Adding Filesystems to an Application</h3><p>For this tutorial, the aim is to modify the helloworld app, to use the 9pfs filesystem: read something from a file, and display it.
+Use kraft, the <code>qemu-guest</code> script, and <code>qemu-system</code> to run the modified application.</p><p>Some parts of this tutorial were already discussed last session.</p><h4 id=the-code>The Code</h4><p>First of all, we need to write some simple code, to read from a file. We will do this in <code>main.c</code>.</p><pre><code>	FILE *in = fopen(&quot;file&quot;, &quot;r&quot;);
+	char buffer[100];
+
+	fread(buffer, 1, 100, in);
+	printf(&quot;File contents: %s\n&quot;, buffer);
+	fclose(in);
+</code></pre><p>In the application&rsquo;s folder, we will create a folder, <code>guest_fs</code> (or any other name).
+In this folder, we will add our file.</p><h4 id=configuring-the-application>Configuring the Application</h4><p>First, we need to add a more powerfull libc. Newlib will do nicely. For this, in the <code>Makefile</code> file, we add the following line:</p><pre><code>LIBS := $(UK_LIBS)/newlib
+</code></pre><p><strong>Note</strong>: the build will fail if <code>unikraft</code> and <code>newlib</code> repositories aren&rsquo;t both on the <code>staging</code> or the <code>stable</code> branches.
+For this session, use the <code>staging</code> branch, for every repository used.</p><p>Now we need to enable <strong>9pfs</strong> and <strong>newlib</strong> in Unikraft.
+To do this, we run</p><pre><code>$ make menuconfig
+</code></pre><p>We need to select the following options, from the <code>Library Configuration</code> menu:</p><ul><li><code>libnewlib</code></li><li><code>vfscore</code></li><li><code>vfscore: Configuration</code> -> <code>Automatically mount a root filesystem</code> -> <code>Default root filesystem</code> -> <code>9pfs</code></li></ul><p>These configurations will also mark as required <strong>9pfs</strong> and <strong>uk9p</strong> in the menu.</p><p>We want to run Unikraft with QEMU/KVM, so we must selevct <strong>KVM guest</strong> in the <code>Platform Configuration</code> menu.
+We also need to enable, in the KVM guest options menu, <code>Virtio</code> -> <code>Virtio PCI device support</code>.</p><p>Save, exit, and build the Unikraft image:</p><pre><code>make
+</code></pre><p>Building the Unikraft image will take a while.</p><h4 id=running-with-qemu-system-x86_64>Running with qemu-system-x86_64</h4><p>To run the Unikraft image with QEMU/KVM, we use the following command:</p><pre><code>$ qemu-system-x86_64 -fsdev local,id=myid,path=guest_fs,security_model=none -device virtio-9p-pci,fsdev=myid,mount_tag=rootfs -kernel build/app-helloworld_kvm-x86_64 -serial stdio
+</code></pre><p>Lets break it down:</p><ul><li><code>-serial stdio</code> - prints the output of QEMU to the standard output</li><li><code>-kernel build/app-helloworld_kvm-x86_64</code> - tells QEMU that it will run a kernel;
+if this parameter is omited, QEMU will think it runs a raw file</li><li><code>-fsdev local,id=myid,path=guest_fs,security_model=none</code> - assign an id to the <code>guest_fs</code> local folder</li><li><code>-device virtio-9p-pci,fsdev=myid,mount_tag=rootfs</code> - create a device with the 9pfs type, link to it the ID from above, and assign it a mount tag.
+Unikraft will look after that mount tag when trying to mount the filesystem, so it is important that the mount tag from the configuration is the same as the one given as argument to qemu.</li></ul><h4 id=runing-with-qemu-guest>Runing with qemu-guest</h4><p><a href=https://github.com/unikraft/kraft/blob/staging/scripts/qemu-guest>qemu-guest</a> is the script used by kraft to run its QEMU/KVM images.
+Before looking at the command, take some time to look through the script, and maybe figure out the arguments needed for our task.</p><p>To run Unikraft using qemu-guest, we use:</p><pre><code>$ ./qemu-guest -e guest_fs/ -k build/app-helloworld_kvm-x86_64
+</code></pre><p>If we add the <code>-D</code> option, we can see the qemu-system command generated.</p><p>You may get the following error:</p><pre><code>[    0.100664] CRIT: [libvfscore] &lt;rootfs.c @  122&gt; Failed to mount /: 22
+</code></pre><p>If you do, check that the mount tag in the configuration is the same as the one used by <code>qemu-guest</code>.
+<code>qemu-guest</code> will use the tag <strong>fs0</strong>.</p><h4 id=enter-kraft>Enter kraft</h4><p>With kraft, the whole process of configuring, building and running Unikraft can be made easier.
+First, we need to modify <strong>kraft.yaml</strong>, to reflect our new configuration, like this:</p><pre><code>specification: '0.5'
+name: helloworld
+unikraft:
+  version: staging
+  kconfig:
+    - CONFIG_LIBUK9P=y
+    - CONFIG_LIB9PFS=y
+    - CONFIG_LIBVFSCORE_AUTOMOUNT_ROOTFS=y
+    - CONFIG_LIBVFSCORE_ROOTFS_9PFS=y
+    - CONFIG_LIBVFSCORE_ROOTDEV=&quot;fs0&quot;
+targets:
+  - architecture: x86_64
+    platform: kvm
+libraries:
+  newlib:
+    version: staging
+    kconfig:
+      - CONFIG_LIBNEWLIBC=y
+volumes:
+  fs0:
+    driver: 9pfs
+    source: guest_fs.tgz
+</code></pre><p>Next, we will make kraft reconfigure our application, using <code>kraft configure -y</code>.
+In our case, nothing will be modified in <strong>.config</strong>, as we had the same configuration before.
+If you get an error like &ldquo;missing component: newlib&rdquo;, you need to run <code>kraft list update</code>.</p><p>Then, build:</p><pre><code>$ kraft build
+</code></pre><p>And run:</p><pre><code>$ ./qemu-guest -e guest_fs/ -k build/app-helloworld_kvm-x86_64
+</code></pre><h3 id=07-tutorial-give-the-user-a-choice>07. Tutorial: Give the User a Choice</h3><p>The goal of this exercise is to modify <strong>Config.uk</strong>, for the helloworld app, so that the user can choose if the app will display <em>Hello world</em>, or what it reads from the file from the previous exercise.</p><p>First of all, we need to add a new configuration in Config.uk.
+We will do it like this:</p><pre><code>config APPHELLOWORLD_READFILE
+	bool &quot;Read my file&quot;
+	default n
+	help
+	  Reads the file in guest_fs/ and prints its contents,
+	  instead of printing helloworld
+</code></pre><p>After this, we need to modify our code in <code>main.c</code>, to use this configuration option.</p><pre><code>#ifndef CONFIG_APPHELLOWORLD_READFILE
+	printf(&quot;Hello world!\n&quot;);
+#else
+	FILE *in = fopen(&quot;file&quot;, &quot;r&quot;);
+	char buffer[100];
+
+	fread(buffer, 1, 100, in);
+	printf(&quot;File contents: %s\n&quot;, buffer);
+	fclose(in);
+#endif
+</code></pre><p>Note that, for our configuration option <code>APPHELLOWORLD_READFILE</code>, a symbol, <code>CONFIG_APPHELLOWORLD_READFILE</code>, was defined.
+We tell GCC that, if that symbol was not defined, it should use the <code>printf("Hello world!\n")</code>.
+Otherwise, it should use the code written by us.</p><p>The last step is to configure the application.
+We do this by running <code>make menuconfig</code>, then going to the <code>Application Options</code> and enabling our configuration option.</p><p>Now we can build and run the new Unikraft image.</p><h3 id=08-tutorial-arguments-from-command-line>08. Tutorial: Arguments from Command Line</h3><p>We want to configure the helloworld app to receive command line arguments and then print them.</p><p>For this, the Helloworld application already has a configuration option.
+Configure the application by running</p><pre><code>$ make menuconfig
+</code></pre><p>In the configuration menu, go to <code>Application Options</code> and enable <code>Print arguments</code>.
+If we build and run the image now, using <code>qemu-guest</code>, we will see that two arguments are passed to Unikraft: the kernel argument, and a console.
+We want to pass it an aditional argument, <code>"foo=bar"</code>.</p><p>Before this, make sure to reset your configuration, so Unikraft won&rsquo;t use 9pfs for this task:</p><pre><code>$ make clean
+</code></pre><h4 id=raw-qemu-command>Raw qemu command</h4><p>To send an argument with qemu-system, we use the <code>-append</code> option, like this:</p><pre><code>$ qemu-system-x86_64 -kernel build/app-helloworld_kvm-x86_64 -append &quot;console=ttyS0 foo=bar&quot; -serial stdio
+</code></pre><h4 id=qemu-guest-script>qemu-guest script</h4><p>To send an argument with the qemu-guest script, we use the <code>-a</code> option, like this:</p><pre><code>$ ./qemu-guest -k build/app-helloworld_kvm-x86_64 -a &quot;foo=bar&quot;
+</code></pre><h4 id=kraft-1>Kraft</h4><p>To send an argument while using kraft, run it like this:</p><pre><code>$ kraft run &quot;foo=bar&quot;
+</code></pre><h3 id=09-adding-a-new-source-file>09. Adding a new source file</h3><p>Create a new source file for your application, and implement a function that sorts a given integer array, by calling qsort, in turn, from different libc variants, and then prints that array.
+For each library, check the size of the Unikraft image.
+Enable <strong>nolibc</strong> and then, as a separate config / build, <strong>newlibc</strong>, both by using <strong>make menuconfig</strong> and modifying <strong>kraft.yaml</strong>.
+You will have four different configurations and builds:</p><ul><li>nolibc + kraft</li><li>nolibc + make</li><li>newlibc + kraft</li><li>newlibc + make</li></ul><h3 id=10-more-power-to-the-user>10. More Power to the User</h3><p>Add the possibility to include the new source file only if a configuration option is selected.
+Make sure that after this change, the application can still be built and run.</p><h3 id=11-less-power-to-the-user>11. Less Power to the User</h3><p>Delete <code>Config.uk</code> and reconfigure / rebuild the app.
+What happens when you run the app?</p><h3 id=12-give-us-feedback>12. Give Us Feedback</h3><p>We want to know how to make the next sessions better.
+Fo this we need your <a href=https://forms.gle/awraHJpjLaPDeXzk9>feedback</a>.</p></div><div class=td-content style=page-break-before:always><h1 id=pg-7cf16a4b6aedab923e52e136ddacfa59>5 - Session 03: Benchmarking and Debugging</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-cbba34b6d1e7d9a0e83c791f84d7f29d>6 - Session 04: Complex Applications</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-221c0eb25b4f393f30fd7c711495bed2>7 - Session 05: Contributing to Unikraft</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-c8164d0e219bb0f24fd8b32fe7e996e3>8 - Session 06: Testing Unikraft</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-e8257ea2e30401a82888d38de2231d40>9 - Session 07: Syscall Shim</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-0cf305157c0d79c36b53cb269a783170>10 - Session 08: Basic App Porting</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-f352576afa36c9b30f15b2be6533c580>11 - Session 09: Advanced App Porting</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-9026b735a1faa018402aa9ac7ce1ebd9>12 - Session 10: High Performance</h1></div></main></div></div><footer class="bg-dark py-5 row d-print-none"><div class="container-fluid mx-sm-5"><div class=row><div class="col-6 col-sm-4 text-xs-center order-sm-2"><ul class="list-inline mb-0"><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=Discord aria-label=Discord><a class=text-white target=_blank rel="noopener noreferrer" href=https://bit.ly/UnikraftDiscord><i class="fab fa-discord"></i></a></li><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=Twitter aria-label=Twitter><a class=text-white target=_blank rel="noopener noreferrer" href=https://twitter.com/UnikraftSDK><i class="fab fa-twitter"></i></a></li></ul></div><div class="col-6 col-sm-4 text-right text-xs-center order-sm-3"><ul class="list-inline mb-0"><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=GitHub aria-label=GitHub><a class=text-white target=_blank rel="noopener noreferrer" href=https://github.com/unikraft/unikraft><i class="fab fa-github"></i></a></li><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=LinkedIn aria-label=LinkedIn><a class=text-white target=_blank rel="noopener noreferrer" href=https://linkedin.com/company/unikraft-sdk><i class="fab fa-linkedin"></i></a></li></ul></div><div class="col-12 col-sm-4 text-center py-2 order-sm-2"><small class=text-white>&copy; 2021 Unikraft and Open-Source Contributors. All Rights Reserved</small></div></div></div></footer></div><script src=https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js integrity=sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49 crossorigin=anonymous></script><script src=https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js integrity=sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy crossorigin=anonymous></script><script src=/js/main.min.5c74b870c6953931a705f390a49c7e4c0a842ec5c83b24354758dd674343ed0d.js integrity="sha256-XHS4cMaVOTGnBfOQpJx+TAqELsXIOyQ1R1jdZ0ND7Q0=" crossorigin=anonymous></script></body></html>
