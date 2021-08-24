@@ -1,4 +1,5 @@
 #include <stdio.h>
+#include <stdlib.h>
 
 /* Import user configuration: */
 #ifdef __Unikraft__
@@ -30,10 +31,15 @@ int main(int argc, char *argv[])
 #endif
 
 	printf("Hello world!\n");
-	FILE *in = fopen("file", "r");
-	char buffer[100];
+	FILE *in;
+	char buffer[128];
 
-	fread(buffer, 1, 100, in);
+	in = fopen("file", "rt");
+	if (in == NULL) {
+		fprintf(stderr, "Error opening file 'file'.");
+		exit(EXIT_FAILURE);
+	}
+	fgets(buffer, 128, in);
 	printf("File contents: %s\n", buffer);
 	fclose(in);
 
@@ -56,4 +62,6 @@ int main(int argc, char *argv[])
 		millisleep(250);
 	}
 #endif /* CONFIG_APPHELLOWORLD_SPINNER */
+
+	return 0;
 }

@@ -21,4 +21,3 @@ volumes:
   fs0:
     driver: 9pfs
     source: guest_fs.tgz
-networks: {}

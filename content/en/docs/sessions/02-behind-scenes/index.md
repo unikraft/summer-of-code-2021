@@ -517,7 +517,12 @@ These configurations will also mark as required **9pfs** and **uk9p** in the men
 We want to run Unikraft with QEMU/KVM, so we must selevct **KVM guest** in the `Platform Configuration` menu.
 We also need to enable, in the KVM guest options menu, `Virtio` -> `Virtio PCI device support`.
 
-Save, exit, and run `make` to build the Unikraft image.
+Save, exit, and build the Unikraft image:
+
+```
+make
+```
+
 Building the Unikraft image will take a while.
 
 #### Running with qemu-system-x86_64
@@ -589,20 +594,21 @@ volumes:
     source: guest_fs.tgz
 ```
 
-TODO: the archive - I don't know if it's needed to be an archive; it doesn't run either way
-
 Next, we will make kraft reconfigure our application, using `kraft configure -y`.
 In our case, nothing will be modified in **.config**, as we had the same configuration before.
 If you get an error like "missing component: newlib", you need to run `kraft list update`.
 
-Then, use
+Then, build:
 
 ```
 $ kraft build
-$ kraft run
 ```
 
-You should see(about that...) the contents of you file displayed.
+And run:
+
+```
+$ ./qemu-guest -e guest_fs/ -k build/app-helloworld_kvm-x86_64
+```
 
 ### 07. Tutorial: Give the User a Choice
 
