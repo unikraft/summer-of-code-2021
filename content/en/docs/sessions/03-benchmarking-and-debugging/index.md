@@ -144,7 +144,7 @@ For the actual debugging, you first need to create the guest (we recommend pause
 gdbsx -a [DOMAIN ID] 64 [PORT]
 ```
 
-You can then connect GDB within a separate console and you;re ready to debug:
+You can then connect GDB within a separate console and you're ready to debug:
 
 ```
 gdb --eval-command="target remote :[PORT]" build/helloworld_xen-x86_64.dbg
@@ -382,7 +382,7 @@ Do you think you can find out the **secret**?
 
 ### 03. Bug or feature?
 
-There are two kernel images located in located in the `work/03-app-bug/` folder.
+There are two kernel images located in the `work/03-app-bug/` folder.
 One of them is build for **Linuxu**, the other for **KVM**.
 
 First try to inspect what it's wrong with **Linuxu** image.
@@ -468,7 +468,7 @@ Put a hardware break to main and continue until there.
 (gdb) continue
 ```
 
-Now we can put a break to first function `start_status` to chechk if the first tracepoint is successful.
+Now we can put a break to first function `start_status` to check if the first tracepoint is successful.
 To show all the tracepoints we can use `uk trace`.
 
 {{% alert title="GDB configuration" %}}
@@ -515,7 +515,7 @@ Let's try a new application based on networking, **Nginx**.
 First try to run **Nginx** using kraft.
 After you have successfully run using kraft, try to make a Makefile for **Nginx** and run manually.
 
-Do you observe something strage? Where is the `main.c`?
+Do you observe something strange? Where is the `main.c`?
 
 Deselect this option `Library Configuration` -> `libnginx` -> `Provide a main function` and try to make your own `main.c` that will run **Nginx**.
 
