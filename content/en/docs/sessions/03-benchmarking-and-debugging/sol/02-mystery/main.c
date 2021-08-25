@@ -84,9 +84,9 @@ struct secret_struct {
 /*so that gdb can see the secret_struct*/
 volatile struct secret_struct unused_secret;
 
-void __attribute__ ((noinline)) unveil_mystery(void *mistery) {
+void __attribute__ ((noinline)) unveil_mystery(void *mystery) {
 	printf("There is nothing but void in here\n");
-	printf("Maybe you're looking for some pointers, here's one: %p\n", mistery);
+	printf("Maybe you're looking for some pointers, here's one: %p\n", mystery);
 }
 
 int main()

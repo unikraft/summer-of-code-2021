@@ -11,17 +11,17 @@ This session aims to familiarize you to solve any problem encountered during the
 At this stage, you should be familiar with the steps of configuring, building and running any application within Unikraft and know the main parts of the architecture.
 Below you can see a list of the commands you have used so far.
 
-| Command                                             | Description                                                             |
-|-----------------------------------------------------|-------------------------------------------------------------------------|
-| kraft list                                          | Get a list of all components that are available for use with kraft      |
-| kraft up -t application_name your_application_name  | Download, configure and build existing components into unikernel images |
-| kraft run                                           | Run resulting unikernel image                                           |
-| kraft init -t application_name                      | Initialize the application                                              |
-| kraft configure                                     | Configure platform and architecture(interactive)                        |
-| kraft configure -p platform -m arhitecture          | Configure platform and architecture(non-interactive)                    |
-| kraft build                                         | Build the application                                                   |
-| kraft clean                                         | Clean the application                                                   |
-| make menuconfig                                     | Configure application through the main menu                             |
+| Command                                                | Description                                                             |
+|--------------------------------------------------------|-------------------------------------------------------------------------|
+| `kraft list`                                           | Get a list of all components that are available for use with kraft      |
+| `kraft up -t <appname> <your_appname>`                 | Download, configure and build existing components into unikernel images |
+| `kraft run`                                            | Run resulting unikernel image                                           |
+| `kraft init -t application_name`                       | Initialize the application                                              |
+| `kraft configure`                                      | Configure platform and architecture (interactive)                       |
+| `kraft configure -p <plat> -m <arch>`                  | Configure platform and architecture (non-interactive)                   |
+| `kraft build`                                          | Build the application                                                   |
+| `kraft clean`                                          | Clean the application                                                   |
+| `make menuconfig`                                      | Configure application through the main menu                             |
 
 ## Debugging
 
@@ -42,8 +42,9 @@ A couple of hints that should help starting:
 ### Using GDB
 
 The build system always creates two image files for each selected platform:
-- one that includes debugging information and symbols (`.dbg` file extension)
-- one that does not
+
+* one that includes debugging information and symbols (`.dbg` file extension)
+* one that does not
 
 Before using GDB, go to the configuration menu under `Build Options` and select a `Debug information level` that is bigger than 0.
 We recommend 3, the highest level.
@@ -52,13 +53,13 @@ We recommend 3, the highest level.
 
 Once set, save the configuration and build your images.
 
-#### Linux
+#### Linuxu
 ---
 
 For the Linux user space target (`linuxu`) simply point GDB to the resulting debug image, for example:
 
 ```
-gdb build/app-helloworld_linuxu-x86_64.dbg
+$ gdb build/app-helloworld_linuxu-x86_64.dbg
 ```
 
 #### KVM
@@ -68,20 +69,20 @@ For KVM, you can start the guest with the kernel image that includes debugging i
 We recommend creating the guest in a paused state (the `-S` option):
 
 ```
-qemu-system-x86_64 -s -S -cpu host -enable-kvm -m 128 -nodefaults -no-acpi -display none -serial stdio -device isa-debug-exit -kernel build/app-helloworld_kvm-x86_64.dbg -append verbose
+$ qemu-system-x86_64 -s -S -cpu host -enable-kvm -m 128 -nodefaults -no-acpi -display none -serial stdio -device isa-debug-exit -kernel build/app-helloworld_kvm-x86_64.dbg -append verbose
 ```
 
 Note that the `-s` parameter is shorthand for `-gdb tcp::1234`.
 To avoid this long `qemu-system-x86` command with a lot of arguments, we can use `qemu-guest`.
 
 ```
-qemu-guest -P -g 1234 -k build/app-helloworld_kvm-x86_64.dbg
+$ qemu-guest -P -g 1234 -k build/app-helloworld_kvm-x86_64.dbg
 ```
 
 Now connect GDB by using the debug image with:
 
 ```
-gdb --eval-command="target remote :1234" build/app-helloworld_kvm-x86_64.dbg
+$ gdb --eval-command="target remote :1234" build/app-helloworld_kvm-x86_64.dbg
 ```
 
 Unless you're debugging early boot code (until `_libkvmplat_start32`), you’ll need to set a hardware break point:
@@ -122,7 +123,7 @@ kernel        = 'build/app-helloworld_xen-x86_64.dbg'
 ```
 Start the virtual machine with:
 
-`xl create -c helloworld.cfg`
+`$ xl create -c helloworld.cfg`
 
 {{% /alert %}}
 
@@ -133,21 +134,21 @@ Here are sample instructions to do that:
 
 ```
 [get Xen sources]
-./configure
-cd tools/debugger/gdbsx/ && make
+$ ./configure
+$ cd tools/debugger/gdbsx/ && make
 ```
 
 The `gdbsx` tool will then be under tools/debugger.
 For the actual debugging, you first need to create the guest (we recommend paused state: `xl create -p`), note its domain ID (`xl list`) and execute the debugger backend:
 
 ```
-gdbsx -a [DOMAIN ID] 64 [PORT]
+$ gdbsx -a [DOMAIN ID] 64 [PORT]
 ```
 
 You can then connect GDB within a separate console and you're ready to debug:
 
 ```
-gdb --eval-command="target remote :[PORT]" build/helloworld_xen-x86_64.dbg
+$ gdb --eval-command="target remote :[PORT]" build/helloworld_xen-x86_64.dbg
 ```
 
 You should be also able to use the debugging file (`build/app-helloworld_xen-x86_64.dbg`) for GDB instead passing the kernel image.
@@ -155,7 +156,7 @@ You should be also able to use the debugging file (`build/app-helloworld_xen-x86
 ## Tracepoints
 
 Because Unikraft needs a tracing and performance measurement system, one method to do this is using Unikrat's tracepoint system.
-A tracepoint provides a hook to call a function that you can provide at runtime. 
+A tracepoint provides a hook to call a function that you can provide at runtime.
 You can put tracepoints at important locations in the code.
 They are lightweight hooks that can pass an arbitrary number of parameters, which prototypes are described in a tracepoint declaration placed in a header file.
 
@@ -251,13 +252,13 @@ source /path/to/your/build/uk-gdb.py
 In order to collect the data, open GDB with the debug image and connect to your Unikraft instance as described in Section [Using GDB](#using-gdb):
 
 ```
-gdb build/app-helloworld_linuxu-x86_64.dbg
+$ gdb build/app-helloworld_linuxu-x86_64.dbg
 ```
 
 The `.dbg` image is required because it contains offline data needed for parsing the trace buffer.
 
 As soon as you let run your guest, samples should be stored in Unikraft's trace buffer.
-You can print them by issuing the gdb command `uk trace`:
+You can print them by issuing the GDB command `uk trace`:
 
 ```
 (gdb) uk trace
@@ -278,7 +279,7 @@ This can happen when no tracepoint was ever called.
 Any saved trace file can be later processed with the `trace.py` script. In our example:
 
 ```
-support/scripts/uk_trace/trace.py list traces.dat
+$ support/scripts/uk_trace/trace.py list traces.dat
 ```
 
 ## Summary
@@ -304,7 +305,7 @@ workdir
 For the image for the **linuxu** platform we can use GDB directly with the binary already created.
 
 ```
-gdb build/app-helloworld_linuxu-x86_64.dbg
+$ gdb build/app-helloworld_linuxu-x86_64.dbg
 ```
 
 #### KVM
@@ -313,13 +314,13 @@ To avoid using a command with a lot of parameters that you noticed above in the 
 
 
 ```
-qemu-guest -P -g 1234 -k build/app-helloworld_kvm-x86_64.dbg
+$ qemu-guest -P -g 1234 -k build/app-helloworld_kvm-x86_64.dbg
 ```
 
 Open another terminal to connect to GDB by using the debug image with:
 
 ```
-gdb --eval-command="target remote :1234" build/app-helloworld_kvm-x86_64.dbg
+$ gdb --eval-command="target remote :1234" build/app-helloworld_kvm-x86_64.dbg
 ```
 
 First you can set the right CPU architecture and then reconnect:
@@ -343,9 +344,9 @@ All you need to do is to provide the path to kernel image.
 kvm_gdb_debug build/app-helloworld_kvm-x86_64.dbg
 ```
 
-### 02. Mistery. Find the secret using GDB
+### 02. Mystery: Find the secret using GDB
 
-Before starting the task let's get familiar with some gdb commands.
+Before starting the task let's get familiar with some GDB commands.
 
 `ni` - go to the next instruction, but skip function calls
 
@@ -357,28 +358,38 @@ Before starting the task let's get familiar with some gdb commands.
 
 `x addr` - get the value at the indicated address (similar to `p *addr`)
 
-`whatis arg` - print the data type of arg
+`whatis arg` - print the data type of `arg`
 
 GDB provides convenience variables that you can use within GDB to hold on to a value and refer to it later.
 For example:
 
-`set $foo = *object_ptr`
+
+```
+set $foo = *object_ptr
+```
 
 Note that you can also cast variables in GDB similar to C:
 
-`set $var = (int *) ptr`
+```
+set $var = (int *) ptr
+```
 
 If you want to dereference a pointer and actually see the value, you can use the following command:
 
-`p *addr`
+```
+p *addr
+```
 
-You can find more gdb commands [here](https://users.ece.utexas.edu/~adnan/gdb-refcard.pdf)
+You can find more GDB commands [here](https://users.ece.utexas.edu/~adnan/gdb-refcard.pdf)
 
 Now, let's get back to the task.
-Navigate to `work/02-mistery` directory and use the 2 scripts: `debug.sh` and `connect.sh` to start the `mistery_kvm-x86_64.dbg` executable using gdb.
+Download the `mystery_kvm-x86_64` file from [here](https://drive.google.com/drive/folders/1K74TYViRxGtyRwDepJ3W_JNOZWdO2LXT?usp=sharing).
+Copy the `mystery_kvm-x86_64` file to the `work/02-mystery/` directory.
+Navigate to `work/02-mystery/` directory.
+Use the 2 scripts in the directory (`debug.sh` and `connect.sh`) to start the `mystery_kvm-x86_64.dbg` executable using GDB.
 Do you think you can find out the **secret**?
 
-**HINT** Use the nm utility on the binary as a starting point.
+**HINT** Use the `nm` utility on the binary as a starting point.
 
 ### 03. Bug or feature?
 
@@ -413,37 +424,37 @@ In our case it should be something similar with:
 
 ```
 UK_TRACEPOINT(start_trace, "%d", int);
-UK_TRACEPOINT(stop_trace, "%d", int); 
+UK_TRACEPOINT(stop_trace, "%d", int);
 ```
 
 Now we can invoke them inside the main.
 
 ```
 int main(int argc, char *argv[])
-{                               
-    start_trace(argc);          
-    start_status();             
-                                
-    printf("Hello world!\n");   
-                                
-    stop_trace(argc);           
-    stop_status();              
-                                
-    return 0;                   
-}                               
+{
+    start_trace(argc);
+    start_status();
+
+    printf("Hello world!\n");
+
+    stop_trace(argc);
+    stop_status();
+
+    return 0;
+}
 
 ```
 
 We also added two simple functions for a better view of tracepoints in GDB.
 
 ```
-void start_status(){          
+void start_status(){
     printf("Start tracing\n");
-}                             
-                              
-void stop_status(){           
-    printf("Stop tracing\n"); 
-}                             
+}
+
+void stop_status(){
+    printf("Stop tracing\n");
+}
 ```
 
 You can check the source code for this tutorial in `work/04-tutorial-tracepoints.`
@@ -519,21 +530,21 @@ Do you observe something strange? Where is the `main.c`?
 
 Deselect this option `Library Configuration` -> `libnginx` -> `Provide a main function` and try to make your own `main.c` that will run **Nginx**.
 
-- Nginx + kraft
-- Nginx + Makefile
-- Nginx without `provide main function`
+* Nginx + kraft
+* Nginx + Makefile
+* Nginx without `provide main function`
 
 
-### 07. Bonus. Bad elf in the town.
+### 07. Bonus. Bad ELF in Town
 
 We managed to build an ELF file that is valid when doing static analysis, but that can't be executed.
-The file is bad_elf, located in the work/07-bad-elf/ folder.
+The file is `bad_elf`, located in the `work/07-bad-elf/` folder.
 
 Running it triggers a segmentation fault message.
-Running it using strace show an error with execve().
+Running it using `strace` show an error with `execve()`.
 
 ```
-~/Doc/U/summer-of-code-2021/c/e/d/s/0/w/05-bad-elf > ./bad_elf       
+~/Doc/U/summer-of-code-2021/c/e/d/s/0/w/05-bad-elf > ./bad_elf
 [1]    125458 segmentation fault  ./bad_elf
 ~/Doc/U/summer-of-code-2021/c/e/d/s/0/w/05-bad-elf > strace ./bad_elf
 execve("./bad_elf", ["./bad_elf"], 0x7ffc9ca2e960 /* 66 vars */) = -1 EINVAL (Invalid argument)
@@ -543,30 +554,26 @@ execve("./bad_elf", ["./bad_elf"], 0x7ffc9ca2e960 /* 66 vars */) = -1 EINVAL (In
 ```
 
 The ELF file itself is valid.
-You can check using readelf:
+You can check using `readelf`:
 
 ```
-~/Doc/U/summer-of-code-2021/c/e/d/s/0/work/05-bad-elf > readelf -a ./bad_elf
+$ readelf -a ./bad_elf
 ```
 
 The issue is to be detected in the kernel.
-Use either [perf](https://www.brendangregg.com/perf.html), or, better yet [ftrace](https://jvns.ca/blog/2017/03/19/getting-started-with-ftrace/) to inspect the kernel function calls done by the program.
-Identify the function call that sends out the SIGSEGV signal.
+Use either [`perf`](https://www.brendangregg.com/perf.html), or, better yet [`ftrace`](https://jvns.ca/blog/2017/03/19/getting-started-with-ftrace/) to inspect the kernel function calls done by the program.
+Identify the function call that sends out the `SIGSEGV` signal.
 Identify the cause of the issue.
-Find that cause in the [manual page elf(5)](https://linux.die.net/man/5/elf).
-
+Find that cause in the [manual page `elf(5)`](https://linux.die.net/man/5/elf).
 
 ### 08. Give Us Feedback
 
 We want to know how to make the next sessions better.
-Fo this we need your [feedback](https://forms.gle/9EuzgL1n244Mvqfq8).
-
+For this we need your [feedback](https://forms.gle/9EuzgL1n244Mvqfq8).
+Thank you!
 
 ## Further Reading
 
 [Hardware Breakpoint](https://sourceware.org/gdb/wiki/Internals/Breakpoint%20Handling)
-<<<<<<< HEAD
-=======
 [Tracepoints](https://01.org/linuxgraphics/gfx-docs/drm/trace/tracepoints.html)
 [GDB Cheatsheet](https://users.ece.utexas.edu/~adnan/gdb-refcard.pdf)
->>>>>>> Enhancement: Add bad-elf task. Delete part with Uniprof and Ukstore. Add solutions for 04, 05 and 06 task
