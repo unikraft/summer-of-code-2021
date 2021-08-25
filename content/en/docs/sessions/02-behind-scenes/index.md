@@ -65,7 +65,7 @@ demo/  images/  index.md  sol/
 ### 01. Virtualization
 
 Through virtualization, multiple operating systems (OS) are able to run on the same hardware, independently, thinking that each one of them controls the entire system.
-This can be done using a hypervisor, which is a low-level software that virtualizes the underlying hardware and manages access to the real hardware, either direclty or through the host Operating System.
+This can be done using a hypervisor, which is a low-level software that virtualizes the underlying hardware and manages access to the real hardware, either directly or through the host Operating System.
 There are 2 main virtualized environments: virtual machines and containers, each with pros and cons regarding complexity, size, performance and security.
 Unikernels come somewhere between those 2.
 
@@ -87,7 +87,7 @@ We won't go in depth into them, but it is good to know how they are different:
 
 #### Containers
 
-Containers are environments designed to contain and run only one application and its dependecies.
+Containers are environments designed to contain and run only one application and its dependencies.
 This leads to very small sizes.
 The containers are managed by a Container Management Engine, like Docker, and are dependent on the host OS, as they cannot run without it.
 
@@ -207,7 +207,7 @@ In this session, we will use the first and the last configuration options.
 
 ### 06. The Build System - basics
 
-Once the application is configured, in **.config**, symbols are defined (eg. `CONFIG_ARCH_X86_64`).
+Once the application is configured, in **.config**, symbols are defined (e.g. `CONFIG_ARCH_X86_64`).
 Those symbols are usable both in the C code, to include certain functionalities only if they were selected in the configuring process, and in the actual building process, to include / exclude source files, or whole libraries.
 This last thing is done in **Makefile.uk**, where source code files are added to libraries.
 During the build process, all the `Makefile.uk` files (from the Unikraft core and external libraries) are evaluated, and the selected files are compiled and linked, to form the Unikraft image.
@@ -259,7 +259,7 @@ demo/  images/  index.md  sol/
 
 We want to build the Helloworld application, using the Kconfig-based system, for the **linuxu** and **KVM** platforms, for the **ARM** and **x86** architectures, and then run them.
 
-If you don't have the unikraft and app-helloworld repositories cloned already, do so, by running the following commands:
+If you don't have the `unikraft` and `app-helloworld` repositories cloned already, do so, by running the following commands:
 
 ```
 $ git clone https://github.com/unikraft/unikraft
@@ -344,8 +344,8 @@ Other, more complex applications, will require more options given to qemu.
 We have run Unikraft in the emulation mode, with the command from above.
 We can also run it in the virtualization mode, by adding the `-enable-kvm` option.
 You may receive a warning, `host doesn't support requested feature:`.
-This is because kvm uses a generic cpu model.
-You can instruct kvm to use your local cpu model, by adding `-cpu host` to the command.
+This is because kvm uses a generic CPU model.
+You can instruct kvm to use your local CPU model, by adding `-cpu host` to the command.
 
 The final command will look like this:
 
@@ -363,7 +363,7 @@ $ time sudo qemu-system-x86_64 -enable-kvm -cpu host -kernel ./build/app-hellowo
 
 Because `helloworld` is a simple application, the **real** running time will be similar.
 The differences are where each image runs most of its time: in user space, or in kernel space.
-Find an explaination to those differences.
+Find an explanation to those differences.
 
 #### KVM, ARM
 
@@ -387,7 +387,7 @@ To run Unikraft, use the following command:
 $ sudo qemu-system-aarch64 -machine virt -cpu cortex-a57 -kernel ./build/app-helloworld_kvm-arm64 -serial stdio
 ```
 
-Note that now we need to provide a machine and a cpu model to be emulated, as there are no defaults available.
+Note that now we need to provide a machine and a CPU model to be emulated, as there are no defaults available.
 If you want to find information about other machines, run
 
 ```
@@ -467,7 +467,7 @@ Note: sending a critical kernel message will not affect how Unikraft runs after 
 
 ### 06. Tutorial / Reminder: Adding Filesystems to an Application
 
-For this tutorial, the aim is to create a simple QEMU/KVM application to reads from a file and displays to standard output.
+For this tutorial, the aim is to create a simple QEMU/KVM application that reads from a file and displays the contents to standard output.
 A local directory is to be mounted as the root directory (`/`) inside the QEMU/KVM virtual machine.
 
 Some parts of this tutorial were already discussed in [Session 01: Baby Steps](content/en/docs/sessions/01-baby-steps/index.md).
@@ -495,7 +495,7 @@ The program (`main.c`) reads the contents of the `/grass` file and prints it to 
 `kraft.yaml` is used by kraft to configure, build and run the application.
 
 `launch.sh` is a wrapper script around `qemu-system-x86_64` used to manually run the application.
-Similary, `qemu-guest` is a wrapper script [used internally by `kraft`](https://github.com/unikraft/kraft/blob/staging/scripts/qemu-guest).
+Similarly, `qemu-guest` is a wrapper script [used internally by `kraft`](https://github.com/unikraft/kraft/blob/staging/scripts/qemu-guest).
 We'll use it as well to run the application.
 
 **If, at any point of this tutorial, something doesn't work, or you want a quick check, see the reference solution in `sol/06-adding-filesystems/` folder in the session directory.**
@@ -539,7 +539,7 @@ We need to select the following options, from the `Library Configuration` menu:
 
 These configurations will also mark as required **9pfs** and **uk9p** in the menu.
 
-We want to run Unikraft with QEMU/KVM, so we must selevct **KVM guest** in the `Platform Configuration` menu.
+We want to run Unikraft with QEMU/KVM, so we must select **KVM guest** in the `Platform Configuration` menu.
 For 9PFS we also need to enable, in the **KVM guest** options menu, `Virtio` -> `Virtio PCI device support`.
 
 Save the configuration and exit.
@@ -605,7 +605,7 @@ Lets break it down:
   Unikraft will look after that mount tag when trying to mount the filesystem, so it is important that the mount tag from the configuration is the same as the one given as argument to qemu.
 * `-kernel build/06-adding-filesystems_kvm-x86_64` - tells QEMU that it will run a kernel;
   if this parameter is omitted, QEMU will think it runs a raw file
-* `-nographic` - prints the output of QEMU to the standard output, it deosn't open a graphical window
+* `-nographic` - prints the output of QEMU to the standard output, it doesn't open a graphical window
 
 #### Run with qemu-guest
 
@@ -629,7 +629,7 @@ You may get the following error:
 If you do, check that the mount tag in the configuration is the same as the one used by `qemu-guest`.
 `qemu-guest` will use the tag `fs0`.
 
-**The `fs0` tag is hardcoded for `qemu-guest` (and, thus, `kraft`).
+**The `fs0` tag is hardcoded for `qemu-guest` (and, thus, for `kraft`).
 This is why we used the `fs0` tag when configuring the application with `make menuconfig`.
 Another tag could be used but then we couldn't run the application with `qemu-guest` or `kraft`.
 It could only be run by manually using `qemu-system-x86_64` with the corresponding arguments.**
@@ -698,7 +698,7 @@ If you get an error like "missing component: newlib", you need to run `kraft lis
 
 ##### Build
 
-We can now buld the application using:
+We can now build the application using:
 
 ```
 $ kraft build
@@ -713,13 +713,13 @@ $ kraft run
 ```
 
 **Note**: This step is not currently working due to [a kraft issue](https://github.com/unikraft/kraft/issues/71).
-You can use the fix described in the issue ot make `kraft run` work.
+You can use the fix described in the issue to make `kraft run` work.
 
 ### 07. Tutorial: Give the User a Choice
 
-The goal of this exercise is to modify **Config.uk**, for the helloworld app, so that the user can choose if the app will display *Hello world*, or what it reads from the file from the previous exercise.
+The goal of this exercise is to modify **Config.uk**, for the Helloworld app, so that the user can choose if the app will display *Hello world*, or what it reads from the file from the previous exercise.
 
-First of all, we need to add a new configuration in Config.uk.
+First of all, we need to add a new configuration in `Config.uk`.
 We will do it like this:
 
 ```
