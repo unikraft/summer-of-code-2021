@@ -16,7 +16,7 @@ Below you can see a list of the commands you have used so far.
 | `kraft list`                                           | Get a list of all components that are available for use with kraft      |
 | `kraft up -t <appname> <your_appname>`                 | Download, configure and build existing components into unikernel images |
 | `kraft run`                                            | Run resulting unikernel image                                           |
-| `kraft init -t application_name`                       | Initialize the application                                              |
+| `kraft init -t <appname>`                              | Initialize the application                                              |
 | `kraft configure`                                      | Configure platform and architecture (interactive)                       |
 | `kraft configure -p <plat> -m <arch>`                  | Configure platform and architecture (non-interactive)                   |
 | `kraft build`                                          | Build the application                                                   |
@@ -381,6 +381,8 @@ p *addr
 ```
 
 You can find more GDB commands [here](https://users.ece.utexas.edu/~adnan/gdb-refcard.pdf)
+Also, if you are unfamiliar with X86_64 calling convention you can read more about it [here](https://en.wikipedia.org/wiki/X86_calling_conventions).
+
 
 Now, let's get back to the task.
 Download the `mystery_kvm-x86_64` file from [here](https://drive.google.com/drive/folders/1K74TYViRxGtyRwDepJ3W_JNOZWdO2LXT?usp=sharing).
@@ -517,20 +519,21 @@ The output will be similar to this:
 
 ### 05. Can you trace your own program?
 
-Modify your `Echo-bach Server` application implemented in the [first](https://usoc21.unikraft.org/docs/sessions/01-baby-steps/#01-echo-back-server) session so that each time the server responds with a message a tracepoint with the corresponding message will be activated.
+Modify your `Echo-back Server` application implemented in the [first](https://usoc21.unikraft.org/docs/sessions/01-baby-steps/#01-echo-back-server) session so that each time the server responds with a message a tracepoint with the corresponding message will be activated.
 Save all your tracepoints in a `traces.dat` file and show them in a user-friendly view with `trace.py`.
 
 ### 06. Nginx with or without main? That's the question.
 
 Let's try a new application based on networking, **Nginx**.
-First try to run **Nginx** using kraft.
-After you have successfully run using kraft, try to make a Makefile for **Nginx** and run manually.
+
+First clone the repository for [app-nginx](https://github.com/unikraft/app-nginx) and put it in the right hierarchy.
+Then you need to create `Makefile` and `Makefile.uk`.
+Make sure to respect the order of libraries in `Makefile`. For more information check [lib-nginx](https://github.com/unikraft/lib-nginx) repository.
 
 Do you observe something strange? Where is the `main.c`?
 
 Deselect this option `Library Configuration` -> `libnginx` -> `Provide a main function` and try to make your own `main.c` that will run **Nginx**.
 
-* Nginx + kraft
 * Nginx + Makefile
 * Nginx without `provide main function`
 
@@ -574,6 +577,7 @@ Thank you!
 
 ## Further Reading
 
-[Hardware Breakpoint](https://sourceware.org/gdb/wiki/Internals/Breakpoint%20Handling)
-[Tracepoints](https://01.org/linuxgraphics/gfx-docs/drm/trace/tracepoints.html)
-[GDB Cheatsheet](https://users.ece.utexas.edu/~adnan/gdb-refcard.pdf)
+* [Hardware Breakpoint](https://sourceware.org/gdb/wiki/Internals/Breakpoint%20Handling)
+* [Tracepoints](https://01.org/linuxgraphics/gfx-docs/drm/trace/tracepoints.html)
+* [GDB Cheatsheet](https://users.ece.utexas.edu/~adnan/gdb-refcard.pdf)
+* [X86_64 calling convention](https://en.wikipedia.org/wiki/X86_calling_conventions)
