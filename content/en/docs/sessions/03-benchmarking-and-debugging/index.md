@@ -330,8 +330,32 @@ To avoid using a command with a lot of parameters that you noticed above in the 
 qemu-guest -P -g 1234 -k build/app-helloworld_kvm-x86_64.dbg
 ```
 
+Open another terminal to connect to GDB by using the debug image with:
 
+```
+gdb --eval-command="target remote :1234" build/app-helloworld_kvm-x86_64.dbg
+```
 
+First you can set the right CPU architecture and then reconnect:
+
+```
+disconnect
+set arch i386:x86-64:intel
+tar remote localhost:1234
+```
+
+Then you can put a hardware break point at main function and run `continue`:
+```
+hbreak main
+continue
+```
+
+All steps described above can be done using the script `kvm_gdb_debug` located in the `work/01-tutorial-gdb/` folder.
+All you need to do is to provide the path to kernel image.
+
+```
+kvm_gdb_debug build/app-helloworld_kvm-x86_64.dbg
+```
 
 ### 02. Mistery. Find the secret using GDB
 
@@ -365,14 +389,156 @@ If you want to dereference a pointer and actually see the value, you can use the
 You can find more gdb commands [here](https://users.ece.utexas.edu/~adnan/gdb-refcard.pdf)
 
 Now, let's get back to the task.
-Navigate to `summer-of-code-2021/content/en/docs/sessions/03-benchmarking-and-debugging/work/02` directory and use the 2 scripts: `debug.sh` and `connect.sh` to start the `mistery_kvm-x86_64.dbg` executable using gdb. Do you think you can find out the **secret**?
+Navigate to `work/02-mistery` directory and use the 2 scripts: `debug.sh` and `connect.sh` to start the `mistery_kvm-x86_64.dbg` executable using gdb.
+Do you think you can find out the **secret**?
 
 **HINT** Use the nm utility on the binary as a starting point.
 
-### 03. Work Item 3
+### 03. Bug or feature?
 
-### 04. Work Item 4
+There are two kernel images located in located in the `work/03-app-bug/` folder.
+One of them is build for **Linuxu**, the other for **KVM**.
+
+First try to inspect what it's wrong with **Linuxu** image.
+You will notice that if you run the program you will get a segmentation fault.
+Why does this happen?
+
+After you figure out what it's happening with **Linuxu** image have a look also at the **KVM** one.
+It was built from the code source, but when you will try to run it, you will not get a segmentation fault.
+Is this a bug or a feature?
+
+### 04. Tutorial. Use Tracepoints.
+
+We will start from the `app-helloworld` application and we will put two tracepoints.
+One at the beginning of the program (after the main) and one at the end of it and these tracepoints should print `argc`.
+
+First we need to define `UK_DEBUG_TRACE` and to include `uk/trace.h`.
+
+```
+#ifndef UK_DEBUG_TRACE
+#define UK_DEBUG_TRACE
+#endif
+
+#include <uk/trace.h>
+```
+
+After that we have to define those tracepoints that we want to use.
+In our case it should be something similar with:
+
+```
+UK_TRACEPOINT(start_trace, "%d", int);
+UK_TRACEPOINT(stop_trace, "%d", int); 
+```
+
+Now we can invoke them inside the main.
+
+```
+int main(int argc, char *argv[])
+{                               
+    start_trace(argc);          
+    start_status();             
+                                
+    printf("Hello world!\n");   
+                                
+    stop_trace(argc);           
+    stop_status();              
+                                
+    return 0;                   
+}                               
+
+```
+
+We also added two simple functions for a better view of tracepoints in GDB.
+
+```
+void start_status(){          
+    printf("Start tracing\n");
+}                             
+                              
+void stop_status(){           
+    printf("Stop tracing\n"); 
+}                             
+```
+
+You can check the source code for this tutorial in `work/04-tutorial-tracepoints.`
+Now we can build the application, but we need to make sure that we have checked the `CONFIG_LIBUKDEBUG_TRACEPOINTS` option in the configuration.(`Library Configuration -> ukdebug -> Enable tracepoints`)
+
+Now we will have to start the application in paused state.
+
+```
+qemu-guest -P -g 1234 -k build/app-helloworld-tracepoints_kvm-x86_64.dbg
+```
+
+In another terminal we will start the GDB:
+
+```
+gdb --eval-command="target remote :1234" build/app-helloworld-tracepoints_kvm-x86_64.dbg
+```
+
+Put a hardware break to main and continue until there.
+
+```
+(gdb) hbreak main
+(gdb) continue
+```
+
+Now we can put a break to first function `start_status` to chechk if the first tracepoint is successful.
+To show all the tracepoints we can use `uk trace`.
+
+{{% alert title="GDB configuration" %}}
+Don't forget to put this line `source /path/to/your/build/uk-gdb.py` in your GDB file configuration `~/.gdbinit`.
+Otherwise you won't be able to use `uk trace`.
+{{% /alert %}}
+
+
+```
+(gdb) break start_status
+(gdb) continue
+(gdb) uk trace
+0000116012362374 start_trace: 2
+```
+
+We notice that we got an output and that the tracepoint was reached.
+We continue until the second trace point and we will save all the tracepoints obtained with the command `uk trace save traces.dat`
+
+```
+(gdb) break stop_status
+(gdb) continue
+(gdb) uk trace save traces.dat
+Saving traces to traces.dat ...
+```
+
+Now we can read all the tracepoints obtained using `trace.py` from the main repo located in `unikraft/support/scripts/uk_trace/trace.py`.
+The output will be similar to this:
+
+```
+       time  tp_name        msg
+-----------  -----------  -----
+ 5321091993  start_trace      2
+11121071844  stop_trace       2
+```
+
+### 05. Can you trace your own program?
+
+Modify your `Echo-bach Server` application implemented in the (first)[https://usoc21.unikraft.org/docs/sessions/01-baby-steps/#01-echo-back-server] session so that each time the server responds with a message a tracepoint with the corresponding message will be activated.
+Save all your tracepoints in a `traces.dat` file and show them in a user-friendly view with `trace.py`.
+
+### 06. Nginx with or without main? That's the question.
+
+Let's try a new application based on networking, **Nginx**.
+First try to run **Nginx** using kraft.
+After you have successfully run using kraft, try to make a Makefile for **Nginx** and run manually.
+
+Do you observe something strage? Where is the `main.c`?
+
+Deselect this option `Library Configuration` -> `libnginx` -> `Provide a main function` and try to make your own `main.c` that will run **Nginx**.
+
+- Nginx + kraft
+- Nginx + Makefile
+- Nginx without `provide main function`
+
+
 
 ## Further Reading
 
->>>>>>> Enhancement: Adding debug documentation part.
+[Hardware Breakpoint](https://sourceware.org/gdb/wiki/Internals/Breakpoint%20Handling)
