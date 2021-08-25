@@ -629,4 +629,193 @@ Enable <strong>nolibc</strong> and then, as a separate config / build, <strong>n
 You will have four different configurations and builds:</p><ul><li>nolibc + kraft</li><li>nolibc + make</li><li>newlibc + kraft</li><li>newlibc + make</li></ul><h3 id=10-more-power-to-the-user>10. More Power to the User</h3><p>Add the possibility to include the new source file only if a configuration option is selected.
 Make sure that after this change, the application can still be built and run.</p><h3 id=11-less-power-to-the-user>11. Less Power to the User</h3><p>Delete <code>Config.uk</code> and reconfigure / rebuild the app.
 What happens when you run the app?</p><h3 id=12-give-us-feedback>12. Give Us Feedback</h3><p>We want to know how to make the next sessions better.
-Fo this we need your <a href=https://forms.gle/awraHJpjLaPDeXzk9>feedback</a>.</p></div><div class=td-content style=page-break-before:always><h1 id=pg-7cf16a4b6aedab923e52e136ddacfa59>5 - Session 03: Benchmarking and Debugging</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-cbba34b6d1e7d9a0e83c791f84d7f29d>6 - Session 04: Complex Applications</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-221c0eb25b4f393f30fd7c711495bed2>7 - Session 05: Contributing to Unikraft</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-c8164d0e219bb0f24fd8b32fe7e996e3>8 - Session 06: Testing Unikraft</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-e8257ea2e30401a82888d38de2231d40>9 - Session 07: Syscall Shim</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-0cf305157c0d79c36b53cb269a783170>10 - Session 08: Basic App Porting</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-f352576afa36c9b30f15b2be6533c580>11 - Session 09: Advanced App Porting</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-9026b735a1faa018402aa9ac7ce1ebd9>12 - Session 10: High Performance</h1></div></main></div></div><footer class="bg-dark py-5 row d-print-none"><div class="container-fluid mx-sm-5"><div class=row><div class="col-6 col-sm-4 text-xs-center order-sm-2"><ul class="list-inline mb-0"><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=Discord aria-label=Discord><a class=text-white target=_blank rel="noopener noreferrer" href=https://bit.ly/UnikraftDiscord><i class="fab fa-discord"></i></a></li><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=Twitter aria-label=Twitter><a class=text-white target=_blank rel="noopener noreferrer" href=https://twitter.com/UnikraftSDK><i class="fab fa-twitter"></i></a></li></ul></div><div class="col-6 col-sm-4 text-right text-xs-center order-sm-3"><ul class="list-inline mb-0"><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=GitHub aria-label=GitHub><a class=text-white target=_blank rel="noopener noreferrer" href=https://github.com/unikraft/unikraft><i class="fab fa-github"></i></a></li><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=LinkedIn aria-label=LinkedIn><a class=text-white target=_blank rel="noopener noreferrer" href=https://linkedin.com/company/unikraft-sdk><i class="fab fa-linkedin"></i></a></li></ul></div><div class="col-12 col-sm-4 text-center py-2 order-sm-2"><small class=text-white>&copy; 2021 Unikraft and Open-Source Contributors. All Rights Reserved</small></div></div></div></footer></div><script src=https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js integrity=sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49 crossorigin=anonymous></script><script src=https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js integrity=sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy crossorigin=anonymous></script><script src=/js/main.min.5c74b870c6953931a705f390a49c7e4c0a842ec5c83b24354758dd674343ed0d.js integrity="sha256-XHS4cMaVOTGnBfOQpJx+TAqELsXIOyQ1R1jdZ0ND7Q0=" crossorigin=anonymous></script></body></html>
+Fo this we need your <a href=https://forms.gle/awraHJpjLaPDeXzk9>feedback</a>.</p></div><div class=td-content style=page-break-before:always><h1 id=pg-7cf16a4b6aedab923e52e136ddacfa59>5 - Session 03: Benchmarking and Debugging</h1><p>Because unikernels aim to be a more efficient method of virtualization, this can sometimes cause problems.
+This session aims to familiarize you to solve any problem encountered during the development using <strong>GDB</strong> and <strong>Tracepoints</strong>.</p><h2 id=reminders>Reminders</h2><p>At this stage, you should be familiar with the steps of configuring, building and running any application within Unikraft and know the main parts of the architecture.
+Below you can see a list of the commands you have used so far.</p><table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody><tr><td><code>kraft list</code></td><td>Get a list of all components that are available for use with kraft</td></tr><tr><td><code>kraft up -t &lt;appname> &lt;your_appname></code></td><td>Download, configure and build existing components into unikernel images</td></tr><tr><td><code>kraft run</code></td><td>Run resulting unikernel image</td></tr><tr><td><code>kraft init -t &lt;appname></code></td><td>Initialize the application</td></tr><tr><td><code>kraft configure</code></td><td>Configure platform and architecture (interactive)</td></tr><tr><td><code>kraft configure -p &lt;plat> -m &lt;arch></code></td><td>Configure platform and architecture (non-interactive)</td></tr><tr><td><code>kraft build</code></td><td>Build the application</td></tr><tr><td><code>kraft clean</code></td><td>Clean the application</td></tr><tr><td><code>make menuconfig</code></td><td>Configure application through the main menu</td></tr></tbody></table><h2 id=debugging>Debugging</h2><p>Contrary to popular belief, debugging a unikernel is in fact simpler than debugging a standard operating system.
+Since the application and OS are linked into a single binary, debuggers can be used on the running unikernel to debug both application and OS code at the same time.
+A couple of hints that should help starting:</p><ol><li>In the configuration menu (presented with <code>make menuconfig</code>), under <code>Build Options</code> make sure that <code>Drop unused functions and data</code> is <strong>unselected</strong>.
+This prevents Unikraft from removing unused symbols from the final image and, if enabled, might hide missing dependencies during development.</li><li>Use <code>make V=1</code> to see verbose output for all of the commands being executed during the build.
+If the compilation for a particular file is breaking and you would like to understand why (e.g., perhaps the include paths are wrong), you can debug things by adding the <code>-E</code> flag to the command, removing the <code>-o [objname]</code>, and redirecting the output to a file which you can then inspect.</li><li>Check out the targets under <code>Miscellaneous</code> when typing <code>make help</code>, these may come in handy.
+For instance, <code>make print-vars</code> enables inspecting at the value of a particular variable in <code>Makefile.uk</code>.</li><li>Use the individual <code>make clean-[libname]</code> targets to ensure that you&rsquo;re cleaning only the part of Unikraft you&rsquo;re working on and not all the libraries that it may depend on.
+This will speed up the build and thus the development process.</li><li>Use the Linux user space platform target (<code>linuxu</code>) for quicker and easier development and debugging.</li></ol><h3 id=using-gdb>Using GDB</h3><p>The build system always creates two image files for each selected platform:</p><ul><li>one that includes debugging information and symbols (<code>.dbg</code> file extension)</li><li>one that does not</li></ul><p>Before using GDB, go to the configuration menu under <code>Build Options</code> and select a <code>Debug information level</code> that is bigger than 0.
+We recommend 3, the highest level.</p><p><img src=./images/debug_information_level.png alt="debug information level"></p><p>Once set, save the configuration and build your images.</p><h4 id=linuxu>Linuxu</h4><hr><p>For the Linux user space target (<code>linuxu</code>) simply point GDB to the resulting debug image, for example:</p><pre><code>$ gdb build/app-helloworld_linuxu-x86_64.dbg
+</code></pre><h4 id=kvm>KVM</h4><hr><p>For KVM, you can start the guest with the kernel image that includes debugging information, or the one that does not.
+We recommend creating the guest in a paused state (the <code>-S</code> option):</p><pre><code>$ qemu-system-x86_64 -s -S -cpu host -enable-kvm -m 128 -nodefaults -no-acpi -display none -serial stdio -device isa-debug-exit -kernel build/app-helloworld_kvm-x86_64.dbg -append verbose
+</code></pre><p>Note that the <code>-s</code> parameter is shorthand for <code>-gdb tcp::1234</code>.
+To avoid this long <code>qemu-system-x86</code> command with a lot of arguments, we can use <code>qemu-guest</code>.</p><pre><code>$ qemu-guest -P -g 1234 -k build/app-helloworld_kvm-x86_64.dbg
+</code></pre><p>Now connect GDB by using the debug image with:</p><pre><code>$ gdb --eval-command=&quot;target remote :1234&quot; build/app-helloworld_kvm-x86_64.dbg
+</code></pre><p>Unless you&rsquo;re debugging early boot code (until <code>_libkvmplat_start32</code>), you’ll need to set a hardware break point:
+Hardware breakpoints have the same effect as the common software breakpoints you are used to, but they are different in the implementation.
+As the name suggests, hardware breakpoints are based on direct hardware support.
+This may limit the number of breakpoints you can set, but makes them especially useful when debugging kernel code.</p><pre><code>hbreak [location]
+continue
+</code></pre><p>We’ll now need to set the right CPU architecture:</p><pre><code>disconnect
+set arch i386:x86-64:intel
+</code></pre><p>And reconnect:</p><pre><code>tar remote localhost:1234
+</code></pre><p>You can now run <code>continue</code> and debug as you would normally.</p><h4 id=xen>Xen</h4><hr><div class="alert alert-primary" role=alert><h4 class=alert-heading>Running Unikraft in Xen</h4><p>For Xen you first need to create a VM configuration (save it under <code>helloworld.cfg</code>):</p><pre><code>name          = 'helloworld'
+vcpus         = '1'
+memory        = '4'
+kernel        = 'build/app-helloworld_xen-x86_64.dbg'
+</code></pre><p>Start the virtual machine with:</p><p><code>$ xl create -c helloworld.cfg</code></p></div><p>For Xen the process is slightly more complicated and depends on Xen&rsquo;s <code>gdbsx</code> tool.
+First you&rsquo;ll need to make sure you have the tool on your system.
+Here are sample instructions to do that:</p><pre><code>[get Xen sources]
+$ ./configure
+$ cd tools/debugger/gdbsx/ &amp;&amp; make
+</code></pre><p>The <code>gdbsx</code> tool will then be under tools/debugger.
+For the actual debugging, you first need to create the guest (we recommend paused state: <code>xl create -p</code>), note its domain ID (<code>xl list</code>) and execute the debugger backend:</p><pre><code>$ gdbsx -a [DOMAIN ID] 64 [PORT]
+</code></pre><p>You can then connect GDB within a separate console and you&rsquo;re ready to debug:</p><pre><code>$ gdb --eval-command=&quot;target remote :[PORT]&quot; build/helloworld_xen-x86_64.dbg
+</code></pre><p>You should be also able to use the debugging file (<code>build/app-helloworld_xen-x86_64.dbg</code>) for GDB instead passing the kernel image.</p><h2 id=tracepoints>Tracepoints</h2><p>Because Unikraft needs a tracing and performance measurement system, one method to do this is using Unikrat&rsquo;s tracepoint system.
+A tracepoint provides a hook to call a function that you can provide at runtime.
+You can put tracepoints at important locations in the code.
+They are lightweight hooks that can pass an arbitrary number of parameters, which prototypes are described in a tracepoint declaration placed in a header file.</p><h3 id=dependencies>Dependencies</h3><p>We provide some tools to read and export trace data that were collected with Unikraft&rsquo;s tracepoint system.
+The tools depend on Python3, as well as the click and tabulate modules.
+You can install them by running (Debian/Ubuntu):</p><pre><code>sudo apt-get install python3 python3-click python3-tabulate
+</code></pre><h3 id=enabling-tracing>Enabling Tracing</h3><p>Tracepoints are provided by <code>lib/ukdebug</code>.
+To enable Unikraft to collect trace data, enable the option <code>CONFIG_LIBUKDEBUG_TRACEPOINTS</code> in your configuration (via <code>make menuconfig</code> under <code>Library Configuration -> ukdebug -> Enable tracepoints</code>).</p><p><img src=./images/enable_tracepoints.png alt="enable tracepoints"></p><p>The configuration option <code>CONFIG_LIBUKDEBUG_ALL_TRACEPOINTS</code> activates <strong>all</strong> existing tracepoints.
+Because tracepoints may noticeably affect performance, you can alternatively enable tracepoints only for compilation units that you are interested in.</p><p>This can be done with the <code>Makefile.uk</code> of each library.</p><pre><code># Enable tracepoints for a whole library
+LIBNAME_CFLAGS-y += -DUK_DEBUG_TRACE
+LIBNAME_CXXFLAGS-y += -DUK_DEBUG_TRACE
+
+# Alternatively, enable tracepoints of source files you are interested in
+LIBNAME_FILENAME1_FLAGS-y += -DUK_DEBUG_TRACE
+LIBNAME_FILENAME2_FLAGS-y += -DUK_DEBUG_TRACE
+</code></pre><p>This can also be done by defining <code>UK_DEBUG_TRACE</code> in the head of your source files.
+Please make sure that <code>UK_DEBUG_TRACE</code> is defined before <code>&lt;uk/trace.h></code> is included:</p><pre><code>#ifndef UK_DEBUG_TRACE
+#define UK_DEBUG_TRACE
+#endif
+
+#include &lt;uk/trace.h&gt;
+</code></pre><p>As soon as tracing is enabled, Unikraft will store samples of each enabled tracepoint into an internal trace buffer.
+Currently this is not a circular buffer.
+This means that as soon as it is full, Unikraft will stop collecting further samples.</p><h3 id=creating-tracepoints>Creating Tracepoints</h3><p>Instrumenting your code with tracepoints is done by two steps.
+First, you define and register a tracepoint handler with the <code>UK_TRACEPOINT()</code> macro.
+Second, you place calls to the generated handler at those places in your code where your want to trace an event:</p><pre><code>#include &lt;uk/trace.h&gt;
+
+UK_TRACEPOINT(trace_vfs_open, &quot;\&quot;%s\&quot; 0x%x 0%0o&quot;, const char*, int, mode_t);
+
+int open(const char *pathname, int flags, ...)
+{
+      trace_vfs_open(pathname, flags, mode);
+
+      /* lots of cool stuff */
+
+      return 0;
+}
+</code></pre><p><code>UK_TRACEPOINT(trace_name, fmt, type1, type2, ... typeN)</code> generates the handler <code>trace_name()</code> (static function).
+It will accept up to 7 parameters of type <code>type1</code>, <code>type2</code>, etc.
+The given format string <code>fmt</code> is a printf-style format which will be used to create meaningful messages based on the collected trace parameters.
+This format string is only kept in the debug image and is used by the tools to read and parse the trace data.
+Unikraft&rsquo;s trace buffer stores for each sample a timestamp, the name of the tracepoint, and the given parameters.</p><h3 id=reading-trace-data>Reading Trace Data</h3><p>Unikraft is storing trace data to an internal buffer that resides in the guest&rsquo;s main memory.
+You can use GDB to read and export it.
+For this purpose, you will need to load the <code>uk-gdb.py</code> helper script into your GDB session.
+It adds additional commands that allow you to list and store the trace data.
+We recommend to automatically load the script to GDB.
+For this purpose, add the following line to your <code>~/.gdbinit</code>:</p><pre><code>source /path/to/your/build/uk-gdb.py
+</code></pre><p>In order to collect the data, open GDB with the debug image and connect to your Unikraft instance as described in Section <a href=#using-gdb>Using GDB</a>:</p><pre><code>$ gdb build/app-helloworld_linuxu-x86_64.dbg
+</code></pre><p>The <code>.dbg</code> image is required because it contains offline data needed for parsing the trace buffer.</p><p>As soon as you let run your guest, samples should be stored in Unikraft&rsquo;s trace buffer.
+You can print them by issuing the GDB command <code>uk trace</code>:</p><pre><code>(gdb) uk trace
+</code></pre><p>Alternatively, you can save all trace data to disk with <code>uk trace save &lt;filename></code>:</p><pre><code>(gdb) uk trace save traces.dat
+</code></pre><p>It may make sense to connect with GDB after the guest execution has been finished (and the trace buffer got filled).
+For this purpose, make sure that your hypervisor is not destroying the instance after guest shut down (on QEMU add <code>--no-shutdown</code> and <code>--no-reboot</code> parameters).</p><p>If you are seeing the error message <code>Error getting the trace buffer. Is tracing enabled?</code>, you probably did not enable tracing or Unikraft&rsquo;s trace buffer is empty.
+This can happen when no tracepoint was ever called.</p><p>Any saved trace file can be later processed with the <code>trace.py</code> script. In our example:</p><pre><code>$ support/scripts/uk_trace/trace.py list traces.dat
+</code></pre><h2 id=summary>Summary</h2><h2 id=practical-work>Practical Work</h2><h3 id=01-tutorial-use-gdb-in-unikraft>01. Tutorial. Use GDB in Unikraft</h3><p>For this tutorial, we will just start the <code>app-helloworld</code> application and inspect it with the help of GDB.</p><p>First make sure you have the following file structure in your working directory:</p><pre><code>workdir
+|_______apps
+|	|_______helloworld
+|_______libs
+|_______unikraft
+</code></pre><h4 id=linuxu-1>Linuxu</h4><p>For the image for the <strong>linuxu</strong> platform we can use GDB directly with the binary already created.</p><pre><code>$ gdb build/app-helloworld_linuxu-x86_64.dbg
+</code></pre><h4 id=kvm-1>KVM</h4><p>To avoid using a command with a lot of parameters that you noticed above in the <strong>KVM</strong> section, we can use <code>qemu-guest</code>.</p><pre><code>$ qemu-guest -P -g 1234 -k build/app-helloworld_kvm-x86_64.dbg
+</code></pre><p>Open another terminal to connect to GDB by using the debug image with:</p><pre><code>$ gdb --eval-command=&quot;target remote :1234&quot; build/app-helloworld_kvm-x86_64.dbg
+</code></pre><p>First you can set the right CPU architecture and then reconnect:</p><pre><code>disconnect
+set arch i386:x86-64:intel
+tar remote localhost:1234
+</code></pre><p>Then you can put a hardware break point at main function and run <code>continue</code>:</p><pre><code>hbreak main
+continue
+</code></pre><p>All steps described above can be done using the script <code>kvm_gdb_debug</code> located in the <code>work/01-tutorial-gdb/</code> folder.
+All you need to do is to provide the path to kernel image.</p><pre><code>kvm_gdb_debug build/app-helloworld_kvm-x86_64.dbg
+</code></pre><h3 id=02-mystery-find-the-secret-using-gdb>02. Mystery: Find the secret using GDB</h3><p>Before starting the task let&rsquo;s get familiar with some GDB commands.</p><p><code>ni</code> - go to the next instruction, but skip function calls</p><p><code>si</code> - go to the next instruction, but enters function calls</p><p><code>c</code> - continue execution to the next breakpoint</p><p><code>p expr</code> - display the value of an expression</p><p><code>x addr</code> - get the value at the indicated address (similar to <code>p *addr</code>)</p><p><code>whatis arg</code> - print the data type of <code>arg</code></p><p>GDB provides convenience variables that you can use within GDB to hold on to a value and refer to it later.
+For example:</p><pre><code>set $foo = *object_ptr
+</code></pre><p>Note that you can also cast variables in GDB similar to C:</p><pre><code>set $var = (int *) ptr
+</code></pre><p>If you want to dereference a pointer and actually see the value, you can use the following command:</p><pre><code>p *addr
+</code></pre><p>You can find more GDB commands <a href=https://users.ece.utexas.edu/~adnan/gdb-refcard.pdf>here</a>
+Also, if you are unfamiliar with X86_64 calling convention you can read more about it <a href=https://en.wikipedia.org/wiki/X86_calling_conventions>here</a>.</p><p>Now, let&rsquo;s get back to the task.
+Download the <code>mystery_kvm-x86_64</code> file from <a href="https://drive.google.com/drive/folders/1K74TYViRxGtyRwDepJ3W_JNOZWdO2LXT?usp=sharing">here</a>.
+Copy the <code>mystery_kvm-x86_64</code> file to the <code>work/02-mystery/</code> directory.
+Navigate to <code>work/02-mystery/</code> directory.
+Use the 2 scripts in the directory (<code>debug.sh</code> and <code>connect.sh</code>) to start the <code>mystery_kvm-x86_64.dbg</code> executable using GDB.
+Do you think you can find out the <strong>secret</strong>?</p><p><strong>HINT</strong> Use the <code>nm</code> utility on the binary as a starting point.</p><h3 id=03-bug-or-feature>03. Bug or feature?</h3><p>There are two kernel images located in the <code>work/03-app-bug/</code> folder.
+One of them is build for <strong>Linuxu</strong>, the other for <strong>KVM</strong>.</p><p>First try to inspect what it&rsquo;s wrong with <strong>Linuxu</strong> image.
+You will notice that if you run the program you will get a segmentation fault.
+Why does this happen?</p><p>After you figure out what it&rsquo;s happening with <strong>Linuxu</strong> image have a look also at the <strong>KVM</strong> one.
+It was built from the code source, but when you will try to run it, you will not get a segmentation fault.
+Is this a bug or a feature?</p><h3 id=04-tutorial-use-tracepoints>04. Tutorial. Use Tracepoints.</h3><p>We will start from the <code>app-helloworld</code> application and we will put two tracepoints.
+One at the beginning of the program (after the main) and one at the end of it and these tracepoints should print <code>argc</code>.</p><p>First we need to define <code>UK_DEBUG_TRACE</code> and to include <code>uk/trace.h</code>.</p><pre><code>#ifndef UK_DEBUG_TRACE
+#define UK_DEBUG_TRACE
+#endif
+
+#include &lt;uk/trace.h&gt;
+</code></pre><p>After that we have to define those tracepoints that we want to use.
+In our case it should be something similar with:</p><pre><code>UK_TRACEPOINT(start_trace, &quot;%d&quot;, int);
+UK_TRACEPOINT(stop_trace, &quot;%d&quot;, int);
+</code></pre><p>Now we can invoke them inside the main.</p><pre><code>int main(int argc, char *argv[])
+{
+    start_trace(argc);
+    start_status();
+
+    printf(&quot;Hello world!\n&quot;);
+
+    stop_trace(argc);
+    stop_status();
+
+    return 0;
+}
+
+</code></pre><p>We also added two simple functions for a better view of tracepoints in GDB.</p><pre><code>void start_status(){
+    printf(&quot;Start tracing\n&quot;);
+}
+
+void stop_status(){
+    printf(&quot;Stop tracing\n&quot;);
+}
+</code></pre><p>You can check the source code for this tutorial in <code>work/04-tutorial-tracepoints.</code>
+Now we can build the application, but we need to make sure that we have checked the <code>CONFIG_LIBUKDEBUG_TRACEPOINTS</code> option in the configuration.(<code>Library Configuration -> ukdebug -> Enable tracepoints</code>)</p><p>Now we will have to start the application in paused state.</p><pre><code>qemu-guest -P -g 1234 -k build/app-helloworld-tracepoints_kvm-x86_64.dbg
+</code></pre><p>In another terminal we will start the GDB:</p><pre><code>gdb --eval-command=&quot;target remote :1234&quot; build/app-helloworld-tracepoints_kvm-x86_64.dbg
+</code></pre><p>Put a hardware break to main and continue until there.</p><pre><code>(gdb) hbreak main
+(gdb) continue
+</code></pre><p>Now we can put a break to first function <code>start_status</code> to check if the first tracepoint is successful.
+To show all the tracepoints we can use <code>uk trace</code>.</p><div class="alert alert-primary" role=alert><h4 class=alert-heading>GDB configuration</h4>Don&rsquo;t forget to put this line <code>source /path/to/your/build/uk-gdb.py</code> in your GDB file configuration <code>~/.gdbinit</code>.
+Otherwise you won&rsquo;t be able to use <code>uk trace</code>.</div><pre><code>(gdb) break start_status
+(gdb) continue
+(gdb) uk trace
+0000116012362374 start_trace: 2
+</code></pre><p>We notice that we got an output and that the tracepoint was reached.
+We continue until the second trace point and we will save all the tracepoints obtained with the command <code>uk trace save traces.dat</code></p><pre><code>(gdb) break stop_status
+(gdb) continue
+(gdb) uk trace save traces.dat
+Saving traces to traces.dat ...
+</code></pre><p>Now we can read all the tracepoints obtained using <code>trace.py</code> from the main repo located in <code>unikraft/support/scripts/uk_trace/trace.py</code>.
+The output will be similar to this:</p><pre><code>       time  tp_name        msg
+-----------  -----------  -----
+ 5321091993  start_trace      2
+11121071844  stop_trace       2
+</code></pre><h3 id=05-can-you-trace-your-own-program>05. Can you trace your own program?</h3><p>Modify your <code>Echo-back Server</code> application implemented in the <a href=https://usoc21.unikraft.org/docs/sessions/01-baby-steps/#01-echo-back-server>first</a> session so that each time the server responds with a message a tracepoint with the corresponding message will be activated.
+Save all your tracepoints in a <code>traces.dat</code> file and show them in a user-friendly view with <code>trace.py</code>.</p><h3 id=06-nginx-with-or-without-main-thats-the-question>06. Nginx with or without main? That&rsquo;s the question.</h3><p>Let&rsquo;s try a new application based on networking, <strong>Nginx</strong>.</p><p>First clone the repository for <a href=https://github.com/unikraft/app-nginx>app-nginx</a> and put it in the right hierarchy.
+Then you need to create <code>Makefile</code> and <code>Makefile.uk</code>.
+Make sure to respect the order of libraries in <code>Makefile</code>. For more information check <a href=https://github.com/unikraft/lib-nginx>lib-nginx</a> repository.</p><p>Do you observe something strange? Where is the <code>main.c</code>?</p><p>Deselect this option <code>Library Configuration</code> -> <code>libnginx</code> -> <code>Provide a main function</code> and try to make your own <code>main.c</code> that will run <strong>Nginx</strong>.</p><ul><li>Nginx + Makefile</li><li>Nginx without <code>provide main function</code></li></ul><h3 id=07-bonus-bad-elf-in-town>07. Bonus. Bad ELF in Town</h3><p>We managed to build an ELF file that is valid when doing static analysis, but that can&rsquo;t be executed.
+The file is <code>bad_elf</code>, located in the <code>work/07-bad-elf/</code> folder.</p><p>Running it triggers a segmentation fault message.
+Running it using <code>strace</code> show an error with <code>execve()</code>.</p><pre><code>~/Doc/U/summer-of-code-2021/c/e/d/s/0/w/05-bad-elf &gt; ./bad_elf
+[1]    125458 segmentation fault  ./bad_elf
+~/Doc/U/summer-of-code-2021/c/e/d/s/0/w/05-bad-elf &gt; strace ./bad_elf
+execve(&quot;./bad_elf&quot;, [&quot;./bad_elf&quot;], 0x7ffc9ca2e960 /* 66 vars */) = -1 EINVAL (Invalid argument)
++++ killed by SIGSEGV +++
+[1]    125468 segmentation fault (core dumped)  strace ./bad_elf
+
+</code></pre><p>The ELF file itself is valid.
+You can check using <code>readelf</code>:</p><pre><code>$ readelf -a ./bad_elf
+</code></pre><p>The issue is to be detected in the kernel.
+Use either <a href=https://www.brendangregg.com/perf.html><code>perf</code></a>, or, better yet <a href=https://jvns.ca/blog/2017/03/19/getting-started-with-ftrace/><code>ftrace</code></a> to inspect the kernel function calls done by the program.
+Identify the function call that sends out the <code>SIGSEGV</code> signal.
+Identify the cause of the issue.
+Find that cause in the <a href=https://linux.die.net/man/5/elf>manual page <code>elf(5)</code></a>.</p><h3 id=08-give-us-feedback>08. Give Us Feedback</h3><p>We want to know how to make the next sessions better.
+For this we need your <a href=https://forms.gle/9EuzgL1n244Mvqfq8>feedback</a>.
+Thank you!</p><h2 id=further-reading>Further Reading</h2><ul><li><a href=https://sourceware.org/gdb/wiki/Internals/Breakpoint%20Handling>Hardware Breakpoint</a></li><li><a href=https://01.org/linuxgraphics/gfx-docs/drm/trace/tracepoints.html>Tracepoints</a></li><li><a href=https://users.ece.utexas.edu/~adnan/gdb-refcard.pdf>GDB Cheatsheet</a></li><li><a href=https://en.wikipedia.org/wiki/X86_calling_conventions>X86_64 calling convention</a></li></ul></div><div class=td-content style=page-break-before:always><h1 id=pg-cbba34b6d1e7d9a0e83c791f84d7f29d>6 - Session 04: Complex Applications</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-221c0eb25b4f393f30fd7c711495bed2>7 - Session 05: Contributing to Unikraft</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-c8164d0e219bb0f24fd8b32fe7e996e3>8 - Session 06: Testing Unikraft</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-e8257ea2e30401a82888d38de2231d40>9 - Session 07: Syscall Shim</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-0cf305157c0d79c36b53cb269a783170>10 - Session 08: Basic App Porting</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-f352576afa36c9b30f15b2be6533c580>11 - Session 09: Advanced App Porting</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-9026b735a1faa018402aa9ac7ce1ebd9>12 - Session 10: High Performance</h1></div></main></div></div><footer class="bg-dark py-5 row d-print-none"><div class="container-fluid mx-sm-5"><div class=row><div class="col-6 col-sm-4 text-xs-center order-sm-2"><ul class="list-inline mb-0"><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=Discord aria-label=Discord><a class=text-white target=_blank rel="noopener noreferrer" href=https://bit.ly/UnikraftDiscord><i class="fab fa-discord"></i></a></li><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=Twitter aria-label=Twitter><a class=text-white target=_blank rel="noopener noreferrer" href=https://twitter.com/UnikraftSDK><i class="fab fa-twitter"></i></a></li></ul></div><div class="col-6 col-sm-4 text-right text-xs-center order-sm-3"><ul class="list-inline mb-0"><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=GitHub aria-label=GitHub><a class=text-white target=_blank rel="noopener noreferrer" href=https://github.com/unikraft/unikraft><i class="fab fa-github"></i></a></li><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=LinkedIn aria-label=LinkedIn><a class=text-white target=_blank rel="noopener noreferrer" href=https://linkedin.com/company/unikraft-sdk><i class="fab fa-linkedin"></i></a></li></ul></div><div class="col-12 col-sm-4 text-center py-2 order-sm-2"><small class=text-white>&copy; 2021 Unikraft and Open-Source Contributors. All Rights Reserved</small></div></div></div></footer></div><script src=https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js integrity=sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49 crossorigin=anonymous></script><script src=https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js integrity=sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy crossorigin=anonymous></script><script src=/js/main.min.5c74b870c6953931a705f390a49c7e4c0a842ec5c83b24354758dd674343ed0d.js integrity="sha256-XHS4cMaVOTGnBfOQpJx+TAqELsXIOyQ1R1jdZ0ND7Q0=" crossorigin=anonymous></script></body></html>
