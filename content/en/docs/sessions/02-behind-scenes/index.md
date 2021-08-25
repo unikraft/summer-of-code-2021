@@ -469,40 +469,64 @@ Note: sending a critical kernel message will not affect how Unikraft runs after 
 
 ### 06. Tutorial / Reminder: Adding Filesystems to an Application
 
-For this tutorial, the aim is to modify the helloworld app, to use the 9pfs filesystem: read something from a file, and display it.
-Use kraft, the `qemu-guest` script, and `qemu-system` to run the modified application.
+For this tutorial, the aim is to create a simple QEMU/KVM application to reads from a file and displays to standard output.
+A local directory is to be mounted as the root directory (`/`) inside the QEMU/KVM virtual machine.
 
-Some parts of this tutorial were already discussed last session.
+Some parts of this tutorial were already discussed in [Session 01: Baby Steps](content/en/docs/sessions/01-baby-steps/index.md).
 
-#### The Code
+We will use both the manual approach (`make` and `qemu-system-x86_64` / `qemu-guest`) and `kraft` to configure, build and run the application.
 
-First of all, we need to write some simple code, to read from a file. We will do this in `main.c`.
+#### Setup
+
+The basic setup is in the `work/06-adding-filesystems/` folder in the session directory.
+Enter that folder:
 
 ```
-	FILE *in = fopen("file", "r");
-	char buffer[100];
+$ cd work/06-adding-filesystems/
 
-	fread(buffer, 1, 100, in);
-	printf("File contents: %s\n", buffer);
-	fclose(in);
+$ ls -F
+guest_fs/  kraft.yaml  launch.sh*  main.c  Makefile  Makefile.uk  qemu-guest*
 ```
 
-In the application's folder, we will create a folder, `guest_fs` (or any other name).
-In this folder, we will add our file.
+The `guest_fs/` local directory is to be mounted as the root directory (`/`) inside the QEMU/KVM virtual machine.
+It contains the `grass` file.
+The program (`main.c`) reads the contents of the `/grass` file and prints it to standard output.
+`Makefile.uk` lists the `main.c` file as the application source file to be compiled and linked with Unikraft.
 
-#### Configuring the Application
+`Makefile` is used by the manual configuration and build system.
+`kraft.yaml` is used by kraft to configure, build and run the application.
 
-First, we need to add a more powerfull libc. Newlib will do nicely. For this, in the `Makefile` file, we add the following line:
+`launch.sh` is a wrapper script around `qemu-system-x86_64` used to manually run the application.
+Similary, `qemu-guest` is a wrapper script [used internally by `kraft`](https://github.com/unikraft/kraft/blob/staging/scripts/qemu-guest).
+We'll use it as well to run the application.
+
+**If, at any point of this tutorial, something doesn't work, or you want a quick check, see the reference solution in `sol/06-adding-filesystems/` folder in the session directory.**
+
+#### Using the Manual Approach
+
+Firstly, we will use the manual approach to configure, build and run the application.
+
+##### Configure
+
+For filesystem functionalities (opening, reading, writing files) we require a more powerful libc.
+[newlib](https://github.com/unikraft/lib-newlib) is already ported in Unikraft and will do nicely.
+For this, we update the `LIBS` line in the `Makefile`:
 
 ```
 LIBS := $(UK_LIBS)/newlib
 ```
 
-**Note**: the build will fail if `unikraft` and `newlib` repositories aren't both on the `staging` or the `stable` branches.
-For this session, use the `staging` branch, for every repository used.
+Update the `UK_ROOT` and `UK_LIBS` variables in the `Makefile` to point to the folders storing the Unikraft and libraries repositories.
+
+**Make sure that both `unikraft` and `newlib` repositories are on the `staging` branch.**
+Go to each of the two repository folders (`unikraft` and `newlib`) and check the current branch:
+
+```
+$ git checkout
+```
 
 Now we need to enable **9pfs** and **newlib** in Unikraft.
-To do this, we run
+To do this, we run:
 
 ```
 $ make menuconfig
@@ -511,51 +535,92 @@ $ make menuconfig
 We need to select the following options, from the `Library Configuration` menu:
 
 * `libnewlib`
-* `vfscore`
-* `vfscore: Configuration` -> `Automatically mount a root filesystem` -> `Default root filesystem` -> `9pfs`
+* `vfscore: VFS Core Interface`
+* `vfscore: VFS Configuration` -> `Automatically mount a root filesystem` -> `Default root filesystem` -> `9pfs`
+  * For the `Default root device` option fill the `fs0` string (instead of the default `rootfs` string).
 
 These configurations will also mark as required **9pfs** and **uk9p** in the menu.
 
 We want to run Unikraft with QEMU/KVM, so we must selevct **KVM guest** in the `Platform Configuration` menu.
-We also need to enable, in the KVM guest options menu, `Virtio` -> `Virtio PCI device support`.
+For 9PFS we also need to enable, in the **KVM guest** options menu, `Virtio` -> `Virtio PCI device support`.
 
-Save, exit, and build the Unikraft image:
+Save the configuration and exit.
+
+Do a quick check of the configuration in `.config` by pitting it against the `config.sol` file in the reference solution:
+
+```
+$ diff -u .config ../../sol/06-adding-filesytstems/config.sol
+```
+
+Differences should be minimal, such as the application identifier.
+
+##### Build
+
+Build the Unikraft image:
 
 ```
 make
 ```
 
 Building the Unikraft image will take a while.
+It has to pull newlib source code, patch it and then build it, together with the Unikraft source code.
 
-#### Running with qemu-system-x86_64
+##### Run with qemu-system-x86_64
 
-To run the Unikraft image with QEMU/KVM, we use the following command:
+To run the Unikraft image with QEMU/KVM, we use the wrapper `launch.sh` script, that calls `qemu-system-x86_64` command with the proper arguments:
 
 ```
-$ qemu-system-x86_64 -fsdev local,id=myid,path=guest_fs,security_model=none -device virtio-9p-pci,fsdev=myid,mount_tag=rootfs -kernel build/app-helloworld_kvm-x86_64 -serial stdio
+$ ./launch.sh ./build/unikraft-kraft-9pfs-issue_kvm-x86_64
+[...]
+o.   .o       _ _               __ _
+Oo   Oo  ___ (_) | __ __  __ _ ' _) :_
+oO   oO ' _ `| | |/ /  _)' _` | |_|  _)
+oOo oOO| | | | |   (| | | (_) |  _) :_
+ OoOoO ._, ._:_:_,\_._,  .__,_:_, \___)
+                   Tethys 0.5.0~825b115
+Hello, world!
+File contents: The grass is green!
+Bye, world!
+```
+
+A completely manual run would use the command:
+
+```
+$ qemu-system-x86_64 -fsdev local,id=myid,path=guest_fs,security_model=none -device virtio-9p-pci,fsdev=myid,mount_tag=fs0 -kernel build/06-adding-filesystems_kvm-x86_64 -nographic
+[...]
+Powered by
+o.   .o       _ _               __ _
+Oo   Oo  ___ (_) | __ __  __ _ ' _) :_
+oO   oO ' _ `| | |/ /  _)' _` | |_|  _)
+oOo oOO| | | | |   (| | | (_) |  _) :_
+ OoOoO ._, ._:_:_,\_._,  .__,_:_, \___)
+                   Tethys 0.5.0~825b115
+Hello, world!
+File contents: The grass is green!
+Bye, world!
 ```
 
 Lets break it down:
 
-* `-serial stdio` - prints the output of QEMU to the standard output
-* `-kernel build/app-helloworld_kvm-x86_64` - tells QEMU that it will run a kernel;
-  if this parameter is omited, QEMU will think it runs a raw file
-* `-fsdev local,id=myid,path=guest_fs,security_model=none` - assign an id to the `guest_fs` local folder
-* `-device virtio-9p-pci,fsdev=myid,mount_tag=rootfs` - create a device with the 9pfs type, link to it the ID from above, and assign it a mount tag.
+* `-fsdev local,id=myid,path=guest_fs,security_model=none` - assign an id (`myid`) to the `guest_fs/` local folder
+* `-device virtio-9p-pci,fsdev=myid,mount_tag=fs0` - create a device with the 9pfs type, assign the `myid` for the `-fsdev` option and also assign the mount tag that we configured above (`fs0`)
   Unikraft will look after that mount tag when trying to mount the filesystem, so it is important that the mount tag from the configuration is the same as the one given as argument to qemu.
+* `-kernel build/06-adding-filesystems_kvm-x86_64` - tells QEMU that it will run a kernel;
+  if this parameter is omitted, QEMU will think it runs a raw file
+* `-nographic` - prints the output of QEMU to the standard output, it deosn't open a graphical window
 
-#### Runing with qemu-guest
+#### Run with qemu-guest
 
 [qemu-guest](https://github.com/unikraft/kraft/blob/staging/scripts/qemu-guest) is the script used by kraft to run its QEMU/KVM images.
 Before looking at the command, take some time to look through the script, and maybe figure out the arguments needed for our task.
 
-To run Unikraft using qemu-guest, we use:
+To run a QEMU/KVM application using `qemu-guest`, we use:
 
 ```
-$ ./qemu-guest -e guest_fs/ -k build/app-helloworld_kvm-x86_64
+$ ./qemu-guest -e guest_fs/ -k build/06-adding-filesystems_kvm-x86_64
 ```
 
-If we add the `-D` option, we can see the qemu-system command generated.
+If we add the `-D` option, we can see the `qemu-system` command generated.
 
 You may get the following error:
 
@@ -564,18 +629,52 @@ You may get the following error:
 ```
 
 If you do, check that the mount tag in the configuration is the same as the one used by `qemu-guest`.
-`qemu-guest` will use the tag **fs0**.
+`qemu-guest` will use the tag `fs0`.
 
-#### Enter kraft
+**The `fs0` tag is hardcoded for `qemu-guest` (and, thus, `kraft`).
+This is why we used the `fs0` tag when configuring the application with `make menuconfig`.
+Another tag could be used but then we couldn't run the application with `qemu-guest` or `kraft`.
+It could only be run by manually using `qemu-system-x86_64` with the corresponding arguments.**
+
+#### Using kraft
 
 With kraft, the whole process of configuring, building and running Unikraft can be made easier.
-First, we need to modify **kraft.yaml**, to reflect our new configuration, like this:
 
+##### Configure
+
+First, we need to replace the `TODO` lines in **kraft.yaml**, to reflect our new configuration.
+The first set of `TODO` lines correspond to the Unikraft configuration.
+They are used by the `kraft configure` command.
+This is the equivalent of what `make menuconfig` does.
+We need to update those `TODO` lines with:
+
+```yaml
+  kconfig:
+    - CONFIG_LIBUK9P=y
+    - CONFIG_LIB9PFS=y
+    - CONFIG_LIBVFSCORE_AUTOMOUNT_ROOTFS=y
+    - CONFIG_LIBVFSCORE_ROOTFS_9PFS=y
+    - CONFIG_LIBVFSCORE_ROOTDEV="fs0"
 ```
+
+Then, we need to update the `TODO` lines for the volume configuration (for mounting the filesystem).
+These configuration lines are to be used by the `kraft run` command.
+We need to update those `TODO` lines with:
+
+```yaml
+volumes:
+  guest_fs:
+    driver: 9pfs
+```
+
+In the end, the resulting `kraft.yaml` file will look like this:
+
+```yaml
+---
 specification: '0.5'
-name: helloworld
+name: 06-adding-filesystems
 unikraft:
-  version: staging
+  version: 'staging'
   kconfig:
     - CONFIG_LIBUK9P=y
     - CONFIG_LIB9PFS=y
@@ -587,30 +686,36 @@ targets:
     platform: kvm
 libraries:
   newlib:
-    version: staging
+    version: 'staging'
     kconfig:
       - CONFIG_LIBNEWLIBC=y
 volumes:
-  fs0:
+  guest_fs:
     driver: 9pfs
-    source: guest_fs.tgz
 ```
 
-Next, we will make kraft reconfigure our application, using `kraft configure -y`.
-In our case, nothing will be modified in **.config**, as we had the same configuration before.
+Next, we will make kraft reconfigure our application, using `kraft configure`.
+In our case, nothing should be modified in `.config`, as we had the same configuration before.
 If you get an error like "missing component: newlib", you need to run `kraft list update`.
 
-Then, build:
+##### Build
+
+We can now buld the application using:
 
 ```
 $ kraft build
 ```
 
-And run:
+##### Run
+
+Run the application using:
 
 ```
-$ ./qemu-guest -e guest_fs/ -k build/app-helloworld_kvm-x86_64
+$ kraft run
 ```
+
+**Note**: This step is not currently working due to [a kraft issue](https://github.com/unikraft/kraft/issues/71).
+You can use the fix described in the issue ot make `kraft run` work.
 
 ### 07. Tutorial: Give the User a Choice
 
