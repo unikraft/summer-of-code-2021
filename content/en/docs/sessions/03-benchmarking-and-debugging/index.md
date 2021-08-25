@@ -3,9 +3,8 @@ title: "Session 03: Benchmarking and Debugging"
 linkTitle: "03. Benchmarking and Debugging"
 ---
 
-Because unikernels aim to be a more efficient method of virtualization, then we should have certain mechanisms to measure this.
-Of course, in addition to identifying bottlenecks, we also need a way to fix any bugs.
-This session aims to familiarize you with the tools and setup needed to achieve a benchmark for an application or to solve any problem encountered during development.
+Because unikernels aim to be a more efficient method of virtualization, this can sometimes cause problems.
+This session aims to familiarize you to solve any problem encountered during the development using **GDB** and **Tracepoints**.
 
 ## Reminders
 
@@ -25,8 +24,6 @@ Below you can see a list of the commands you have used so far.
 | make menuconfig                                     | Configure application through the main menu                             |
 
 ## Debugging
-
-### Debugging in Unikraft
 
 Contrary to popular belief, debugging a unikernel is in fact simpler than debugging a standard operating system.
 Since the application and OS are linked into a single binary, debuggers can be used on the running unikernel to debug both application and OS code at the same time.
@@ -128,7 +125,6 @@ Start the virtual machine with:
 `xl create -c helloworld.cfg`
 
 {{% /alert %}}
-
 
 
 For Xen the process is slightly more complicated and depends on Xen's `gdbsx` tool.
@@ -284,16 +280,6 @@ Any saved trace file can be later processed with the `trace.py` script. In our e
 ```
 support/scripts/uk_trace/trace.py list traces.dat
 ```
-
-## Benchmarking
-
-
-## Uniprof
-
-[Uniprof](https://github.com/sysml/uniprof) is a unikernel profiler and performance debugger that gives developers insight into their unikernel behavior transparently, without having to instrument the unikernel itself.
-Right now works on both x86 and ARM architectures and is available only for Xen platform.
-It can be integrated with [Flame Graph](https://github.com/brendangregg/FlameGraph) and in this way you can see all the stack traces into a user-friendly interface.
-Right now you can see an example of integration between Unikraft and Uniprof [here](https://github.com/gabrielmocanu/Uniprof-FlameGraph).
 
 ## Summary
 
@@ -520,7 +506,7 @@ The output will be similar to this:
 
 ### 05. Can you trace your own program?
 
-Modify your `Echo-bach Server` application implemented in the (first)[https://usoc21.unikraft.org/docs/sessions/01-baby-steps/#01-echo-back-server] session so that each time the server responds with a message a tracepoint with the corresponding message will be activated.
+Modify your `Echo-bach Server` application implemented in the [first](https://usoc21.unikraft.org/docs/sessions/01-baby-steps/#01-echo-back-server) session so that each time the server responds with a message a tracepoint with the corresponding message will be activated.
 Save all your tracepoints in a `traces.dat` file and show them in a user-friendly view with `trace.py`.
 
 ### 06. Nginx with or without main? That's the question.
@@ -538,7 +524,49 @@ Deselect this option `Library Configuration` -> `libnginx` -> `Provide a main fu
 - Nginx without `provide main function`
 
 
+### 07. Bonus. Bad elf in the town.
+
+We managed to build an ELF file that is valid when doing static analysis, but that can't be executed.
+The file is bad_elf, located in the work/07-bad-elf/ folder.
+
+Running it triggers a segmentation fault message.
+Running it using strace show an error with execve().
+
+```
+~/Doc/U/summer-of-code-2021/c/e/d/s/0/w/05-bad-elf > ./bad_elf       
+[1]    125458 segmentation fault  ./bad_elf
+~/Doc/U/summer-of-code-2021/c/e/d/s/0/w/05-bad-elf > strace ./bad_elf
+execve("./bad_elf", ["./bad_elf"], 0x7ffc9ca2e960 /* 66 vars */) = -1 EINVAL (Invalid argument)
++++ killed by SIGSEGV +++
+[1]    125468 segmentation fault (core dumped)  strace ./bad_elf
+
+```
+
+The ELF file itself is valid.
+You can check using readelf:
+
+```
+~/Doc/U/summer-of-code-2021/c/e/d/s/0/work/05-bad-elf > readelf -a ./bad_elf
+```
+
+The issue is to be detected in the kernel.
+Use either [perf](https://www.brendangregg.com/perf.html), or, better yet [ftrace](https://jvns.ca/blog/2017/03/19/getting-started-with-ftrace/) to inspect the kernel function calls done by the program.
+Identify the function call that sends out the SIGSEGV signal.
+Identify the cause of the issue.
+Find that cause in the [manual page elf(5)](https://linux.die.net/man/5/elf).
+
+
+### 08. Give Us Feedback
+
+We want to know how to make the next sessions better.
+Fo this we need your [feedback](https://forms.gle/9EuzgL1n244Mvqfq8).
+
 
 ## Further Reading
 
 [Hardware Breakpoint](https://sourceware.org/gdb/wiki/Internals/Breakpoint%20Handling)
+<<<<<<< HEAD
+=======
+[Tracepoints](https://01.org/linuxgraphics/gfx-docs/drm/trace/tracepoints.html)
+[GDB Cheatsheet](https://users.ece.utexas.edu/~adnan/gdb-refcard.pdf)
+>>>>>>> Enhancement: Add bad-elf task. Delete part with Uniprof and Ukstore. Add solutions for 04, 05 and 06 task
