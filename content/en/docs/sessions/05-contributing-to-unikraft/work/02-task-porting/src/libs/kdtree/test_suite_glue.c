@@ -12,6 +12,7 @@ int libkdtree_test_main() {
     int errorCounter = 0;
     int rc;
 
+// TODO_11
 #if CONFIG_TEST_Y
     testCounter++;
     printf("Running test y ....................\n");
@@ -25,6 +26,7 @@ int libkdtree_test_main() {
     }
 #endif
 
+// TODO_11
 #if CONFIG_TEST_Z
     testCounter++;
     printf("Running test z ....................\n");

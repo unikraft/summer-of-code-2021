@@ -15,7 +15,7 @@ int libkdtree_test_main() {
 #if CONFIG_TEST_1
     testCounter++;
     printf("Running test 1 ....................\n");
-    rc = test1_main(argc, argv);
+    rc = test_1_main(argc, argv);
     if(rc == 0)
         printf("PASS\n");
     else {
@@ -27,7 +27,7 @@ int libkdtree_test_main() {
 #if CONFIG_TEST_2
     testCounter++;
     printf("Running test 2 ....................\n");
-    rc = test2_main(argc, argv);
+    rc = test_2_main(argc, argv);
     if(rc == 0)
         printf("PASS\n");
     else {
