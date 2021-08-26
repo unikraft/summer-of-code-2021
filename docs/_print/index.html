@@ -818,4 +818,247 @@ Identify the function call that sends out the <code>SIGSEGV</code> signal.
 Identify the cause of the issue.
 Find that cause in the <a href=https://linux.die.net/man/5/elf>manual page <code>elf(5)</code></a>.</p><h3 id=08-give-us-feedback>08. Give Us Feedback</h3><p>We want to know how to make the next sessions better.
 For this we need your <a href=https://forms.gle/9EuzgL1n244Mvqfq8>feedback</a>.
-Thank you!</p><h2 id=further-reading>Further Reading</h2><ul><li><a href=https://sourceware.org/gdb/wiki/Internals/Breakpoint%20Handling>Hardware Breakpoint</a></li><li><a href=https://01.org/linuxgraphics/gfx-docs/drm/trace/tracepoints.html>Tracepoints</a></li><li><a href=https://users.ece.utexas.edu/~adnan/gdb-refcard.pdf>GDB Cheatsheet</a></li><li><a href=https://en.wikipedia.org/wiki/X86_calling_conventions>X86_64 calling convention</a></li></ul></div><div class=td-content style=page-break-before:always><h1 id=pg-cbba34b6d1e7d9a0e83c791f84d7f29d>6 - Session 04: Complex Applications</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-221c0eb25b4f393f30fd7c711495bed2>7 - Session 05: Contributing to Unikraft</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-c8164d0e219bb0f24fd8b32fe7e996e3>8 - Session 06: Testing Unikraft</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-e8257ea2e30401a82888d38de2231d40>9 - Session 07: Syscall Shim</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-0cf305157c0d79c36b53cb269a783170>10 - Session 08: Basic App Porting</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-f352576afa36c9b30f15b2be6533c580>11 - Session 09: Advanced App Porting</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-9026b735a1faa018402aa9ac7ce1ebd9>12 - Session 10: High Performance</h1></div></main></div></div><footer class="bg-dark py-5 row d-print-none"><div class="container-fluid mx-sm-5"><div class=row><div class="col-6 col-sm-4 text-xs-center order-sm-2"><ul class="list-inline mb-0"><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=Discord aria-label=Discord><a class=text-white target=_blank rel="noopener noreferrer" href=https://bit.ly/UnikraftDiscord><i class="fab fa-discord"></i></a></li><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=Twitter aria-label=Twitter><a class=text-white target=_blank rel="noopener noreferrer" href=https://twitter.com/UnikraftSDK><i class="fab fa-twitter"></i></a></li></ul></div><div class="col-6 col-sm-4 text-right text-xs-center order-sm-3"><ul class="list-inline mb-0"><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=GitHub aria-label=GitHub><a class=text-white target=_blank rel="noopener noreferrer" href=https://github.com/unikraft/unikraft><i class="fab fa-github"></i></a></li><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=LinkedIn aria-label=LinkedIn><a class=text-white target=_blank rel="noopener noreferrer" href=https://linkedin.com/company/unikraft-sdk><i class="fab fa-linkedin"></i></a></li></ul></div><div class="col-12 col-sm-4 text-center py-2 order-sm-2"><small class=text-white>&copy; 2021 Unikraft and Open-Source Contributors. All Rights Reserved</small></div></div></div></footer></div><script src=https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js integrity=sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49 crossorigin=anonymous></script><script src=https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js integrity=sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy crossorigin=anonymous></script><script src=/js/main.min.5c74b870c6953931a705f390a49c7e4c0a842ec5c83b24354758dd674343ed0d.js integrity="sha256-XHS4cMaVOTGnBfOQpJx+TAqELsXIOyQ1R1jdZ0ND7Q0=" crossorigin=anonymous></script></body></html>
+Thank you!</p><h2 id=further-reading>Further Reading</h2><ul><li><a href=https://sourceware.org/gdb/wiki/Internals/Breakpoint%20Handling>Hardware Breakpoint</a></li><li><a href=https://01.org/linuxgraphics/gfx-docs/drm/trace/tracepoints.html>Tracepoints</a></li><li><a href=https://users.ece.utexas.edu/~adnan/gdb-refcard.pdf>GDB Cheatsheet</a></li><li><a href=https://en.wikipedia.org/wiki/X86_calling_conventions>X86_64 calling convention</a></li></ul></div><div class=td-content style=page-break-before:always><h1 id=pg-cbba34b6d1e7d9a0e83c791f84d7f29d>6 - Session 04: Complex Applications</h1><h2 id=reminders>Reminders</h2><h3 id=print-system>Print system</h3><p>This print system in implemented in <code>lib/ukdebug</code> and can be activated using <code>make menuconfig</code> (<code>Library Configuration -> ukdebug: Debugging and Tracing</code>).</p><p>We have two types of messages:</p><ul><li><strong>Kernel messages</strong><ul><li><strong>Information</strong>(<code>uk_pr_info</code>)</li><li><strong>Warnings</strong>(<code>uk_pr_warn</code>)</li><li><strong>Errors</strong>(<code>uk_pr_err</code>)</li><li><strong>Critical Messages</strong>(<code>uk_pr_crit</code>)</li></ul></li><li><strong>Debug messages</strong>(<code>uk_pr_debug</code>)</li></ul><h3 id=assertions>Assertions</h3><p>We can use assertions to check if the system is in a defined and stable state.
+Can be compiled-in or compiled-out and it can be activated from <code>Library Configuration -> ukdebug: Debugging and Tracing -> Enable assertions</code>.</p><p>The macros used can be:</p><ul><li><code>UK_ASSERT</code> (condition)</li><li><code>UK_BUGON</code> (negative condition)</li><li><code>UK_CTASSERT</code> (condition)(used for compile-time assertions)</li></ul><h3 id=gdb>GDB</h3><p>To use GDB we need the symbols from the <code>gdb</code> file generated at build time.
+For this we need to set <code>Debug information level</code> to <code>Level 3</code> from <code>make menuconfig</code> (<code>Build Options -> Debug information level -> Level 3</code>).</p><h4 id=linux>Linux</h4><p>For the Linux user space target (<code>linuxu</code>) simply point GDB to the resulting debug image:</p><pre><code>$ gdb path_to_unikraft_gdb_image
+</code></pre><h4 id=kvm>KVM</h4><p>For KVM we need to go through few steps:</p><ol><li><p>Run guest in paused state</p><p>Using <strong>qemu</strong>:</p><pre><code>$ qemu-guest -P -g 1234 -k path_to_unikraft_gdb_image
+</code></pre><p>Using <strong>kraft</strong>:</p><pre><code>$ kraft run -d -g 1234 -P
+</code></pre></li><li><p>Attach debugger</p><pre><code>$ gdb --eval-command=&quot;target remote :1234&quot; path_to_unikraft_gdb_image
+</code></pre></li><li><p>Disconnect GDB</p><pre><code>disconnect
+</code></pre></li><li><p>Set GDB&rsquo;s machine architecture to x86_64</p><pre><code>$ set arch i386:x86-64:intel
+</code></pre></li><li><p>Re-connect</p><pre><code>tar remote localhost:1234
+</code></pre></li></ol><h3 id=tracepoints>Tracepoints</h3><p>Tracepoints are provided by <code>lib/ukdebug</code>.
+To enable Unikraft to collect trace data, enable the option <code>CONFIG_LIBUKDEBUG_TRACEPOINTS</code> in your configuration (via <code>make menuconfig</code> under <code>Library Configuration -> ukdebug -> Enable tracepoints</code>).</p><h4 id=instrumenting>Instrumenting</h4><p>Instrumenting your code with tracepoints is done by two steps:</p><ul><li>Define and register a tracepoint handler with the <code>UK_TRACEPOINT()</code> macro.</li><li>Place calls to the generated handler at those places in your code where your want to trace an event.</li></ul><h4 id=reading-traces>Reading traces</h4><p>Unikraft is storing trace data to an internal buffer that resides in the guest&rsquo;s main memory.
+To access that data you need to configure the GDB and add <code>source /path/to/your/build/uk-gdb.py</code> to <code>~/.gdbinit</code></p><p>Commands available in GDB:</p><table><thead><tr><th>Commands</th><th>Deion</th></tr></thead><tbody><tr><td>uk trace</td><td>show tracepoints in GDB</td></tr><tr><td>uk trace save <code>&lt;file></code></td><td>save tracepoints to file</td></tr></tbody></table><p>Any saved trace file can be later processed with the <code>trace.py</code> .</p><pre><code>$ support/s/uk_trace/trace.py list &lt;file&gt;
+</code></pre><h2 id=work-items>Work Items</h2><p>In this session, we are going to run some real-world applications on top of Unikraft.</p><h3 id=support-files>Support Files</h3><p>Session support files are available <a href=https://github.com/unikraft/summer-of-code-2021>in the repository</a>.
+If you already cloned the repository, update it and enter the session directory:</p><pre><code>$ cd path/to/repository/clone
+
+$ git pull --rebase
+
+$ cd content/en/docs/sessions/04-complex-applications/
+
+$ ls -F
+images/  index.md  sol/  work/
+</code></pre><p>If you haven&rsquo;t cloned the repository yet, clone it and enter the session directory:</p><pre><code>$ git clone https://github.com/unikraft/summer-of-code-2021
+
+$ cd summer-of-code-2021/content/en/docs/sessions/04-complex-applications/
+
+$ ls -F
+images/  index.md  sol/  work/
+</code></pre><h3 id=00-qemu-wrapper>00. Qemu Wrapper</h3><p>As we saw during the other sessions, <a href=https://github.com/unikraft/kraft/blob/staging/scripts/qemu-guest>qemu-guest</a> is a wrapper script over the <code>qemu-system-x86_64</code> executable, to make the use of binary less painful.
+In the following session, it will be very handy to use it.
+To see the options for this wrapper you can use <code>qemu_guest -h</code>.</p><p>It is possible to run a lot of complex applications on Unikraft.
+In this session we analyze 3 of them:</p><ul><li>Sqlite</li><li>Redis</li><li>Nginx</li></ul><h3 id=01-sqlite-tutorial>01. SQLite (Tutorial)</h3><p>The goal of this tutorial is to get you to set up and run SQLite on top of Unikraft.
+Find the support files in the <code>work/01-set-up-and-run-sqlite/</code> folder of the session directory.</p><p><a href=https://www.sqlite.org/index.html>SQLite</a> is a C library that implements an encapsulated SQL database engine that does not require any setting or administration.
+It is one of the most popular in the world and is different from other SQL database engines because it is simple to administer, use, maintain, and test.
+Thanks to these features, SQLite is a fast, secure, and most crucial simple application.</p><p>The SQLite application is formed by a ported external library that depends on two other libraries that are also ported for Unikraft: <a href=https://github.com/unikraft/lib-pthread-embedded>pthread-embedded</a> and <a href=https://github.com/unikraft/lib-newlib>newlib</a>.
+To successfully compile and run the SQLite application for the KVM platform and x86-64 architecture, we follow the steps below.</p><h4 id=setup>Setup</h4><p>First, we make sure we have the directory structure to store the local clones of Unikraft, library and application repositories.
+The structure should be:</p><pre><code>workdir
+|-- unikraft/
+|-- libs/
+`-- apps/
+</code></pre><p>We clone the <a href=https://github.com/unikraft/lib-sqlite>lib-sqlite</a> repository in the <code>libs/</code> folder.
+The libraries on which <code>lib-sqlite</code> depends (<a href=https://github.com/unikraft/lib-newlib>pthread-embedded</a> and <a href=https://github.com/unikraft/lib-pthread-embedded>newlib</a>) are also to be cloned in the <code>libs/</code> folder.</p><p>We clone the <a href=https://github.com/unikraft/app-sqlite/>app-sqlite</a> repository in the <code>apps/</code> folder.
+In this directory, we need to create two files:</p><ul><li><code>Makefile</code>: containing rules for building the application as well as specifying the libraries that the application needs</li><li><code>Makefile.uk</code>: used to define variables needed to compile the application or to add application-specific flags</li></ul><p>Also, in the <code>Makefile</code>, the order in which the libraries are mentioned in the <code>LIBS</code> variable is important to avoid the occurrence of compilation errors.</p><pre><code>UK_ROOT ?= $(PWD)/../../unikraft
+UK_LIBS ?= $(PWD)/../../libs
+LIBS := $(UK_LIBS)/lib-pthread-embedded:$(UK_LIBS)/lib-newlib:$(UK_LIBS)/lib-sqlite
+
+all:
+    @$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS)
+
+$(MAKECMDGOALS):
+    @$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS) $(MAKECMDGOALS)
+</code></pre><h4 id=configure>Configure</h4><p>We configure the application by running:</p><pre><code>$ make menuconfig
+</code></pre><p>We select the SQLite library from the configuration menu, <code>Library Configuration</code> section.
+For starters, we select the option to generate the main source file used to run the application.</p><p>To import or export databases or CSV/SQL files, the SQLite application needs to configure a filesystem.
+The filesystem we use is 9pfs.
+Hence, in the <code>Library Configuration</code> section, we select the <code>9pfs</code> filesystem within the <code>vfscore</code> library options.</p><p>Make sure, that both options <code>Virtio PCI device support</code> and <code>Virtio 9P device</code> are selected.
+Those can be found in: <code>Platform Configuration</code> -> <code>KVM guest</code> -> <code>Virtio</code>.</p><p><img src=/docs/sessions/04-complex-applications/images/9pfs_options.png alt="9pfs options"></p><h4 id=build>Build</h4><p>We build the application by running:</p><pre><code>$ make -j 4
+</code></pre><p>We use the <code>-j 4</code> to run the compilation process on multiple cores.
+You should update <code>4</code> with the number of cores of your system.</p><h4 id=test>Test</h4><p>For testing we can use the following SQLite script, which inserts ten values into a table:</p><pre><code>CREATE TABLE tab (d1 int, d2 text);
+INSERT INTO tab VALUES (random(), cast(random() as text)),
+(random(), cast(random() as text)),
+(random(), cast(random() as text)),
+(random(), cast(random() as text)),
+(random(), cast(random() as text)),
+(random(), cast(random() as text)),
+(random(), cast(random() as text)),
+(random(), cast(random() as text)),
+(random(), cast(random() as text)),
+(random(), cast(random() as text));
+</code></pre><p>Up next, create a folder in the application folder called <code>sqlite_files</code> and write the above script into a file.
+When you run the application, you can specify the path of the newly created folder to the <code>qemu-guest</code> as following:</p><pre><code>./qemu-guest -k ./build/app-sqlite_kvm-x86_64 \
+             -e ./sqlite_files \
+             -m 500
+</code></pre><p>The SQLite start command has several parameters:</p><ul><li><code>k</code> indicates the executable resulting from the build of the entire system together with the <code>SQLite application</code></li><li><code>e</code> indicates the path to the shared directory where the Unikraft filesystem will be mounted</li><li><code>m</code> indicates the memory allocated to the application</li></ul><p>To load the SQLite script, we use the following command <code>.read &lt;sqlite_script_name.sql></code>.
+And in the end, we run <code>select * from tab</code> to see the contents of the table.</p><p>If everything runs as expected, then we&rsquo;ll see the following output:</p><pre><code>SeaBIOS (version 1.10.2-1ubuntu1)
+Booting from ROM...
+Powered by
+o.   .o       _ _               __ _
+Oo   Oo  ___ (_) | __ __  __ _ ' _) :_
+oO   oO ' _ `| | |/ /  _)' _` | |_|  _)
+oOo oOO| | | | |   (| | | (_) |  _) :_
+ OoOoO ._, ._:_:_,\_._,  .__,_:_, \___)
+                   Tethys 0.5.0~825b115
+SQLite version 3.30.1 2019-10-10 20:19:45
+Enter &quot;.help&quot; for usage hints.
+sqlite&gt; .read script.sql
+sqlite&gt; select * from tab;
+-4482895989777805454|-110319092326802521
+1731384004930241734|4521105937488475129
+394829130239418471|-5931220326625632549
+4715172377251814631|3421393665393635031
+2633802986882468389|174376437407985264
+-1691186051150364618|3056262814461654943
+-4054754806183404125|-2391909815601847844
+-4437812378917371546|-6267837926735068846
+8830824471222267926|7672933566995619644
+4185269687730257244|-3477150175417807640
+sqlite&gt;
+</code></pre><h3 id=02-sqlite-new-filesystem-tutorial>02. SQLite New Filesystem (Tutorial)</h3><p>In the previous work item, we have chosen to use 9PFS as the filesystem.
+For this work item, we want to change the filesystem to RamFS and load the SQLlite script as we have done in the previous work item.
+Find the support files in the <code>work/02-change-filesystem-sqlite/</code> folder of the session directory.</p><p>First, we need to change the filesystem to InitRD.
+We can obtain that by using the command <code>make menuconfig</code> and from the <code>vfscore: Configuration</code> option, we select the default root filesystem as <code>InitRD</code>.</p><p><img src=/docs/sessions/04-complex-applications/images/filesystems.png alt="filesystems menu"></p><p>The InitRD filesystem can load only <a href="https://www.ibm.com/docs/en/zos/2.2.0?topic=formats-cpio-format-cpio-archives">cpio archives</a>, so to load our SQLite script into RamFS filesystem, we need to create a cpio out of it.
+This can be achieved the following way: Create a folder, move the SQLite script in it, and <code>cd </code>in it.
+After that we run the following command:</p><pre><code>$ find -depth -print | tac | bsdcpio -o --format newc &gt; ../archive.cpio
+</code></pre><p>We&rsquo;ll obtain an cpio archive called <code>archive.cpio</code> in the parent directory.</p><p>Next we run the following qemu command to run the instance:</p><pre><code>./qemu-guest -k build/app-sqlite_kvm-x86_64 -m 100 -i archive.cpio
+</code></pre><p>If everything runs as expected, then we&rsquo;ll see the following output:</p><pre><code>SeaBIOS (version 1.10.2-1ubuntu1)
+Booting from ROM...
+Powered by
+o.   .o       _ _               __ _
+Oo   Oo  ___ (_) | __ __  __ _ ' _) :_
+oO   oO ' _ `| | |/ /  _)' _` | |_|  _)
+oOo oOO| | | | |   (| | | (_) |  _) :_
+ OoOoO ._, ._:_:_,\_._,  .__,_:_, \___)
+                   Tethys 0.5.0~825b115
+SQLite version 3.30.1 2019-10-10 20:19:45
+Enter &quot;.help&quot; for usage hints.
+sqlite&gt; .read script.sql
+sqlite&gt; select * from tab;
+-4482895989777805454|-110319092326802521
+1731384004930241734|4521105937488475129
+394829130239418471|-5931220326625632549
+4715172377251814631|3421393665393635031
+2633802986882468389|174376437407985264
+-1691186051150364618|3056262814461654943
+-4054754806183404125|-2391909815601847844
+-4437812378917371546|-6267837926735068846
+8830824471222267926|7672933566995619644
+4185269687730257244|-3477150175417807640
+sqlite&gt;
+</code></pre><h3 id=03-redis-tutorial>03. Redis (Tutorial)</h3><p>The goal of this tutorial is to get you to set up and run Redis on top of Unikraft.
+Find the support files in the <code>work/03-set-up-and-run-redis/</code> folder of the session directory.</p><p><a href=https://redis.io/topics/introduction>Redis</a> is one of the most popular key-value databases, with a design that facilitates the fast writing and reading of data from memory as well as the storage of data on disk to be able to reconstruct the state of data in memory in case of a system restart.
+Unlike other data storage systems, Redis supports different types of data structures such as lists, maps, strings, sets, bitmaps, streams.</p><p>The Redis application is formed by a ported external library that depends on other ported libraries for Unikraft (<a href=https://github.com/unikraft/lib-pthread-embedded>pthread-embedded</a>, <a href=https://github.com/unikraft/lib-newlib>newlib</a>, <a href=https://github.com/unikraft/lib-lwip>lwip-network</a> library).
+To successfully compile and run the Redis application for the KVM platform and x86-64 architecture, we follow the steps below.</p><h4 id=setup-1>Setup</h4><p>As above, we make sure we have the directory structure to store the local clones of Unikraft, library and application repositories.
+The structure should be:</p><pre><code>workdir
+|-- unikraft/
+|-- libs/
+`-- apps/
+</code></pre><p>We clone the <a href=https://github.com/unikraft/lib-redis>lib-redis</a> repository in the <code>libs/</code> folder.
+We alsoe clonethe library repositories which <a href=https://github.com/unikraft/lib-redis>lib-redis</a> depends on ([pthread-embedded](<a href=https://github.com/unikraft/lib-pthread-embedded>pthread-embedded</a>, <a href=https://github.com/unikraft/lib-newlib>newlib</a> and <a href=https://github.com/unikraft/lib-lwip>lwip</a>) in the <code>libs/</code> folder.</p><p>We clone the <a href=https://github.com/unikraft/app-redis/>app-redis</a> repository in the <code>apps/</code> folder.
+In this directory, we need to create two files:</p><ul><li><code>Makefile</code>: it contains rules for building the application as well as specifying the libraries that the application needs</li><li><code>Makefile.uk</code>: used to define variables needed to compile the application or to add application-specific flags</li></ul><p>Also, in the <code>Makefile</code>, the order in which the libraries are mentioned in the <code>LIBS</code> variable is important to avoid the occurrence of compilation errors.</p><pre><code>UK_ROOT ?= $(PWD)/../../unikraft
+UK_LIBS ?= $(PWD)/../../libs
+LIBS := $(UK_LIBS)/lib-pthread-embedded:$(UK_LIBS)/lib-newlib:$(UK_LIBS)/lib-lwip:$(UK_LIBS)/lib-redis
+
+all:
+    @$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS)
+
+$(MAKECMDGOALS):
+    @$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS) $(MAKECMDGOALS)
+</code></pre><h4 id=configure-1>Configure</h4><p>We configure the application by running:</p><pre><code>$ make menuconfig
+</code></pre><p>We select the Redis library from the configuration menu, <code>Library Configuration</code> section.
+For starters, we select the option to generate the main source file used to run the application.</p><p><img src=/docs/sessions/04-complex-applications/images/redis_menu.png alt="redis selection menu"></p><h4 id=build-1>Build</h4><p>We build the application by running:</p><pre><code>$ make -j 4
+</code></pre><p>We use the <code>-j 4</code> to run the compilation process on multiple cores.
+You should update <code>4</code> with the number of cores of your system.</p><h4 id=test-1>Test</h4><p>To connect to the Redis server, the network features should be configured.
+Hence, in the configuration menu in the <code>Library Configuration</code> section, within the <code>lwip library</code> the following options should be selected:</p><ul><li><code>IPv4</code></li><li><code>UDP support</code></li><li><code>TCP support</code></li><li><code>ICMP support</code></li><li><code>DHCP support</code></li><li><code>Socket API</code></li></ul><p><img src=/docs/sessions/04-complex-applications/images/lwip_redis_menu.png alt="lwip selection menu"></p><p>The Redis application needs a configuration file to start.
+Thus, a filesystem should be selected in Unikraft.
+The filesystem we used was 9PFS.
+So, in the <code>Library Configuration</code> section of the configuration menu, the following selection chain should be made in the vfscore library: <code>VFSCore Interface</code> -> <code>vfscore Configuration</code> -> <code>Automatically mount a root filesystem</code> -> <code>Default root filesystem</code> -> <code>9PFS</code>.</p><p>Therefore, following the steps above, the build of the entire system, together with the Redis application will be successful.
+We used a script to run the application in which a bridge and a network interface (<code>kraft0</code>) are created.
+The network interface has an IP associated with it used by clients to connect to the Redis server.
+Also, the script takes care of starting the Redis server, but also of stopping it, deleting the settings created for the network.</p><pre><code>brctl addbr kraft0
+ifconfig kraft0 172.44.0.1
+ifconfig kraft0 up
+
+dnsmasq -d \
+        --log-queries \
+        --bind-dynamic \
+        --interface=kraft0 \
+        --listen-addr=172.44.0.1 \
+        --dhcp-range=172.44.0.2,172.44.0.254,255.255.255.0,12h &amp;&gt; $WORKDIR/dnsmasq.log &amp;
+
+./qemu_guest.sh -k ./build/redis_kvm-x86_64 \
+                -a &quot;/redis.conf&quot; \
+                -b kraft0 \
+                -e ./redis_files
+                -m 100
+</code></pre><p>The Redis server start command has several parameters:</p><ul><li><code>k</code> indicates the executable resulting from the build of the entire system together with the <code>Redis</code> application</li><li><code>e</code> indicates the path to the shared directory where the Unikraft filesystem will be mounted</li><li><code>b</code> indicates the network interface used for external communication</li><li><code>m</code> indicates the memory allocated to the application</li><li><code>a</code> allows the addition of parameters specific to running the application</li></ul><p>The following image is presenting an overview of our setup:</p><p><img src=/docs/sessions/04-complex-applications/images/redis_setup.png alt="lwip selection menu"></p><p>Consequently, after running the script the Redis server will start and dnsmasq will dynamically assign an IP address.
+The IP can be seen in the output of qemu as bellow:</p><p><img src=/docs/sessions/04-complex-applications/images/redis_ip.png alt="redis ip"></p><p>Using the received IP, it will be possible to connect clients to it using <code>redis-cli</code> (the binary <code>redis-cli</code> is the folder for this work item):</p><pre><code>$ ./redis-cli -h 172.88.0.76 -p 6379
+172.88.0.2:6379&gt; PING
+PONG
+172.88.0.2:6379&gt;
+</code></pre><h3 id=04-redis-static-ip-address>04. Redis Static IP Address</h3><p>In tutorial above we have dynamically assigned an IP to the network interface used by Unikraft using the <code>dnsmasq</code> utility.
+Find the support files in the <code>work/04-obtain-the-ip-statically/</code> folder of the session directory.</p><p>Modify the launching script and run the application with a static IP.
+Beware that the assigned IP address must differ from the one assigned on the bridge.</p><p>You can use <code>redis-cli</code>, found in the suport folder to test your changes.
+If everything runs as expected you should see the following output:</p><pre><code>./redis-cli -h 172.88.0.76 -p 6379
+172.88.0.2:6379&gt; PING
+PONG
+172.88.0.2:6379&gt;
+</code></pre><h3 id=05-redis-benchmarking-tutorial>05. Redis Benchmarking (Tutorial)</h3><p>We aim to do benchmarking for the Redis app running on top of Unikraft and for the Redis running on top of Linux.
+Find the support files in the <code>work/05-benchmark-redis/</code> folder of the session directory.
+There are three binaries: <code>redis-cli</code>, <code>redis-benchmark</code>, and <code>redis</code>.</p><p>First, we will start by benchmarking <code>redis app</code>, running on Unikraft.
+Start the Redis on the top of Unikraft as we have already done at above and in another terminal run the following command:</p><pre><code>$ ./redis-benchmark --csv -q -r 100 -n 10000 -c 1 -h 172.44.0.76 -p 6379 -P 8 -t set,get
+</code></pre><p>The description of the used option can be seen here:</p><pre><code>Usage: redis-benchmark [-h &lt;host&gt;] [-p &lt;port&gt;] [-c &lt;clients&gt;] [-n &lt;requests&gt;] [-k &lt;boolean&gt;]
+
+ -h &lt;hostname&gt;      Server hostname (default 127.0.0.1)
+ -p &lt;port&gt;          Server port (default 6379)
+ -c &lt;clients&gt;       Number of parallel connections (default 50)
+ -n &lt;requests&gt;      Total number of requests (default 100000)
+ -P &lt;numreq&gt;        Pipeline &lt;numreq&gt; requests. Default 1 (no pipeline).
+ -q                 Quiet. Just show query/sec values
+ --csv              Output in CSV format
+ -t &lt;tests&gt;         Only run the comma separated list of tests. The test
+                    names are the same as the ones produced as output.
+</code></pre><p>If everything runs as expected, you&rsquo;ll see the following output:</p><pre><code>&quot;SET&quot;,&quot;147058.81&quot;
+&quot;GET&quot;,&quot;153846.16&quot;
+</code></pre><p>The printed values represent <code>requests/second</code> for the operation <code>set</code> and <code>get</code>.</p><p>Further, we will run the executable <code>redis-server</code> (<code>./redis-server</code>), which can be found in the support folder, and the following command (only the IP address of the redis server was changed):</p><pre><code>$./redis-benchmark --csv -q -r 100 -n 10000 -c 1 -h 127.0.0.1 -p 6379 -P 8 -t set,get
+</code></pre><p>After that you&rsquo;ll get something like this:</p><pre><code>&quot;SET&quot;,&quot;285714.28&quot;
+&quot;GET&quot;,&quot;294117.62&quot;
+</code></pre><h3 id=06-nginx>06. Nginx</h3><p>The aim of this work item is to set up and run Nginx.
+Find the support files in the <code>work/06-set-up-and-run-nginx/</code> folder of the session directory.</p><p>From the point of view of the library dependencies, the nginx app has the same dependencies as the Redis app.
+It&rsquo;s your choice how you assign the IP to the VM.</p><p>In the support folder of this work item there is a subfolder called <code>nginx</code> with the following structure:</p><pre><code>nginx_files
+`-- nginx/
+    |-- conf/
+    |   |-- fastcgi.conf
+    |   |-- fastcgi_params
+    |   |-- koi-utf
+    |   |-- koi-win
+    |   |-- mime.types
+    |   |-- nginx.conf
+    |   |-- nginx.conf.default
+    |   |-- scgi_params
+    |   |-- uwsgi_params
+    |   `-- win-utf
+    |-- data/
+    |   `-- images/
+    |       `-- small-img100.png
+    |-- html/
+    |   |-- 50x.html
+    |   `-- index.html
+    `-- logs/
+        |-- error.log
+        `-- nginx.pid
+</code></pre><p>The path to the <code>nginx_files</code> folder should be given as a parameter to the <code>-e option</code> of the <code>qemu-guest</code>.
+The <code>html/</code> folder stores the files of the website you want to be run.</p><p>If everything works as expected, you should see the following web page in the browser.</p><p><img src=/docs/sessions/04-complex-applications/images/nginx_output.png alt="nginx output"></p><h3 id=07-nginx-benchmarking-tutorial>07. Nginx Benchmarking (Tutorial)</h3><p>Benchmarking Nginx running on the top of Unikraft can be achieved with a utility called <code>iperf</code>.
+The package can be easily installed using the command:</p><pre><code>sudo apt-get install -y iperf
+</code></pre><p>Next, we will start the nginx app as we have done at the previous work item and then we will open another two terminals.
+We&rsquo;ll start an <code>iperf</code> server in the first terminal with the command:</p><pre><code>iperf -s
+</code></pre><p>In the second terminal we&rsquo;ll start an <code>iperf</code> client with the command:</p><pre><code>iperf -c 172.44.0.76 -p 80
+</code></pre><p>If everything runs as expected, then we will see the following output:</p><pre><code>------------------------------------------------------------
+Client connecting to 172.44.0.76, TCP port 80
+TCP window size: 85.0 KByte (default)
+------------------------------------------------------------
+[  3] local 172.44.0.1 port 33262 connected with 172.44.0.76 port 80
+[ ID] Interval       Transfer     Bandwidth
+[  3]  0.0-10.0 sec  1.28 GBytes  1.10 Gbits/sec
+</code></pre><h3 id=08-give-us-feedback>08. Give Us Feedback</h3><p>We want to know how to make the next sessions better. For this we need your <a href=https://forms.gle/QyvxBx19cK4fUYRS7>feedback</a>. Thank you!</p></div><div class=td-content style=page-break-before:always><h1 id=pg-221c0eb25b4f393f30fd7c711495bed2>7 - Session 05: Contributing to Unikraft</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-c8164d0e219bb0f24fd8b32fe7e996e3>8 - Session 06: Testing Unikraft</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-e8257ea2e30401a82888d38de2231d40>9 - Session 07: Syscall Shim</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-0cf305157c0d79c36b53cb269a783170>10 - Session 08: Basic App Porting</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-f352576afa36c9b30f15b2be6533c580>11 - Session 09: Advanced App Porting</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-9026b735a1faa018402aa9ac7ce1ebd9>12 - Session 10: High Performance</h1></div></main></div></div><footer class="bg-dark py-5 row d-print-none"><div class="container-fluid mx-sm-5"><div class=row><div class="col-6 col-sm-4 text-xs-center order-sm-2"><ul class="list-inline mb-0"><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=Discord aria-label=Discord><a class=text-white target=_blank rel="noopener noreferrer" href=https://bit.ly/UnikraftDiscord><i class="fab fa-discord"></i></a></li><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=Twitter aria-label=Twitter><a class=text-white target=_blank rel="noopener noreferrer" href=https://twitter.com/UnikraftSDK><i class="fab fa-twitter"></i></a></li></ul></div><div class="col-6 col-sm-4 text-right text-xs-center order-sm-3"><ul class="list-inline mb-0"><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=GitHub aria-label=GitHub><a class=text-white target=_blank rel="noopener noreferrer" href=https://github.com/unikraft/unikraft><i class="fab fa-github"></i></a></li><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=LinkedIn aria-label=LinkedIn><a class=text-white target=_blank rel="noopener noreferrer" href=https://linkedin.com/company/unikraft-sdk><i class="fab fa-linkedin"></i></a></li></ul></div><div class="col-12 col-sm-4 text-center py-2 order-sm-2"><small class=text-white>&copy; 2021 Unikraft and Open-Source Contributors. All Rights Reserved</small></div></div></div></footer></div><script src=https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js integrity=sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49 crossorigin=anonymous></script><script src=https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js integrity=sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy crossorigin=anonymous></script><script src=/js/main.min.5c74b870c6953931a705f390a49c7e4c0a842ec5c83b24354758dd674343ed0d.js integrity="sha256-XHS4cMaVOTGnBfOQpJx+TAqELsXIOyQ1R1jdZ0ND7Q0=" crossorigin=anonymous></script></body></html>
