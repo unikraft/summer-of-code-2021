@@ -3,7 +3,97 @@ title: "Session 04: Complex Applications"
 linkTitle: "04. Complex Applications"
 ---
 
-In this session, we are going to run some real-world applications on top of Unikraft. 
+## Reminders
+
+### Print system
+This print system in implemented in `lib/ukdebug` and can be activated using `make menuconfig`(`Library Configuration -> ukdebug: Debugging and Tracing`)
+
+We have two types of messages:
+* **Kernel messages**
+	* **Information**(`uk_pr_info`)
+	* **Warnings**(`uk_pr_warn`)
+	* **Errors**(`uk_pr_err`)
+	* **Critical Messages**(`uk_pr_crit`)
+* **Debug messages**(`uk_pr_debug`)
+
+### Assertions
+
+We can use assertions to check if the system is in a defined and stable state.
+Can be compiled-in or compiled-out and it can be activated from `Library Configuration -> ukdebug: Debugging and Tracing -> Enable assertions`.
+
+The macros used can be:
+* **UK_ASSERT**(condition)
+* **UK_BUGON**(negative condition)
+* **UK_CTASSERT**(condition)(used for compile-time assertions)
+
+### GDB
+
+To use GDB we need the symbols from the `gdb` file generated at build time.
+For this we need to set `Debug information level` to `Level 3` from **menuconfig**.(`Build Options -> Debug information level -> Level 3`)
+
+#### Linux
+
+For the Linux user space target (`linuxu`) simply point GDB to the resulting debug image:
+```
+$ gdb path_to_unikraft_gdb_image
+```
+
+#### KVM
+
+For KVM we need to go through few steps:
+1. Run guest in paused state
+
+Using **qemu**:
+```
+qemu-guest -P -g 1234 -k path_to_unikraft_gdb_image
+```
+Using **kraft**:
+
+```
+kraft run -d -g 1234 -P
+```
+2. Attach debugger
+```
+gdb --eval-command="target remote :1234" path_to_unikraft_gdb_image
+```
+3. Disconnect GDB
+```
+disconnect
+```
+4. Set GDB's machine architecture to x86_64
+```
+set arch i386:x86-64:intel
+```
+5. Re-connect
+```
+tar remote localhost:1234
+```
+
+### Tracepoints
+
+Tracepoints are provided by `lib/ukdebug`.
+To enable Unikraft to collect trace data, enable the option `CONFIG_LIBUKDEBUG_TRACEPOINTS` in your configuration (via `make menuconfig` under `Library Configuration -> ukdebug -> Enable tracepoints`).
+
+#### Instrumenting
+Instrumenting your code with tracepoints is done by two steps:
+* Define and register a tracepoint handler with the `UK_TRACEPOINT()` macro
+* Place calls to the generated handler at those places in your code where your want to trace an event
+
+#### Reading trace
+ Unikraft is storing trace data to an internal buffer that resides in the guest’s main memory.
+ To access that data you need to configure the GDB and add `source /path/to/your/build/uk-gdb.py` to `~/.gdbinit`
+
+Commands available in GDB:
+
+| Commands               | Deion              |
+|------------------------|--------------------------|
+| uk trace               | show tracepoints in GDB  |
+| uk trace save `<file>` | save tracepoints to file |
+
+Any saved trace file can be later processed with the  `trace.py`  .
+```
+$ support/s/uk_trace/trace.py list <file>
+```
 
 ## Required Tools and Resources
 
@@ -68,6 +158,9 @@ $ cd summer-of-code-2021/content/en/docs/sessions/02-behind-scenes/
 $ ls
 demo/  images/  index.md  sol/
 ```
+
+
+In this session, we are going to run some real-world applications on top of Unikraft. 
 
 ## 00. Qemu wrapper - [qemu_guest.sh](https://github.com/unikraft/kraft/blob/staging/scripts/qemu-guest)
 
