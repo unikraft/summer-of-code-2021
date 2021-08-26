@@ -52,8 +52,8 @@ LIBKDTREE_EXTRACTED = $(LIBKDTREE_ORIGIN)/kdtree-$(LIBKDTREE_VERSION)
 ################################################################################
 # Library includes
 ################################################################################
-LIBKDTREE_COMMON_INCLUDES-y     += -I$(LIBKDTREE_BASE)/include
 LIBKDTREE_COMMON_INCLUDES-y     += -I$(LIBKDTREE_EXTRACTED)/
+LIBKDTREE_COMMON_INCLUDES-y     += -I$(LIBKDTREE_BASE)/include
 
 CINCLUDES-$(CONFIG_LIBKDTREE)   += $(LIBKDTREE_COMMON_INCLUDES-y)
 CXXINCLUDES-$(CONFIG_LIBKDTREE) += $(LIBKDTREE_COMMON_INCLUDES-y)
@@ -83,10 +83,10 @@ LIBKDTREE_SRCS-y += $(LIBKDTREE_EXTRACTED)/kdtree.c
 # LIBKDTREE tests
 ################################################################################
 LIBKDTREE_SRCS-$(CONFIG_TEST_1) += $(LIBKDTREE_EXTRACTED)/examples/test.c
-LIBKDTREE_TEST_FLAGS-$(CONFIG_TEST_1) += -Dmain=test1_main
+LIBKDTREE_TEST_FLAGS-$(CONFIG_TEST_1) += -Dmain=test_1_main
 
 LIBKDTREE_SRCS-$(CONFIG_TEST_2) += $(LIBKDTREE_EXTRACTED)/examples/test2.c
-LIBKDTREE_TEST2_FLAGS-$(CONFIG_TEST_1) += -Dmain=test2_main
+LIBKDTREE_TEST2_FLAGS-$(CONFIG_TEST_1) += -Dmain=test_2_main
 
 LIBKDTREE_SRCS-$(CONFIG_BUILD_TESTS) += $(LIBKDTREE_BASE)/test_suite_glue.c
 ################################################################################
