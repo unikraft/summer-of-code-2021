@@ -5,3 +5,5 @@ menuconfig APPHELLOWORLD_DEPENDENCIES
         select LIBNEWLIBC
         select LIB9PFS
         select LIBUK9P
+        select VIRTIO_PCI
+        select LIBVFSCORE_AUTOMOUNT_ROOTFS
