@@ -149,7 +149,7 @@ images/  index.md  sol/  work/
 
 As we saw during the other sessions, [qemu-guest](https://github.com/unikraft/kraft/blob/staging/scripts/qemu-guest) is a wrapper script over the `qemu-system-x86_64` executable, to make the use of binary less painful.
 In the following session, it will be very handy to use it.
-To see the options for this wrapper you can use `qemu_guest -h`.
+To see the options for this wrapper you can use `qemu-guest -h`.
 
 It is possible to run a lot of complex applications on Unikraft.
 In this session we analyze 3 of them:
@@ -199,10 +199,10 @@ UK_LIBS ?= $(PWD)/../../libs
 LIBS := $(UK_LIBS)/lib-pthread-embedded:$(UK_LIBS)/lib-newlib:$(UK_LIBS)/lib-sqlite
 
 all:
-    @$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS)
+	@$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS)
 
 $(MAKECMDGOALS):
-    @$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS) $(MAKECMDGOALS)
+	@$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS) $(MAKECMDGOALS)
 ```
 
 #### Configure
@@ -230,11 +230,8 @@ Those can be found in: `Platform Configuration` -> `KVM guest` -> `Virtio`.
 We build the application by running:
 
 ```
-$ make -j 4
+$ make
 ```
-
-We use the `-j 4` to run the compilation process on multiple cores.
-You should update `4` with the number of cores of your system.
 
 #### Test
 
@@ -258,9 +255,9 @@ Up next, create a folder in the application folder called `sqlite_files` and wri
 When you run the application, you can specify the path of the newly created folder to the `qemu-guest` as following:
 
 ```
-./qemu-guest -k ./build/app-sqlite_kvm-x86_64 \
-             -e ./sqlite_files \
-             -m 500
+$ ./qemu-guest -k ./build/app-sqlite_kvm-x86_64 \
+               -e ./sqlite_files \
+               -m 500
 ```
 
 The SQLite start command has several parameters:
@@ -317,7 +314,7 @@ This can be achieved the following way: Create a folder, move the SQLite script 
 After that we run the following command:
 
 ```
-$ find -depth -print | tac | bsdcpio -o --format newc > ../archive.cpio
+$ find -type f | bsdcpio -o --format newc > ../archive.cpio
 ```
 
 We'll obtain an cpio archive called `archive.cpio` in the parent directory.
@@ -325,7 +322,7 @@ We'll obtain an cpio archive called `archive.cpio` in the parent directory.
 Next we run the following qemu command to run the instance:
 
 ```
-./qemu-guest -k build/app-sqlite_kvm-x86_64 -m 100 -i archive.cpio
+$ ./qemu-guest -k build/app-sqlite_kvm-x86_64 -m 100 -i archive.cpio
 ```
 
 If everything runs as expected, then we'll see the following output:
@@ -397,10 +394,10 @@ UK_LIBS ?= $(PWD)/../../libs
 LIBS := $(UK_LIBS)/lib-pthread-embedded:$(UK_LIBS)/lib-newlib:$(UK_LIBS)/lib-lwip:$(UK_LIBS)/lib-redis
 
 all:
-    @$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS)
+	@$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS)
 
 $(MAKECMDGOALS):
-    @$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS) $(MAKECMDGOALS)
+	@$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS) $(MAKECMDGOALS)
 ```
 
 #### Configure
@@ -421,11 +418,8 @@ For starters, we select the option to generate the main source file used to run 
 We build the application by running:
 
 ```
-$ make -j 4
+$ make
 ```
-
-We use the `-j 4` to run the compilation process on multiple cores.
-You should update `4` with the number of cores of your system.
 
 #### Test
 
@@ -463,7 +457,7 @@ dnsmasq -d \
         --listen-addr=172.44.0.1 \
         --dhcp-range=172.44.0.2,172.44.0.254,255.255.255.0,12h &> $WORKDIR/dnsmasq.log &
 
-./qemu_guest.sh -k ./build/redis_kvm-x86_64 \
+./qemu-guest.sh -k ./build/redis_kvm-x86_64 \
                 -a "/redis.conf" \
                 -b kraft0 \
                 -e ./redis_files
@@ -508,7 +502,7 @@ You can use `redis-cli`, found in the suport folder to test your changes.
 If everything runs as expected you should see the following output:
 
 ```
-./redis-cli -h 172.88.0.76 -p 6379
+$ ./redis-cli -h 172.88.0.76 -p 6379
 172.88.0.2:6379> PING
 PONG
 172.88.0.2:6379>
@@ -555,7 +549,7 @@ The printed values represent `requests/second` for the operation `set` and `get`
 Further, we will run the executable `redis-server` (`./redis-server`), which can be found in the support folder, and the following command (only the IP address of the redis server was changed):
 
 ```
-$./redis-benchmark --csv -q -r 100 -n 10000 -c 1 -h 127.0.0.1 -p 6379 -P 8 -t set,get
+$ ./redis-benchmark --csv -q -r 100 -n 10000 -c 1 -h 127.0.0.1 -p 6379 -P 8 -t set,get
 ```
 
 After that you'll get something like this:
@@ -620,13 +614,13 @@ Next, we will start the nginx app as we have done at the previous work item and 
 We'll start an `iperf` server in the first terminal with the command:
 
 ```
-iperf -s
+$ iperf -s
 ```
 
 In the second terminal we'll start an `iperf` client with the command:
 
 ```
-iperf -c 172.44.0.76 -p 80
+$ iperf -c 172.44.0.76 -p 80
 ```
 
 If everything runs as expected, then we will see the following output:
