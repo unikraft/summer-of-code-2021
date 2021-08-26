@@ -1,6 +1,6 @@
 ---
-title: "Session 03: Benchmarking and Debugging"
-linkTitle: "03. Benchmarking and Debugging"
+title: "Session 03: Debugging in Unikraft"
+linkTitle: "03. Debugging in Unikraft"
 ---
 
 Because unikernels aim to be a more efficient method of virtualization, this can sometimes cause problems.
@@ -22,6 +22,34 @@ Below you can see a list of the commands you have used so far.
 | `kraft build`                                          | Build the application                                                   |
 | `kraft clean`                                          | Clean the application                                                   |
 | `make menuconfig`                                      | Configure application through the main menu                             |
+
+
+## Support Files
+
+Session support files are available [in the repository](https://github.com/unikraft/summer-of-code-2021).
+If you already cloned the repository, update it and enter the session directory:
+
+```
+$ cd path/to/repository/clone
+
+$ git pull --rebase
+
+$ cd content/en/docs/sessions/03-debugging/
+
+$ ls
+demo/  images/  index.md  sol/  work/
+```
+
+If you haven't cloned the repository yet, clone it and enter the session directory:
+
+```
+$ git clone https://github.com/unikraft/summer-of-code-2021
+
+$ cd summer-of-code-2021/content/en/docs/sessions/03-debugging/
+
+$ ls
+demo/  images/  index.md  sol/  work/
+```
 
 ## Debugging
 
@@ -285,6 +313,34 @@ $ support/scripts/uk_trace/trace.py list traces.dat
 ## Summary
 
 ## Practical Work
+
+### Support Files
+
+Session support files are available [in the repository](https://github.com/unikraft/summer-of-code-2021).
+If you already cloned the repository, update it and enter the session directory:
+
+```
+$ cd path/to/repository/clone
+
+$ git pull --rebase
+
+$ cd content/en/docs/sessions/03-debugging/
+
+$ ls
+demo/  images/  index.md  sol/  work/
+```
+
+If you haven't cloned the repository yet, clone it and enter the session directory:
+
+```
+$ git clone https://github.com/unikraft/summer-of-code-2021
+
+$ cd summer-of-code-2021/content/en/docs/sessions/03-debugging/
+
+$ ls
+demo/  images/  index.md  sol/  work/
+```
+
 
 ### 01. Tutorial. Use GDB in Unikraft
 

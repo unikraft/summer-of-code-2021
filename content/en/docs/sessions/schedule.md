@@ -14,7 +14,7 @@ The complete schedule for USoC'21 is (all times in CEST - Central European Summe
 |------|----------|----------|-------------|
 | Mon, 23.08.2021 | 3:30pm-4pm<br/> 4pm-8pm| Opening Ceremony<br/> [Session 01: Baby Steps]({{<ref "/docs/sessions/01-baby-steps" >}} "01. Baby Steps") | RazvanD, Alex, CristiV <br/> Alex, CristiV, Vlad |
 | Tue, 24.08.2021 | 4pm-8pm | [Session 02: Behind the Scenes]({{<ref "/docs/sessions/02-behind-scenes" >}} "02. Behind the Scenes") | RazvanD, Costi |
-| Wed, 25.08.2021 | 4pm-4:30pm<br/> 4:30pm-8pm | Tech Talk: Debugging and Tracing in Unikraft<br /> [Session 03: Benchmarking and Debugging]({{<ref "/docs/sessions/03-benchmarking-and-debugging" >}} "03. Benchmarking and Debugging") | Simon<br /> CristiV, RazvanD |
+| Wed, 25.08.2021 | 4pm-4:30pm<br/> 4:30pm-8pm | Tech Talk: Debugging and Tracing in Unikraft<br /> [Session 03: Debugging in Unikraft]({{<ref "/docs/sessions/03-debugging" >}} "03. Debugging in Unikraft") | Simon<br /> CristiV, RazvanD |
 | Thu, 26.08.2021 | 4pm-8pm | [Session 04: Complex Applications]({{<ref "/docs/sessions/04-complex-applications" >}} "04. Complex Applications") | Costi, Vlad |
 | Fri, 27.08.2021 | 4pm-4:30pm<br/> 4:30pm-8pm | Tech Talk: Virtual Memory in Unikraft<br/> [Session 05: Contributing to Unikraft]({{<ref "/docs/sessions/05-contributing-to-unikraft" >}} "05. Contributing to Unikraft") | Ștefan<br/> Vlad, RazvanD |
 | Mon, 30.08.2021 | 4pm-8pm | [Session 06: Testing Unikraft]({{<ref "/docs/sessions/06-testing-unikraft" >}} "06. Testing Unikraft") | CristiB, Alex |
