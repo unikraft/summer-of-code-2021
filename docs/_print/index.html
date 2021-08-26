@@ -896,7 +896,7 @@ $ ls -F
 images/  index.md  sol/  work/
 </code></pre><h3 id=00-qemu-wrapper>00. Qemu Wrapper</h3><p>As we saw during the other sessions, <a href=https://github.com/unikraft/kraft/blob/staging/scripts/qemu-guest>qemu-guest</a> is a wrapper script over the <code>qemu-system-x86_64</code> executable, to make the use of binary less painful.
 In the following session, it will be very handy to use it.
-To see the options for this wrapper you can use <code>qemu_guest -h</code>.</p><p>It is possible to run a lot of complex applications on Unikraft.
+To see the options for this wrapper you can use <code>qemu-guest -h</code>.</p><p>It is possible to run a lot of complex applications on Unikraft.
 In this session we analyze 3 of them:</p><ul><li>Sqlite</li><li>Redis</li><li>Nginx</li></ul><h3 id=01-sqlite-tutorial>01. SQLite (Tutorial)</h3><p>The goal of this tutorial is to get you to set up and run SQLite on top of Unikraft.
 Find the support files in the <code>work/01-set-up-and-run-sqlite/</code> folder of the session directory.</p><p><a href=https://www.sqlite.org/index.html>SQLite</a> is a C library that implements an encapsulated SQL database engine that does not require any setting or administration.
 It is one of the most popular in the world and is different from other SQL database engines because it is simple to administer, use, maintain, and test.
@@ -913,18 +913,17 @@ UK_LIBS ?= $(PWD)/../../libs
 LIBS := $(UK_LIBS)/lib-pthread-embedded:$(UK_LIBS)/lib-newlib:$(UK_LIBS)/lib-sqlite
 
 all:
-    @$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS)
+	@$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS)
 
 $(MAKECMDGOALS):
-    @$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS) $(MAKECMDGOALS)
+	@$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS) $(MAKECMDGOALS)
 </code></pre><h4 id=configure>Configure</h4><p>We configure the application by running:</p><pre><code>$ make menuconfig
 </code></pre><p>We select the SQLite library from the configuration menu, <code>Library Configuration</code> section.
 For starters, we select the option to generate the main source file used to run the application.</p><p>To import or export databases or CSV/SQL files, the SQLite application needs to configure a filesystem.
 The filesystem we use is 9pfs.
 Hence, in the <code>Library Configuration</code> section, we select the <code>9pfs</code> filesystem within the <code>vfscore</code> library options.</p><p>Make sure, that both options <code>Virtio PCI device support</code> and <code>Virtio 9P device</code> are selected.
-Those can be found in: <code>Platform Configuration</code> -> <code>KVM guest</code> -> <code>Virtio</code>.</p><p><img src=/docs/sessions/04-complex-applications/images/9pfs_options.png alt="9pfs options"></p><h4 id=build>Build</h4><p>We build the application by running:</p><pre><code>$ make -j 4
-</code></pre><p>We use the <code>-j 4</code> to run the compilation process on multiple cores.
-You should update <code>4</code> with the number of cores of your system.</p><h4 id=test>Test</h4><p>For testing we can use the following SQLite script, which inserts ten values into a table:</p><pre><code>CREATE TABLE tab (d1 int, d2 text);
+Those can be found in: <code>Platform Configuration</code> -> <code>KVM guest</code> -> <code>Virtio</code>.</p><p><img src=/docs/sessions/04-complex-applications/images/9pfs_options.png alt="9pfs options"></p><h4 id=build>Build</h4><p>We build the application by running:</p><pre><code>$ make
+</code></pre><h4 id=test>Test</h4><p>For testing we can use the following SQLite script, which inserts ten values into a table:</p><pre><code>CREATE TABLE tab (d1 int, d2 text);
 INSERT INTO tab VALUES (random(), cast(random() as text)),
 (random(), cast(random() as text)),
 (random(), cast(random() as text)),
@@ -936,9 +935,9 @@ INSERT INTO tab VALUES (random(), cast(random() as text)),
 (random(), cast(random() as text)),
 (random(), cast(random() as text));
 </code></pre><p>Up next, create a folder in the application folder called <code>sqlite_files</code> and write the above script into a file.
-When you run the application, you can specify the path of the newly created folder to the <code>qemu-guest</code> as following:</p><pre><code>./qemu-guest -k ./build/app-sqlite_kvm-x86_64 \
-             -e ./sqlite_files \
-             -m 500
+When you run the application, you can specify the path of the newly created folder to the <code>qemu-guest</code> as following:</p><pre><code>$ ./qemu-guest -k ./build/app-sqlite_kvm-x86_64 \
+               -e ./sqlite_files \
+               -m 500
 </code></pre><p>The SQLite start command has several parameters:</p><ul><li><code>k</code> indicates the executable resulting from the build of the entire system together with the <code>SQLite application</code></li><li><code>e</code> indicates the path to the shared directory where the Unikraft filesystem will be mounted</li><li><code>m</code> indicates the memory allocated to the application</li></ul><p>To load the SQLite script, we use the following command <code>.read &lt;sqlite_script_name.sql></code>.
 And in the end, we run <code>select * from tab</code> to see the contents of the table.</p><p>If everything runs as expected, then we&rsquo;ll see the following output:</p><pre><code>SeaBIOS (version 1.10.2-1ubuntu1)
 Booting from ROM...
@@ -969,8 +968,8 @@ For this work item, we want to change the filesystem to RamFS and load the SQLli
 Find the support files in the <code>work/02-change-filesystem-sqlite/</code> folder of the session directory.</p><p>First, we need to change the filesystem to InitRD.
 We can obtain that by using the command <code>make menuconfig</code> and from the <code>vfscore: Configuration</code> option, we select the default root filesystem as <code>InitRD</code>.</p><p><img src=/docs/sessions/04-complex-applications/images/filesystems.png alt="filesystems menu"></p><p>The InitRD filesystem can load only <a href="https://www.ibm.com/docs/en/zos/2.2.0?topic=formats-cpio-format-cpio-archives">cpio archives</a>, so to load our SQLite script into RamFS filesystem, we need to create a cpio out of it.
 This can be achieved the following way: Create a folder, move the SQLite script in it, and <code>cd </code>in it.
-After that we run the following command:</p><pre><code>$ find -depth -print | tac | bsdcpio -o --format newc &gt; ../archive.cpio
-</code></pre><p>We&rsquo;ll obtain an cpio archive called <code>archive.cpio</code> in the parent directory.</p><p>Next we run the following qemu command to run the instance:</p><pre><code>./qemu-guest -k build/app-sqlite_kvm-x86_64 -m 100 -i archive.cpio
+After that we run the following command:</p><pre><code>$ find -type f | bsdcpio -o --format newc &gt; ../archive.cpio
+</code></pre><p>We&rsquo;ll obtain an cpio archive called <code>archive.cpio</code> in the parent directory.</p><p>Next we run the following qemu command to run the instance:</p><pre><code>$ ./qemu-guest -k build/app-sqlite_kvm-x86_64 -m 100 -i archive.cpio
 </code></pre><p>If everything runs as expected, then we&rsquo;ll see the following output:</p><pre><code>SeaBIOS (version 1.10.2-1ubuntu1)
 Booting from ROM...
 Powered by
@@ -1010,15 +1009,14 @@ UK_LIBS ?= $(PWD)/../../libs
 LIBS := $(UK_LIBS)/lib-pthread-embedded:$(UK_LIBS)/lib-newlib:$(UK_LIBS)/lib-lwip:$(UK_LIBS)/lib-redis
 
 all:
-    @$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS)
+	@$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS)
 
 $(MAKECMDGOALS):
-    @$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS) $(MAKECMDGOALS)
+	@$(MAKE) -C $(UK_ROOT) A=$(PWD) L=$(LIBS) $(MAKECMDGOALS)
 </code></pre><h4 id=configure-1>Configure</h4><p>We configure the application by running:</p><pre><code>$ make menuconfig
 </code></pre><p>We select the Redis library from the configuration menu, <code>Library Configuration</code> section.
-For starters, we select the option to generate the main source file used to run the application.</p><p><img src=/docs/sessions/04-complex-applications/images/redis_menu.png alt="redis selection menu"></p><h4 id=build-1>Build</h4><p>We build the application by running:</p><pre><code>$ make -j 4
-</code></pre><p>We use the <code>-j 4</code> to run the compilation process on multiple cores.
-You should update <code>4</code> with the number of cores of your system.</p><h4 id=test-1>Test</h4><p>To connect to the Redis server, the network features should be configured.
+For starters, we select the option to generate the main source file used to run the application.</p><p><img src=/docs/sessions/04-complex-applications/images/redis_menu.png alt="redis selection menu"></p><h4 id=build-1>Build</h4><p>We build the application by running:</p><pre><code>$ make
+</code></pre><h4 id=test-1>Test</h4><p>To connect to the Redis server, the network features should be configured.
 Hence, in the configuration menu in the <code>Library Configuration</code> section, within the <code>lwip library</code> the following options should be selected:</p><ul><li><code>IPv4</code></li><li><code>UDP support</code></li><li><code>TCP support</code></li><li><code>ICMP support</code></li><li><code>DHCP support</code></li><li><code>Socket API</code></li></ul><p><img src=/docs/sessions/04-complex-applications/images/lwip_redis_menu.png alt="lwip selection menu"></p><p>The Redis application needs a configuration file to start.
 Thus, a filesystem should be selected in Unikraft.
 The filesystem we used was 9PFS.
@@ -1036,7 +1034,7 @@ dnsmasq -d \
         --listen-addr=172.44.0.1 \
         --dhcp-range=172.44.0.2,172.44.0.254,255.255.255.0,12h &amp;&gt; $WORKDIR/dnsmasq.log &amp;
 
-./qemu_guest.sh -k ./build/redis_kvm-x86_64 \
+./qemu-guest.sh -k ./build/redis_kvm-x86_64 \
                 -a &quot;/redis.conf&quot; \
                 -b kraft0 \
                 -e ./redis_files
@@ -1049,7 +1047,7 @@ PONG
 </code></pre><h3 id=04-redis-static-ip-address>04. Redis Static IP Address</h3><p>In tutorial above we have dynamically assigned an IP to the network interface used by Unikraft using the <code>dnsmasq</code> utility.
 Find the support files in the <code>work/04-obtain-the-ip-statically/</code> folder of the session directory.</p><p>Modify the launching script and run the application with a static IP.
 Beware that the assigned IP address must differ from the one assigned on the bridge.</p><p>You can use <code>redis-cli</code>, found in the suport folder to test your changes.
-If everything runs as expected you should see the following output:</p><pre><code>./redis-cli -h 172.88.0.76 -p 6379
+If everything runs as expected you should see the following output:</p><pre><code>$ ./redis-cli -h 172.88.0.76 -p 6379
 172.88.0.2:6379&gt; PING
 PONG
 172.88.0.2:6379&gt;
@@ -1070,7 +1068,7 @@ Start the Redis on the top of Unikraft as we have already done at above and in a
                     names are the same as the ones produced as output.
 </code></pre><p>If everything runs as expected, you&rsquo;ll see the following output:</p><pre><code>&quot;SET&quot;,&quot;147058.81&quot;
 &quot;GET&quot;,&quot;153846.16&quot;
-</code></pre><p>The printed values represent <code>requests/second</code> for the operation <code>set</code> and <code>get</code>.</p><p>Further, we will run the executable <code>redis-server</code> (<code>./redis-server</code>), which can be found in the support folder, and the following command (only the IP address of the redis server was changed):</p><pre><code>$./redis-benchmark --csv -q -r 100 -n 10000 -c 1 -h 127.0.0.1 -p 6379 -P 8 -t set,get
+</code></pre><p>The printed values represent <code>requests/second</code> for the operation <code>set</code> and <code>get</code>.</p><p>Further, we will run the executable <code>redis-server</code> (<code>./redis-server</code>), which can be found in the support folder, and the following command (only the IP address of the redis server was changed):</p><pre><code>$ ./redis-benchmark --csv -q -r 100 -n 10000 -c 1 -h 127.0.0.1 -p 6379 -P 8 -t set,get
 </code></pre><p>After that you&rsquo;ll get something like this:</p><pre><code>&quot;SET&quot;,&quot;285714.28&quot;
 &quot;GET&quot;,&quot;294117.62&quot;
 </code></pre><h3 id=06-nginx>06. Nginx</h3><p>The aim of this work item is to set up and run Nginx.
@@ -1101,8 +1099,8 @@ It&rsquo;s your choice how you assign the IP to the VM.</p><p>In the support fol
 The <code>html/</code> folder stores the files of the website you want to be run.</p><p>If everything works as expected, you should see the following web page in the browser.</p><p><img src=/docs/sessions/04-complex-applications/images/nginx_output.png alt="nginx output"></p><h3 id=07-nginx-benchmarking-tutorial>07. Nginx Benchmarking (Tutorial)</h3><p>Benchmarking Nginx running on the top of Unikraft can be achieved with a utility called <code>iperf</code>.
 The package can be easily installed using the command:</p><pre><code>sudo apt-get install -y iperf
 </code></pre><p>Next, we will start the nginx app as we have done at the previous work item and then we will open another two terminals.
-We&rsquo;ll start an <code>iperf</code> server in the first terminal with the command:</p><pre><code>iperf -s
-</code></pre><p>In the second terminal we&rsquo;ll start an <code>iperf</code> client with the command:</p><pre><code>iperf -c 172.44.0.76 -p 80
+We&rsquo;ll start an <code>iperf</code> server in the first terminal with the command:</p><pre><code>$ iperf -s
+</code></pre><p>In the second terminal we&rsquo;ll start an <code>iperf</code> client with the command:</p><pre><code>$ iperf -c 172.44.0.76 -p 80
 </code></pre><p>If everything runs as expected, then we will see the following output:</p><pre><code>------------------------------------------------------------
 Client connecting to 172.44.0.76, TCP port 80
 TCP window size: 85.0 KByte (default)
