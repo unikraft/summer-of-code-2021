@@ -5,6 +5,70 @@ linkTitle: "04. Complex Applications"
 
 In this session, we are going to run some real-world applications on top of Unikraft. 
 
+## Required Tools and Resources
+
+For this session, the following tools are needed: `qemu-kvm`, `qemu-system-x86_64`, `qemu-system-aarch64`, `gcc-aarch64-linux-gnu`.
+To install on Debian/Ubuntu use the following command:
+
+```
+$ sudo apt-get -y install qemu-kvm qemu-system-x86 qemu-system-arm gcc-aarch64-linux-gnu
+```
+
+### Support Files
+
+Session support files are available [in the repository](https://github.com/unikraft/summer-of-code-2021).
+If you already cloned the repository, update it and enter the session directory:
+
+```
+$ cd path/to/repository/clone
+
+$ git pull --rebase
+
+$ cd content/en/docs/sessions/02-behind-scenes/
+
+$ ls
+demo/  images/  index.md  sol/
+```
+
+If you haven’t cloned the repository yet, clone it and enter the session directory:
+
+```
+$ git clone https://github.com/unikraft/summer-of-code-2021
+
+$ cd summer-of-code-2021/content/en/docs/sessions/02-behind-scenes/
+
+$ ls
+demo/  images/  index.md  sol/
+```
+
+## Work Items
+
+### Support Files
+
+Session support files are available [in the repository](https://github.com/unikraft/summer-of-code-2021). 
+If you already cloned the repository, update it and enter the session directory:
+
+```
+$ cd path/to/repository/clone
+
+$ git pull --rebase
+
+$ cd content/en/docs/sessions/02-behind-scenes/
+
+$ ls
+demo/  images/  index.md  sol/
+```
+
+If you haven’t cloned the repository yet, clone it and enter the session directory:
+```
+$ git clone https://github.com/unikraft/summer-of-code-2021
+
+$ cd summer-of-code-2021/content/en/docs/sessions/02-behind-scenes/
+
+$ ls
+demo/  images/  index.md  sol/
+```
+
 ## 00. Qemu wrapper - [qemu_guest.sh](https://github.com/unikraft/kraft/blob/staging/scripts/qemu-guest)
 
 `qemu-guest.sh` is a wrapper over the qemu executable, to make the use of qemu binary less painful.
