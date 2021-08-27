@@ -310,3 +310,14 @@ Whenever you launch your unikernel, you should be able to see the UDP packet:
 ```
     3 1.050213439 192.168.128.1 → 192.168.128.254 UDP 60 5001 → 5001 Len=18
 ```
+
+### 04. Don't stop
+
+Now let us send as much as we can with the current implementation. You can
+simply loop forever over packet generation and sending.
+You may notice that we get too many messages on the console that slow us
+down. Try disabling debug messages and all kernel messages except the critical
+ones.
+
+***NOTE**: You should be able to terminate your unikernel with `CTRL`+`C` when
+you launched it with `kraft` or `qemu-guest`.*
