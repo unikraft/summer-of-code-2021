@@ -1,6 +1,29 @@
-
 public/
 resources/
 node_modules/
 tech-doc-hugo
 
+# Ignore temporary files.
+*~
+
+# Ignore object files.
+*.o
+
+# Ignore library files.
+*.a
+*.so
+
+# Ignore archive files.
+*gz
+*bz2
+*.zip
+*.tar
+*xz
+*.rar
+
+# Ignore swap files.
+*swo
+*swp
+
+# Ignore GDB files.
+.gdb_history
