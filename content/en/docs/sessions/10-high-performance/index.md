@@ -120,3 +120,26 @@ $ ls
 index.md  sol/
 ```
 
+### 01. Getting Started
+
+For this session we created a template that contains some basic building blocks
+(like crafting a IPv4/UDP packet) that we are going to use. Make a copy of it:
+
+```sh
+$ cp -a sol/pktgen path/to/your/copy
+```
+
+Go into your copy and initialize `kraft`:
+```sh
+$ cd path/to/your/copy
+$ kraft list update
+$ kraft list pull
+$ kraft configure
+$ kraft build
+```
+
+See if the image runs and prints the Unikraft banner:
+```sh
+$ kraft run
+```
+
