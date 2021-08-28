@@ -8,6 +8,8 @@ Unikraft Summer of Code 2021 (USoC'21) consists of 10 sessions in 10 days and a 
 Each session is 4 hours long and consists of practical demos and then exercises for participants.
 The hackathon is an 8 hours event where you'll have different tasks to enable, test, fix, evaluate and improve applications and libraries with Unikraft.
 
+All sessions are recorded and are available on [YouTube](https://www.youtube.com/playlist?list=PL0ZXUYDfkQ61pQ0Vkt4H5mjDoP267kSjA).
+
 The complete schedule for USoC'21 is (all times in CEST - Central European Summer Time):
 
 | Date | Interval | Activity | TA(s) |
