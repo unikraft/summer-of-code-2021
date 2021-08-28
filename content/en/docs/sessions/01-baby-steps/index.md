@@ -3,6 +3,8 @@ title: "Session 01: Baby Steps"
 linkTitle: "01. Baby Steps"
 ---
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/uLJeajTITGk" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 In this session we are going to understand the basic layout of the Unikraft working directory, its environment variables, as well as what the most common Unikraft specific files mean.
 We are also going to take a look at how we can build basic applications and how we can extend their functionality and support by adding ported external libraries.
 
