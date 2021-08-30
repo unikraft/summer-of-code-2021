@@ -3,6 +3,8 @@ title: "Session 03: Benchmarking and Debugging"
 linkTitle: "03. Benchmarking and Debugging"
 ---
 
+<iframe width="560" height="315" src="https://www.youtube.com/embed/4VeA7_uJrXA" title="YouTube video player" frameborder="0" allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture" allowfullscreen></iframe>
+
 Because unikernels aim to be a more efficient method of virtualization, this can sometimes cause problems.
 This session aims to familiarize you to solve any problem encountered during the development using **GDB** and **Tracepoints**.
 
