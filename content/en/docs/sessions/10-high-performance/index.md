@@ -5,131 +5,149 @@ linkTitle: "10. High Performance"
 
 ## Required Tools and Resources
 
-For this session, you need `kraft` and the following extra tools:
- `qemu-kvm`, `qemu-system-x86_64`, `bridge-utils`, `ifupdown`, `tshark`, `tcpdump`.
+For this session, you need Unikraft companion command-line tool
+[`kraft`](https://github.com/unikraft/kraft) and the following extra tools:
+ 
+ * `qemu-kvm`;
+ * `qemu-system-x86_64`;
+ * `bridge-utils`;
+ * `ifupdown`;
+ * `tshark`; and,
+ * `tcpdump`.
+
 To install on Debian/Ubuntu use the following command:
 
 ```
-$ sudo apt-get -y install qemu-kvm qemu-system-x86 sgabios socat bridge-utils ifupdown tshark tcpdump
+$ sudo apt-get -y install qemu-kvm qemu-system-x86 sgabios \
+    socat bridge-utils ifupdown tshark tcpdump
 ```
 
 ## Overview
 
-Welcome to the last session of our Hackathon. Here, we will introduce you on how
-to develop highly specialized and performance-optimized unikernels with
+Welcome to the last session of the Unikraft Summer of Code!  In this session, we
+will introduce to you how to develop highly specialized and
+performance-optimized unikernels with Unikraft.  So far, we have focused on
+applications and POSIX compatibility; where it is important to provide the same
+set of APIs and system calls that your application uses on its original
+environment (i.e., as a Linux uerspace application).  We achieve this by
+stacking multiple micro-libraries which then assemble together to form a
+combination of various necessary "higher-level" APIs .
+
+In the context of network-based applications, we would typically develop network
+functionality based on [`sockets`](https://linux.die.net/man/7/socket).  This
+requires the following library stack being available within Unikraft for the
+`socket` (and friends) API to interface with the virtual Network Interface Card
+(vNIC):
+
+```
+ .-------------------------.
+(     Socket application    )
+ '-------------------------'
+              |
+              V
++---------------------------+
+|         libvfscore        |
++---------------------------+
++---------------------------+
+|          liblwip          |
++---------------------------+
++---------------------------+
+|        libuknetdev        |
++---------------------------+
++---------------------------+
+|        libkvmplat         |
++---------------------------+
+              |
+              V
+ .-------------------------.
+( Virtual Network Interface )
+ '-------------------------'
+```
+
+Especially the Virtual File System (VFS) layer (provided by
+[`libvfscore`](https://github.com/unikraft/unikraft/tree/staging/lib/vfscore))
+and the TCP/IP network stack (provided by
+[`liblwip`](github.com/unikraft/lib-lwip/)) are complex subsystems which are
+potentially introduce additional overheard.
+
+For high-performance Network Functions (NFs), it is often more effcient to
+bypass any OS component and interact with the driver or hardware as directly;
+cutting out any indirection.  A known framework in the NFV arena is [Intel
+DPDK](https://www.dpdk.org/) which operates network card drivers in
+Linux-userspace in order to avoid interactions with the kernel which comes with
+performance penalities resulting from additional permission checks. Despite this
+advantage in performance, you still need to maintain and operate a complete
+Linux environment in production deployments.  In the case with Unikraft, we can
+configure the libraries to be minimal and can, similar to Intel DPDK, directly
+develop our NF on top of network drivers.
+
+In this scenario, our library stack does look like the following:
+
+```
+ .-------------------------.
+(    High performance NF    )
+ '-------------------------'
+              |
+              V
++---------------------------+
+|        libuknetdev        |
++---------------------------+
++---------------------------+
+|        libkvmplat         |
++---------------------------+
+              |
+              V
+ .-------------------------.
+( Virtual Network Interface )
+ '-------------------------'
+```
+
+In the following tutorial, you will develop a simple, high performance network
+packet generator.  This tutorial will guide you through various options and
+possibilities which can help you during the development of more complex NFs with
 Unikraft.
-So far, we focused on application and POSIX compatibility, where it is important
-to provide the same set of APIs and system calls that your application uses on
-its original  environment (e.g., Linux). We achieve this by stacking multiple
-micro-libraries that assemble these "higher-level" APIs. Imagine we speak about
-network, we would typically develop network functionality based on Sockets. This
-requires the following library stack being available in Unikraft for going from
-Sockets down to the virtual network card:
 
-```
- ---------------------------
-( Socket application        )
- ---------------------------
-              |
-              V
-+---------------------------+
-| libvfscore                |
-|                           |
-|                           |
-+---------------------------+
-+---------------------------+
-| lwip                      |
-|                           |
-|                           |
-+---------------------------+
-+---------------------------+
-| libuknetdev               |
-+---------------------------+
-+---------------------------+
-| libkvmplat                |
-+---------------------------+
-              |
-              V
- ---------------------------
-( Virtual network interface )
- ---------------------------
-```
-
-Especially the VFS layer (`libvfscore`) and the TCP/IP network stack (`liblwip`)
-are complex subsystems that are potentially .
-
-For high-performance network functions (NF) you often want to by-pass any OS
-component and want to interact with the driver or hardware as direct as possible.
-A known framework in the NFV area is [Intel DPDK](https://www.dpdk.org/) that
-does operate network card drivers in Linux-userspace in order to avoid as much
-as kernel interactions as possible. Nevertheless, you still have to maintain and
-operate a complete Linux environment in production deployments.
-In our case with Unikraft, we can configure the libraries to be minimal and can,
-similar to Intel DPDK, directly develop our network function on top of network
-drivers. In this scenario, our library stack does look like the following:
-
-```
- ---------------------------
-( High-perf NF              )
- ---------------------------
-              |
-              V
-+---------------------------+
-| libuknetdev               |
-+---------------------------+
-+---------------------------+
-| libkvmplat                |
-+---------------------------+
-              |
-              V
- ---------------------------
-( Virtual network interface )
- ---------------------------
-```
-
-In the following you will develop a simple, high performance network packet
-generator. We will guide you through various options and possibilities that can
-help you developing more complex NFs with Unikraft.
-
-## Work Items
+## Exercises
 
 ### Support Files
 
-Session support files are available [in the repository](https://github.com/unikraft/summer-of-code-2021).
-If you already cloned the repository, update it and enter the session directory:
+Session support files are available [in the USoC'21
+repository](https://github.com/unikraft/summer-of-code-2021).  If you already
+cloned the repository, update it and enter the session directory:
 
-```
+```bash
 $ cd path/to/repository/clone
-
 $ git pull --rebase
-
 $ cd content/en/docs/sessions/10-high-performance/
-
 $ ls
+```
+```
 index.md  sol/
 ```
 
-If you haven't cloned the repository yet, clone it and enter the session directory:
+If you haven't cloned the repository yet, clone it and enter the session
+directory:
 
-```
+```bash
 $ git clone https://github.com/unikraft/summer-of-code-2021
-
 $ cd summer-of-code-2021/content/en/docs/sessions/10-high-performance/
-
 $ ls
+```
+```
 index.md  sol/
 ```
 
 ### 01. Getting Started
 
-For this session we created a template that contains some basic building blocks
-(like crafting a IPv4/UDP packet) that we are going to use. Make a copy of it:
+For this session, a template has been provided which contains some basic
+building blocks (like crafting a IPv4/UDP packet) for our high performance NF.
+Start by making a copy of it:
 
 ```sh
 $ cp -a sol/pktgen path/to/your/copy
 ```
 
-Go into your copy and initialize `kraft`:
+Go into your copy and initialize it with `kraft`:
 ```sh
 $ cd path/to/your/copy
 $ kraft list update
@@ -138,23 +156,25 @@ $ kraft configure
 $ kraft build
 ```
 
-See if the image runs and prints the Unikraft banner:
+Check if the image runs and prints the Unikraft banner:
 ```sh
 $ kraft run
 ```
 
 ### 02. Bring up a network interface
 
-We can directly interact with network device drivers that are typically provided
-by each platform with the uknetdev API. First, make sure that we state a
-dependency of our application to `libuknetdev`. Therefore, open `Config.uk` and
-place the following dependency accordingly in the file (if not already there):
+We can directly interact with network device drivers which are typically
+provided by each platform using Unikraft's internal
+[`uknetdev`](https://github.com/unikraft/unikraft/tree/staging/lib/uknetdev)
+API. First, make sure that we state a dependency of our application to
+`libuknetdev`.  To do this, open `Config.uk` and place the following dependency
+accordingly in the file (if not already there):
 ```
   depends on LIBUKNETDEV
 ```
 
 This dependency gives us access to the `<uk/netdev.h>` and `<uk/netbuf.h>`
-headers that are available within the `libuknetdev` library:
+headers which are available within the `libuknetdev` library:
 ```sh
 $ ls [PATH-TO-UNIKRAFT]/lib/uknetdev/include/uk/
 ```
@@ -162,30 +182,36 @@ $ ls [PATH-TO-UNIKRAFT]/lib/uknetdev/include/uk/
 As described in `<uk/netdev.h>`, bringing up a network interface means
 transition it through configuration states before we can use the interface for
 sending packets:
+
 1. Check that the platform detected network interfaces. `uk_netdev_count()`
    should tell us how many interfaces are available. Please note that you should
    also check that the network driver is enabled in the platform configuration.
    For this session we are interested in `virtio-net` wihtin `KVM guest`.
+
 2. Retrieve `struct uk_netdev *` for further API interaction from a netdev
    number (they are just incrementally going upwards): We take the first
    interface, so our device number should be `0`.
-3. Configure the device in general which basically means how many receive and
+
+3. Configure the device, which essentially indicate how many receive and
    transmit queues the device should provide. In SMP scenarios, you typically
-   configure as many queues as CPU-cores or handler threads you have available.
-   Please note that not every driver or network card support this multiple
-   queues. There is a query interface where you can check for queues are
-   supported by your device. For simplicity, we are going to configure just one
-   queue for each direction: This is supported by all drivers.
-   Although we are going to send packets only, we still have to also configure
-   one receive queue (zero transmit or receive queues is not possible with our
-   virtio driver):
-```c
-/* Device configuration */
-struct uk_netdev_conf ifconf = {
-	.nb_rx_queues = 1,
-	.nb_tx_queues = 1
-};
-```
+   configure as many queues as CPU-cores or handler threads you have been
+   allocated.
+
+   **Note:**  Not every driver or network card can support multiple queues.
+   
+   There is a query interface where you can check for queues are supported by
+   your device. For simplicity, we are going to configure just one queue for
+   each direction: This is supported by all drivers. Although we are going to
+   send packets only, we still have to also configure one receive queue (zero
+   transmit or receive queues is not possible with our virtio driver):
+   ```c
+   /* Device configuration */
+   struct uk_netdev_conf ifconf = {
+	   .nb_rx_queues = 1,
+	   .nb_tx_queues = 1
+   };
+   ```
+
 4. Configure the transmit queue `0` and the receive queue `0`. This step allows
    us to specify the size for each queue and which allocators should be used for
    internal queue descriptors and receive buffers.
@@ -193,36 +219,37 @@ struct uk_netdev_conf ifconf = {
    allocation function for the receive buffers, because we are not interested in
    receiving for now. We will also let the driver to choose an optimal queue
    size for us. You can hand-over `0`.
-```c
-/* Dummy receive buffer allocation function that is called by the driver */
-static uint16_t dummy_alloc_rxpkts(void *argp __unused,
-				struct uk_netbuf *pkts[] __unused,
-				uint16_t count __unused)
-{
-	return 0;
-}
 
-/* Receive queue configuration */
-struct uk_netdev_rxqueue_conf rxqconf = {
-   	.a = uk_alloc_get_default(),
-   	.alloc_rxpkts = dummy_alloc_rxpkts
-};
+   ```c
+   /* Dummy receive buffer allocation function that is called by the driver */
+   static uint16_t dummy_alloc_rxpkts(void *argp __unused,
+   				struct uk_netbuf *pkts[] __unused,
+   				uint16_t count __unused)
+   {
+   	return 0;
+   }
 
-/* Transmit queue configuration */
-struct uk_netdev_txqueue_conf txqconf = {
-   	.a = uk_alloc_get_default()
-};
-```
-5. Start the network interface. If successful, the device is now ready to
-   process network traffic. You would now have the ability to also enable
-   interrupt mode for each queue individually and change the promiscuous
-   setting for the interface.
-   Because we will operate in polling mode to achieve the highest
-   possible performance, we should not change any interrupt settings. We also do
-   not need promiscuous mode because we will put the device's hardware address
-   as sender address into our generated traffic.
-   It is probably a good moment to print on the console this mac address and
-   store it for later. We will need it to craft our first network packet.
+   /* Receive queue configuration */
+   struct uk_netdev_rxqueue_conf rxqconf = {
+      	.a = uk_alloc_get_default(),
+      	.alloc_rxpkts = dummy_alloc_rxpkts
+   };
+
+   /* Transmit queue configuration */
+   struct uk_netdev_txqueue_conf txqconf = {
+      	.a = uk_alloc_get_default()
+   };
+   ```
+
+5. Start the network interface.  If successful, the device is now ready to
+   process network traffic. You will now have the ability to also enable
+   interrupt mode for each queue individually and change the promiscuous setting
+   for the interface.  Because we will operate in _polling mode_ to achieve the
+   highest possible performance, we should not change any interrupt settings. We
+   also do not need promiscuous mode because we will put the device's hardware
+   address as sender address into our generated traffic. It is probably a good
+   moment to print on the console this mac address and store it for later. We
+   will need it to craft our first network packet.
 
 For easier development of this state transition, we recommend to enable all
 kernel message types and optionally debug message (go to `Library Configuration`
@@ -230,9 +257,13 @@ kernel message types and optionally debug message (go to `Library Configuration`
 can quicker see if something got mis-configured.
 
 In order to test your code you should run the guest with one interface
-attached. For this purpose we need to create a network bridge on your Linux host
+attached.  For this purpose we need to create a network bridge on your Linux host
 first (we just need to do this once):
+
 ```sh
+# Ensure you have permissions to change stp
+sudo sysctl -w net.bridge.bridge-nf-call-arptables=0
+
 # Create bridge 'usocbr0'
 brctl addbr usocbr0
 brctl setfd usocbr0 0
@@ -247,45 +278,61 @@ echo 0 > /proc/sys/net/bridge/bridge-nf-call-ip6tables
 ```
 
 As soon as your unikernel image builds, the guest can then be started with:
+
 ```sh
 $ kraft run -b usocbr0
 ```
 
 ### 03. Say hello on the wire
 
-In this chapter we are going to send out our first packet. We provide you a
-function through the header `"genpkt.h"` that generates an Ethernet-IPv4-UDP
-frame with a dummy payload for a given size: `genpkt_udp4()`. In the same header
-we also provide you the short-hand version `genpkt_usoc21()` which has some
-parameters, like the IP addresses, pre-filled.
+In this chapter we are going to send out our first packet.  We provide you a
+function through the header
+[`"genpkt.h"`](https://github.com/unikraft/summer-of-code-2021/blob/main/content/en/docs/sessions/10-high-performance/sol/pktgen/genpkt.h)
+which generates an Ethernet-IPv4-UDP frame with a dummy payload for a given
+size: `genpkt_udp4()`. In the same header we also provide you the short-hand
+version `genpkt_usoc21()` which has some parameters, like the IP addresses,
+pre-filled.
+
 The only items that the function still wants to know from you are the following:
+
 - `a`: Allocator where the packet should be allocated from. Use
-  `uk_alloc_get_default()` for now.
+  [`uk_alloc_get_default()`](https://github.com/unikraft/unikraft/blob/64870e20031aad230973b205ba80ff70a454c924/lib/ukalloc/include/uk/alloc.h#L135-L138)
+  for now.
+
 - `bufalign`: An alignment requirement for the packet buffer containing the
   packet. Some network drivers require specific alignments. You find this value
-  after querying the device with `uk_netdev_info_get()` on
-  `struct uk_netdev_info` as `ioalign`.
+  after querying the device with
+  [`uk_netdev_info_get()`](https://github.com/unikraft/unikraft/blob/104fed122c41cbdedb03b701c19c38d4974cca34/lib/uknetdev/netdev.c#L217-L236)
+  on [`struct
+  uk_netdev_info`](https://github.com/unikraft/unikraft/blob/104fed122c41cbdedb03b701c19c38d4974cca34/lib/uknetdev/include/uk/netdev_core.h#L141-L150)
+  as `ioalign`.
+
 - `headroom`: Reserved bytes at the beginning of the packet buffer and before
   the packet data starts. Some drivers require this in order to do another
   encapsulation on transmit (like virtio). You find this value on the
   `struct uk_netdev_info` as `nb_encap_tx`.
+
 - `pktlen`: The size of the Ethernet frame (excluding CRC, FCS, SFD, and
-  preamble) that should be generated. According to the Ethernet specification
-  the smallest packet size can be created with `60` and the biggest with `1518`.
-  Most interesting are minimum sized packets because those stress software and
-  hardware components the most: For each packet the header needs to be parsed
-  and the packet needs to get forwarded to the next processing layer of the
-  stack. As smaller the packets are, the more load with parsing and handling
-  packet buffers occurs. So, please take `60` ;-) .
+  preamble) that should be generated. According to the [Ethernet
+  specification](https://www.ietf.org/rfc/rfc1042.txt) the smallest packet size
+  can be created with `60` and the biggest with `1518`.  The most interesting
+  are minimum sized packets because those stress software and hardware
+  components the most.  For each packet, the header needs to be parsed and the
+  packet needs to get forwarded to the next processing layer of the stack. As
+  smaller the packets are, the more load with parsing and handling packet
+  buffers occurs. So, please take `60` ;-)
+
 - `mac_src`: The hardware address of our interface where we are going to send
   the packet out.
 
 The function returns you a `netbuf` that can be send out with
-`uk_netdev_tx_one()`. Please check the resulting status code for success and
-free the packet with `uk_netbuf_free()` in case of failures. The driver will do
-the free operation itself only if a packet got correctly enqueued to the device
-and sent. In such a case, you aren't allowed to touch this packet anymore after
-sending; so your transmit code should look like this:
+[`uk_netdev_tx_one()`](https://github.com/unikraft/unikraft/blob/4e54f09a3930f0482a90903a5750c036346c7c06/lib/uknetdev/include/uk/netdev.h#L471-L508).
+Please check the resulting status code for success and free the packet with
+[`uk_netbuf_free()`](https://github.com/unikraft/unikraft/blob/4e54f09a3930f0482a90903a5750c036346c7c06/lib/uknetdev/netbuf.c#L220-L254)
+in case of failures. The driver will do the free operation itself only if a
+packet got correctly enqueued to the device and sent. In such a case, you aren't
+allowed to touch this packet anymore after sending; so your transmit code should
+look like this:
 ```c
 	/* <...> */
 
@@ -302,11 +349,13 @@ sending; so your transmit code should look like this:
 
 In order to see if everything works, attach `tshark` or `tcpdump` on your Linux
 host to `usocbr0` on a second terminal:
+
 ```sh
 $ tshark -i usocbr0
 ```
 
 Whenever you launch your unikernel, you should be able to see the UDP packet:
+
 ```
     3 1.050213439 192.168.128.1 → 192.168.128.254 UDP 60 5001 → 5001 Len=18
 ```
@@ -319,26 +368,29 @@ You may notice that we get too many messages on the console that slow us
 down. Try disabling debug messages and all kernel messages except the critical
 ones.
 
-***NOTE**: You should be able to terminate your unikernel with `CTRL`+`C` when
+***Note**: You should be able to terminate your unikernel with `CTRL`+`C` when
 you launched it with `kraft` or `qemu-guest`.*
 
 ### 05. How fast are we?
 
-It would be now interesting to understand at which speed we are generating. For
-this purpose we prepared a little function in `"netspeed.h"` that computes the
-packet rate (packets/sec) and current bandwidth (MBit/s): `print_netspeed()`.
+It is now interesting to understand at which speed we are generating.  For this
+purpose we prepared a little function in
+[`"netspeed.h"`](https://github.com/unikraft/summer-of-code-2021/blob/main/content/en/docs/sessions/10-high-performance/sol/pktgen/netspeed.h)
+that computes the packet rate (packets/sec) and current bandwidth (MBit/s):
+[`print_netspeed()`](https://github.com/unikraft/summer-of-code-2021/blob/main/content/en/docs/sessions/10-high-performance/sol/pktgen/netspeed.h#L93-L112).
 
 Declare before your loop the following two variables:
+
 ```c
 uint64_t total_nb_pkts = 0; /* total number of pkts successfully sent */
 uint64_t total_nb_bytes = 0; /* total number of bytes successfully sent */
 ```
 
-Whenever a packet got successfully sent, we will simply increment `total_nb_pkts`
-and add the sent bytes `total_nb_bytes`. In order to see a bandwidth computation
-that is comparable with physical Ethernet speeds, we have to additionally add
-the number of bytes (=`24`) for CRC, FCS, SFD, and preamble to each accounted
-packet size:
+Whenever a packet was successfully sent, we will simply increment
+`total_nb_pkts` and add the sent bytes `total_nb_bytes` counters.  In order to
+see a bandwidth computation that is comparable with physical Ethernet speeds, we
+have to additionally add the number of bytes (=`24`) for CRC, FCS, SFD, and
+preamble to each accounted packet size:
 ```c
 	status = uk_netdev_tx_one(netif, 0, pkt);
 	if (uk_netdev_status_successful(status)) {
@@ -351,35 +403,39 @@ packet size:
 	}
 ```
 
-By having this instrumentation, we could now just print the the packet rate and
+By having this instrumentation, we could now just print the packet rate and
 bandwidth at every loop iteration with:
+
 ```c
-	print_rate(total_nb_pkts, total_nb_bytes);
+	print_netspeed(total_nb_pkts, total_nb_bytes);
 ```
-The problem is that the printing is extremely expensive. It currently happens
-only synchronously on Unikraft so that the CPU can't do anything else while
-waiting for the console to finish its operation. Additionally, for the
-computation the clock is accessed to measure a time delta, which is also an
-expensive operation. In general, this means that we do not want this function to
-be called very often. The cheapest option is to call this print function every
-`n`th sent packet. We could do a cheap modulo operation by using a bitmask,
-like:
+
+The problem is that printing is extremely expensive.  This is because it happens
+synchronously in Unikraft, so the CPU can not do anything else while waiting for
+the console to finish its operation.  Additionally, for computation, the clock
+is accessed to measure a time delta, which is also an expensive operation.  In
+general, this means that we do not want this function to be called very often.
+The cheapest option is to call this print function every `n`th sent packet. We
+could do a cheap modulo operation by using a bitmask, for example:
+
 ```c
 		if ((total_nb_pkts & 0x3fffff) == 0x0) {
-			print_rate(total_nb_pkts, total_nb_bytes);
+			print_netspeed(total_nb_pkts, total_nb_bytes);
 		}
 ```
 
 You are able to adopt the mask `0x3fffff` in order to make printing more often
 or less often.
+
 - Faster: `0x1fffff`, `0x0fffff`, `0x07ffff`, `0x03ffff`, `0x01ffff`, ...
 - Slower: `0x7fffff`, `0xffffff`, `0x1ffffff`, `0x3ffffff`, `0x7ffffff`, ...
 
 Another option is to use another counter variable that is reset as soon as we
 print:
+
 ```c
 		if (count == 1000) {
-			print_rate(total_nb_pkts, total_nb_bytes);
+			print_netspeed(total_nb_pkts, total_nb_bytes);
 			count = 0;
 		}
 ```
@@ -395,58 +451,56 @@ your chosen value and adopt this `n`th packet parameter again.
 
 Now, we have can go through some options to play around with. Our overall goal
 is to get the packet rate of our packer generator as high as possible. Note your
-rate and bandwidth before and after each of the steps. Because we are going over
+rate and bandwidth before and after each of the steps because we are going over
 this list twice, make sure that you do the steps non-destructive and keep the
 code of each step.
 
 1. **Try compiler options**: Enable *Link Time Optimizations* (LTO) and *Dead
-   Code Elimitation* (DCE) within `Build Options`. The compiler reconsiders a
-   second time optimizations like function inlining while linking the final
-   binary; actually over the whole code base at once again.
-   These optimizations can have some visible effect on your packet rate.
-   Try it out!
+   Code Elimitation* (DCE) within `Build Options` of the `menuconfig`. The
+   compiler reconsiders a second time optimizations like function inlining while
+   linking the final binary; actually over the whole code base at once again.
+   These optimizations can have some visible effect on your packet rate. Try it
+   out!
 
-2. **Don't waste packets**: An obvious idea might be to keep packets that failed
-   on sending. We could save on packet generation time if we wouldn't free them.
-   We retry sending a packet until it got finally out. Our assumption is that
-   our reason why we fail is that the transmit queue is full.
-   This approach can have positive but also likely negative effects. The reason
-   might be that some drivers may query their device more often to confirm that
-   there is really no space left. This causes the device being busy answering
-   instead of doing some actual work.
-   Try it out!
+2. **Don't waste packets**: An obvious idea might be to keep packets which have
+   failed to send.  We could save on packet generation time if we wouldn't free
+   them. We retry sending a packet until it finally leaves.  Our assumption is
+   that the reason why it fails is that the transmit queue is full.  This
+   approach can have positive but also likely negative effects. The reason might
+   be that some drivers may query their device more often to confirm that there
+   is really no space left. This causes the device to be busy answering instead
+   of doing some actual work. Try it out!
 
 3. **Copy instead of create**: Depending on how expensive the packet generation
    function is (e.g., because of an extra step computing a checksum), it could
    be cheaper to do a `memcpy` operation from a primordial packet buffer
-   instead. This means that we would run `genpkt_udp4()` just once and used as
-   source for all cloned packets that are going to get transmitted.
-   We provide you such an extra routine with `"netbuf.h"`:
-   `uk_netbuf_dup_single()` duplicates a given netbuf packet with `memcpy`. Like
-   `genpkt_udp4()`, it also needs the same extra information like `bufalign`,
-   `headroom` for doing the allocation of the duplicate.
-   Try it out!
+   instead. This means that we would run `genpkt_udp4()` just once and use as
+   source for all cloned packets that are going to get transmitted. We provide
+   you such an extra routine with `"netbuf.h"`:
+   [`uk_netbuf_dup_single()`](https://github.com/unikraft/summer-of-code-2021/blob/main/content/en/docs/sessions/10-high-performance/sol/pktgen/netbuf.h#L45-L79)
+   duplicates a given `netbuf` packet with `memcpy`.  Like `genpkt_udp4()`, it
+   also needs the same extra information like `bufalign`, `headroom` for doing
+   the allocation of the duplicate. Try it out!
 
 4. **Use a memory pool allocator**: This is usually a very promising
    optimization. Instead of using a general purpose allocator you can ensure
    that all `malloc` and `free` operations are satisfied within O(1). If we deal
    with rates at maximum speed you want to have every job done as fast as
    possible. A pool is basically a list of pre-allocated objects that have
-   all the the same size and an alignment property if given. On `malloc` an
-   object is returned out of this list, on `free` the object gets back to the
+   all the the same size and an alignment property (if given). On `malloc`, an
+   object is returned out of this list; on `free`, the object gets back to the
    free list. For trying it out, continue with 06.1. and come back to point 5 of
    this list afterwards.
 
 5. **Zero-copy with refcounting**: Instead of all the optimization ahead, we
-   could also simply increase the netbuf refcount before sending. This avoids
-   that the packet gets free'd after sending and we would not need to
-   allocate, copy, or generate a packet over and over again. Every free
-   operation will decrease the refcount until the refcount becomes zero. At this
-   point the netbuf is really free'd.
-   Unfortunately, we do not support this mode with network drivers that modify
-   the packet for the transmission, like virtio-net does. Unfortunately, it is
-   not an option for virtio-net at the moment. The transmit function will return
-   an error.
+   could also simply increase the `netbuf` reference counter before sending.
+   This avoids that the packet being `free`'d after sending and we would not
+   need to allocate, copy, or generate a packet over and over again. Every
+   `free` operation will decrease the refcount until the reference counter
+   becomes zero. At this point the netbuf is really `free`'d. Unfortunately, we
+   do not support this mode with network drivers which modify the packet for the
+   transmission, like virtio-net does. Unfortunately, it is not an option for
+   virtio-net at the moment. The transmit function will return an error.
 
 Besides these options, another common technique is using **batching**. Instead
 of sending one packet at a time, you send multiple ones at once. The advantage
