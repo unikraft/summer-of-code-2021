@@ -11,8 +11,8 @@ Before diving into how we can do testing on Unikraft, let's first focus on sever
 
 There are three types of testing: unit testing, integration testing and end-to-end testing.
 To better understand the difference between them, we will look over an example of a webshop.
-If we're testing the whole workflow (creating an account, logging in, adding products to a cart, placing an order) we will call this **end to end testing**.
-Our shop also has an analytics feature that allows us to see a couple of data points such as: how many times an article was clicked on, how much time did user look at it and so on.
+If we're testing the whole workflow (creating an account, logging in, adding products to a cart, placing an order) we will call this **end-to-end testing**.
+Our shop also has an analytics feature that allows us to see a couple of data points such as: how many times an article was clicked on, how much time did a user look at it and so on.
 To make sure the inventory module and the analytics module are working correctly (a counter in the analytics module increases when we click on a product), we will be writing **integration tests**.
 Our shop also has at least an image for every product which should maximize when we're clicking on it. To test this, we would write a **unit test**.
 
@@ -23,7 +23,7 @@ This is used to measure the percentage of code that is executed during a test su
 
 There are three common types of coverage:
 * **Statement coverage**: the percentage of code statements that are run during the testing
-* **Branch coverage**: the percentage of branches executed during the testing(e.g. if or while)
+* **Branch coverage**: the percentage of branches executed during the testing (e.g. if or while)
 * **Path coverage**: the percentage of paths executed during the testing
 
 We'll now go briefly over two other validation techniques: fuzzing and symbolic execution.
@@ -39,7 +39,7 @@ The most popular OS fuzzers are [kAFL](https://github.com/IntelLabs/kAFL) and [s
 
 As per Wikipedia, **symbolic** execution is a means of analyzing a program to determine what inputs cause each part of a program to execute.
 An interpreter follows the program, assuming symbolic values for inputs rather than obtaining actual inputs as normal execution of the program would.
-An example of a program being symbolically executed can be seen in the figure below
+An example of a program being symbolically executed can be seen in the figure below:
 
 ![Symbolic execution](/docs/sessions/06-testing-unikraft/images/symbex.png)
 
@@ -124,7 +124,7 @@ int Factorial(int n) {
 ```
 
 To create a test file, we'll create a new C++ source that includes `gtest/gtest.h`
-We can now define the tests using the `TEST` macro. We named this test `Negative` and added it to the `FactorialTest`
+We can now define the tests using the `TEST` macro. We named this test `Negative` and added it to the `FactorialTest`.
 
 ```C++
 TEST(FactorialTest, Negative) {
@@ -157,7 +157,7 @@ int main(int argc, char ∗∗argv) {
 Easy?
 This is not always the case, for example this [sample](https://github.com/google/googletest/blob/master/googletest/samples/sample9_unittest.cc) shows a more advanced and nested test.
 
-## 03 Unikraft's Testing Framework
+## 02. Unikraft's Testing Framework
 
 Unikraft's testing framework, `uktest`, has been inspired by KUnit and provides a flexible testing API.
 
@@ -186,11 +186,11 @@ UK_TESTCASE(testsuite_name, testcase2_name)
 
 The entire API can be found [here](https://github.com/unikraft/unikraft/blob/usoc21/lib/uktest/include/uk/test.h).
 
-## 04 The Design behind Unikraft's Testing Framework
+## 03. The Design behind Unikraft's Testing Framework
 
 The key ideas that were followed when writing `uktest` are:
 
-* Non-sophisticated. It should follow an existing framework(e.g. KUnit) in order to reuse the existing documentation and have a smaller learning curve
+* Non-sophisticated. It should follow an existing framework (e.g. KUnit) in order to reuse the existing documentation and have a smaller learning curve
 * Ability to specify when to run the tests during the boot process
 * Written in C
 * Should not conflict with other unit test frameworks (e.g. the one used for testing libraries and apps such as Google Test)
@@ -293,7 +293,7 @@ uk_testsuite_run(struct uk_testsuite *suite)
 
 In this work session we will go over writing and running tests for Unikraft.
 We will use `uktest` and `Google Test`.
-Make sure you are on the `usoc21` branch on the core Unirkaft repo and staging on all others.
+Make sure you are on the `usoc21` branch on the core Unikraft repo and `staging` on all others.
 `uktest` should be enabled from the Kconfig.
 
 ### Support Files
@@ -349,7 +349,7 @@ Add a new testsuite for this function.
 
 ### 03. Tutorial: Testing vfscore
 
-We beggin by adding a new file for the tests called `test_stat.c` in a newly created folder `tests` in the `vfscore` internal library:
+We begin by adding a new file for the tests called `test_stat.c` in a newly created folder `tests` in the `vfscore` internal library:
 
 ```Makefile
 LIBVFSCORE_SRCS-$(CONFIG_LIBVFSCORE_TEST_STAT) += \
@@ -437,10 +437,10 @@ Add a new test suite for nolibc with four test cases in it.
 You can use any POSIX function from nolibc for this task.
 Feel free to look over the [documentation](https://github.com/lancs-net/unikraft/blob/nderjung/uktest/lib/uktest/include/uk/test.h) to write more complex tests.
 
-### 04. Tutorial: Running Google Test on Unikraft
+### 05. Tutorial: Running Google Test on Unikraft
 
 For this tutorial, we will use Google Test under Unikraft.
-Aside from `lib-googletest`, we'll need to also have `libcxx`, `libcxxabi`, `libunwind`, `compiler-rt` and `newlib` because we're testing C++ code.
+Aside from `lib-googletest`, we'll also need to have `libcxx`, `libcxxabi`, `libunwind`, `compiler-rt` and `newlib` because we're testing C++ code.
 
 The second step is to enable the Google Test library and its config option `Build google test with main`.
 
@@ -484,9 +484,9 @@ If we run our unikernel, we should see the following output:
 
 We can see that in this case, the tests are being run after the main call, not before!
 
-### 05. Tutorial (Bonus): Using KLEE for Symbolic Execution
+### 06. Tutorial (Bonus): Using KLEE for Symbolic Execution
 
-One of the most popular symbolic execution engine is [KLEE]( (extra://klee.github.io/).
+One of the most popular symbolic execution engine is [KLEE](https://klee.github.io/).
 For convenience, we'll be using Docker.
 
 ```Bash
@@ -495,7 +495,7 @@ docker run --rm -ti --ulimit='stack=-1:-1' klee/klee:2.1
 ```
 
 Let's look over this regular expression program, can you spot any bugs?
-We'll create a file `ex.c` with this code
+We'll create a file `ex.c` with this code:
 
 ```C++
 #include <stdio.h>
@@ -548,7 +548,7 @@ int main(int argc, char **argv) {
 ```
 
 Now, let's run this program symbolically.
-To do this, we'll uncomment the `klee_make_symbol` line, and comment the line with `read`, `printf`.
+To do this, we'll uncomment the `klee_make_symbol` line, and comment the line with `read` and `printf`.
 We'll compile the program with `clang` this time:
 
 ```Bash
@@ -561,7 +561,7 @@ And run it with KLEE:
 klee ex.bc
 ```
 
-We'll see the following output
+We'll see the following output:
 
 ```
 KLEE: output directory is "/home/klee/klee-out-4"
