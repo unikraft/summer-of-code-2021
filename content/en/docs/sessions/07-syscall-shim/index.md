@@ -62,7 +62,7 @@ Let's take an example that you can see in the below image:
 
 1. Application program makes a system call by invoking a wrapper function in the C library.
 1. Each system call has a unique call number which is used by kernel to identify which system call is invoked.
-   The wrapper function again copies the system call number into specific CPU registers
+   The wrapper function again copies the system call number into specific CPU registers.
 1. The wrapper function takes care of copying the arguments to the correct registers.
 1. Now the wrapper function executes trap instruction (`int 0x80` or `syscall` or `sysenter`).
    This instruction causes the processor to switch from *user mode* to *kernel mode*.
@@ -85,7 +85,7 @@ At the same time it is bad because we need to find a way to support applications
 
 For Unikraft to achieve binary compatibility there are two main objectives that need to be met:
 
-1. The ability to pass the binary to Unikraft
+1. The ability to pass the binary to Unikraft.
 1. The ability to load the binary into memory and jump to its entry point.
 
 For the first point we decided to use the initial ramdisk in order to pass the binary to the unikernel.
@@ -320,7 +320,7 @@ demo/  images/  index.md  work/
 
 For the practical work we will need the following prerequisites:
 
-* **gcc version >= 8** - installation guide [here](https://linuxize.com/post/how-to-install-gcc-compiler-on-ubuntu-18-04/)
+* **gcc version >= 8** - installation guide [here](https://linuxize.com/post/how-to-install-gcc-compiler-on-ubuntu-18-04/).
 
 * **the elfloader application** - this is the implementation of our loader which is build like a normal Unikraft application.
   You can clone the [ELF Loader repository](https://github.com/skuenzer/app-elfloader/), on the `usoc21` branch.
@@ -328,7 +328,7 @@ For the practical work we will need the following prerequisites:
 
 * **the configuration file** - you can find the `config` files in the `demo/01` and `demo/03` folder of this session.
 
-* **lwip, zydis, libelf libs** - we have to clone all the repos coresponding to the previously mentioned libraries into the libs folder.
+* **lwip, zydis, libelf libs** - we have to clone all the repos corresponding to the previously mentioned libraries into the `libs` folder.
   All of them have to be on the `staging` branch.
     * [lwip](https://github.com/unikraft/lwip.git)
     * [zydis](https://github.com/unikraft/lib-zydis.git)
@@ -363,7 +363,7 @@ $ cp demo/01/config <WORKDIR>/apps/app-elfloader/.config
 To check that the config file is the correct one, go to the `app-elfloader/` directory and configure it:
 
 1. Change the directory to `<WORKDIR>/apps/app-elfloader/`.
-1. Run `make menuconfig`
+1. Run `make menuconfig`.
 1. Select `library configuration`.
    It should look like the below picture.
    Take a moment and inspect all the sub-menus, especially the syscall-shim one.
@@ -563,7 +563,7 @@ Here we are in the binary, calling getcpu
 Getcpu returned: -1
 ```
 
-Your task is to print a debug message betweem the `Here we are in the binary` and `Getcpu returned` message above and also make the `sched_getcpu()` return 0.
+Your task is to print a debug message between the `Here we are in the binary` and `Getcpu returned` message above and also make the `sched_getcpu()` return 0.
 
 **Hint 1**: [Syscall Shim Layer](http://docs.unikraft.org/developers-app.html#syscall-shim-layer)
 
@@ -572,9 +572,9 @@ You do not have to use `UK_LLSYSCALL_R_DEFINE`, instead, use the two other macro
 
 ### 05. Inspect the program flow of an application.
 
-Take the above C program and compile it dirrectly into Unikraft.
+Take the above C program and compile it directly into Unikraft.
 Inspect the flow of the program, see how we get from the application code to the library code and then to the unikernel code.
-After you see all the functions that get called, modify you program to skip the library code but still keep the same functionality.
+After you see all the functions that get called, modify the program to skip the library code but still keep the same functionality.
 
 **Hint 1**: You should call a function that is generated with the syscall shim macros.
 
