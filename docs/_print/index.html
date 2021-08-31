@@ -1570,4 +1570,291 @@ object 0: data: b'^\x01*\x01*\x01*'
 object 0: hex : 0x5e012a012a012a
 object 0: text: ^.*.*.*
 </code></pre><p>This is just a quick example of the power of symbolic execution, but it comes with one great problem: path explosion.
-When we have more complicated programs that have unbounded loops, the number of paths grows exponentially and thus symbolic execution is not viable anymore.</p><h2 id=further-reading>Further Reading</h2><ul><li><a href=https://ocw.mit.edu/ans7870/6/6.005/s16/classes/03-testing/index.html#automated_testing_and_regression_testing>6.005 Reading 3: Test</a></li><li><a href=https://blog.cloudflare.com/a-gentle-introduction-to-linux-kernel-fuzzing/>A gentle introduction to Linux Kernel fuzzing</a></li><li><a href=https://adalogics.com/blog/symbolic-execution-with-klee>Symbolic execution with KLEE</a></li><li><a href=https://www.kernel.org/doc/html/latest/dev-tools/kunit/usage.html>Using KUnit</a></li></ul></div><div class=td-content style=page-break-before:always><h1 id=pg-e8257ea2e30401a82888d38de2231d40>9 - Session 07: Syscall Shim</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-0cf305157c0d79c36b53cb269a783170>10 - Session 08: Basic App Porting</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-f352576afa36c9b30f15b2be6533c580>11 - Session 09: Advanced App Porting</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-9026b735a1faa018402aa9ac7ce1ebd9>12 - Session 10: High Performance</h1></div></main></div></div><footer class="bg-dark py-5 row d-print-none"><div class="container-fluid mx-sm-5"><div class=row><div class="col-6 col-sm-4 text-xs-center order-sm-2"><ul class="list-inline mb-0"><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=Discord aria-label=Discord><a class=text-white target=_blank rel="noopener noreferrer" href=https://bit.ly/UnikraftDiscord><i class="fab fa-discord"></i></a></li><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=Twitter aria-label=Twitter><a class=text-white target=_blank rel="noopener noreferrer" href=https://twitter.com/UnikraftSDK><i class="fab fa-twitter"></i></a></li></ul></div><div class="col-6 col-sm-4 text-right text-xs-center order-sm-3"><ul class="list-inline mb-0"><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=GitHub aria-label=GitHub><a class=text-white target=_blank rel="noopener noreferrer" href=https://github.com/unikraft/unikraft><i class="fab fa-github"></i></a></li><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=LinkedIn aria-label=LinkedIn><a class=text-white target=_blank rel="noopener noreferrer" href=https://linkedin.com/company/unikraft-sdk><i class="fab fa-linkedin"></i></a></li></ul></div><div class="col-12 col-sm-4 text-center py-2 order-sm-2"><small class=text-white>&copy; 2021 Unikraft and Open-Source Contributors. All Rights Reserved</small></div></div></div></footer></div><script src=https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js integrity=sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49 crossorigin=anonymous></script><script src=https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js integrity=sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy crossorigin=anonymous></script><script src=/js/main.min.5c74b870c6953931a705f390a49c7e4c0a842ec5c83b24354758dd674343ed0d.js integrity="sha256-XHS4cMaVOTGnBfOQpJx+TAqELsXIOyQ1R1jdZ0ND7Q0=" crossorigin=anonymous></script></body></html>
+When we have more complicated programs that have unbounded loops, the number of paths grows exponentially and thus symbolic execution is not viable anymore.</p><h2 id=further-reading>Further Reading</h2><ul><li><a href=https://ocw.mit.edu/ans7870/6/6.005/s16/classes/03-testing/index.html#automated_testing_and_regression_testing>6.005 Reading 3: Test</a></li><li><a href=https://blog.cloudflare.com/a-gentle-introduction-to-linux-kernel-fuzzing/>A gentle introduction to Linux Kernel fuzzing</a></li><li><a href=https://adalogics.com/blog/symbolic-execution-with-klee>Symbolic execution with KLEE</a></li><li><a href=https://www.kernel.org/doc/html/latest/dev-tools/kunit/usage.html>Using KUnit</a></li></ul></div><div class=td-content style=page-break-before:always><h1 id=pg-e8257ea2e30401a82888d38de2231d40>9 - Session 07: Syscall Shim</h1><p>In this session we are going to understand how we can run applications using the binary compatibility layer as well as the inner workings of the system call shim layer.</p><p>One of the obstacles when trying to use Unikraft could be the porting effort of your application.
+One way we can avoid this is through binary compatibility.
+Binary compatibility is the possibility to take already compiled binaries and run them on top of Unikraft without porting effort and at the same time keeping the benefits of unikernels.
+In our case, we support binaries compiled for the Linux kernel.</p><p>In order to achieve binary compatibility with the Linux kernel, we had to find a way to have support for system calls, for this, the <strong>system call shim layer</strong> (also called <strong>syscall shim</strong>) was created.
+The system call shim layer provides Linux-style mappings of system call numbers to actual system call handler functions.</p><h2 id=reminders>Reminders</h2><h3 id=configuring-building-and-running-unikraft>Configuring, Building and Running Unikraft</h3><p>At this stage, you should be familiar with the steps of configuring, building and running any application within Unikraft and know the main parts of the architecture.
+Below you can see a list of the commands you have used so far.</p><table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody><tr><td><code>kraft list</code></td><td>Get a list of all components that are available for use with kraft</td></tr><tr><td><code>kraft up -t &lt;appname> &lt;your_appname></code></td><td>Download, configure and build existing components into unikernel images</td></tr><tr><td><code>kraft run</code></td><td>Run resulting unikernel image</td></tr><tr><td><code>kraft init -t &lt;appname></code></td><td>Initialize the application</td></tr><tr><td><code>kraft configure</code></td><td>Configure platform and architecture (interactive)</td></tr><tr><td><code>kraft configure -p &lt;plat> -m &lt;arch></code></td><td>Configure platform and architecture (non-interactive)</td></tr><tr><td><code>kraft build</code></td><td>Build the application</td></tr><tr><td><code>kraft clean</code></td><td>Clean the application</td></tr><tr><td><code>kraft clean -p</code></td><td>Clean the application, fully remove the <code>build/</code> folder</td></tr><tr><td><code>make clean</code></td><td>Clean the application</td></tr><tr><td><code>make properclean</code></td><td>Clean the application, fully remove the <code>build/</code> folder</td></tr><tr><td><code>make distclean</code></td><td>Clean the application, also remove <code>.config</code></td></tr><tr><td><code>make menuconfig</code></td><td>Configure application through the main menu</td></tr><tr><td><code>make</code></td><td>Build configured application (in <code>.config</code>)</td></tr><tr><td><code>qemu-guest -k &lt;kernel_image></code></td><td>Start the unikernel</td></tr><tr><td><code>qemu-guest -k &lt;kernel_image> -e &lt;directory></code></td><td>Start the unikernel with a filesystem mapping of <code>fs0</code> id from <code>&lt;directory></code></td></tr><tr><td><code>qemu-guest -k &lt;kernel_image> -g &lt;port> -P</code></td><td>Start the unikernel in debug mode, with GDB server on port <code>&lt;port></code></td></tr></tbody></table><h3 id=system-calls>System Calls</h3><p>A system call is the programmatic way in which a process requests a privileged service from the kernel of the operating system.</p><p>A system call is not a function, but specific assembly instructions that do the following:</p><ul><li>setup information to identify the system call and its parameters</li><li>trigger a kernel mode switch</li><li>retrieve the result of a system call</li></ul><p>In Linux, system calls are identified by a system call ID (a number) and the parameters for system calls are machine word sized (32 or 64 bit).
+There can be a maximum of 6 system call parameters.
+Both the system call number and the parameters are stored in certain registers.</p><p>For example, on 32bit x86 architecture, the system call identifier is stored in the <code>EAX</code> register, while parameters in registers <code>EBX</code>, <code>ECX</code>, <code>EDX</code>, <code>ESI</code>, <code>EDI</code>, <code>EBP</code>.</p><p>Usually an application does not make a system call directly, but call functions in the system libraries (e.g. libc) that implement the actual system call.</p><p>Let&rsquo;s take an example that you can see in the below image:</p><ol><li>Application program makes a system call by invoking a wrapper function in the C library.</li><li>Each system call has a unique call number which is used by kernel to identify which system call is invoked.
+The wrapper function again copies the system call number into specific CPU registers</li><li>The wrapper function takes care of copying the arguments to the correct registers.</li><li>Now the wrapper function executes trap instruction (<code>int 0x80</code> or <code>syscall</code> or <code>sysenter</code>).
+This instruction causes the processor to switch from <em>user mode</em> to <em>kernel mode</em>.</li><li>We reach a trap handler, that will call the correct kernel function based on the id we passed.</li><li>The system call service routine is called.</li></ol><p><img src=https://qph.fs.quoracdn.net/main-qimg-0cb5c3a6e1fd7642ac988badc7598c0c alt=system_call_image></p><p>Now, let&rsquo;s take a quick look at unikernels.
+As stated above, in Linux, we use system calls to talk to the operating system, but there is a slight problem.
+The system calling process adds some overhead to our application, because we have to do all the extra operations to switch from <em>user space</em> to <em>kernel space</em>.
+In unikernels, because we don&rsquo;t have a delimitation between <em>kernel space</em> and <em>user space</em> we do not need system calls so everything can be done as simple function calls.
+This is both good and bad.
+It is good because we do not get the overhead that Linux does when doing a system call.
+At the same time it is bad because we need to find a way to support applications that are compiled on Linux, so application that do system calls, even though we don&rsquo;t need them.</p><h2 id=overview>Overview</h2><h3 id=01-the-process-of-loading-and-running-an-application-with-binary-compatibility>01. The Process of Loading and Running an Application with Binary Compatibility</h3><p>For Unikraft to achieve binary compatibility there are two main objectives that need to be met:</p><ol><li>The ability to pass the binary to Unikraft</li><li>The ability to load the binary into memory and jump to its entry point.</li></ol><p>For the first point we decided to use the initial ramdisk in order to pass the binary to the unikernel.
+With <code>qemu-guest</code>, in order to pass an initial ramdisk to a virtual machine you have to use the <code>-initrd</code> option.
+As an example, if we have a <code>helloworld</code> binary, we can pass it to the unikernel with the following command:</p><pre><code>sudo qemu-guest -kernel build/unikernel_image -initrd helloworld_binary
+</code></pre><p>After the unikernel gets the binary the next step is to load it into memory.
+The dominant format for executables is the <em>Executable and Linkable File</em> format (ELF), so, in order to run executables we need an ELF loader.
+The job of the ELF Loader is to load the executable into the main memory.
+It does so by reading the program headers located in the ELF formatted executable and acting accordingly.
+For example, you can see the program headers of a program by running <code>readelf -l binary</code>:</p><pre><code>$ readelf -l helloworld_binary
+
+Elf file type is DYN (Shared object file)
+Entry point 0x8940
+There are 8 program headers, starting at offset 64
+
+Program Headers:
+  Type           Offset             VirtAddr           PhysAddr
+                 FileSiz            MemSiz              Flags  Align
+  LOAD           0x0000000000000000 0x0000000000000000 0x0000000000000000
+                 0x00000000000c013e 0x00000000000c013e  R E    0x200000
+  LOAD           0x00000000000c0e40 0x00000000002c0e40 0x00000000002c0e40
+                 0x00000000000053b8 0x0000000000006aa0  RW     0x200000
+  DYNAMIC        0x00000000000c3c18 0x00000000002c3c18 0x00000000002c3c18
+                 0x00000000000001b0 0x00000000000001b0  RW     0x8
+  NOTE           0x0000000000000200 0x0000000000000200 0x0000000000000200
+                 0x0000000000000044 0x0000000000000044  R      0x4
+  TLS            0x00000000000c0e40 0x00000000002c0e40 0x00000000002c0e40
+                 0x0000000000000020 0x0000000000000060  R      0x8
+  GNU_EH_FRAME   0x00000000000b3d00 0x00000000000b3d00 0x00000000000b3d00
+                 0x0000000000001afc 0x0000000000001afc  R      0x4
+  GNU_STACK      0x0000000000000000 0x0000000000000000 0x0000000000000000
+                 0x0000000000000000 0x0000000000000000  RW     0x10
+  GNU_RELRO      0x00000000000c0e40 0x00000000002c0e40 0x00000000002c0e40
+                 0x00000000000031c0 0x00000000000031c0  R      0x1
+
+ Section to Segment mapping:
+  Segment Sections...
+   00     .note.ABI-tag .note.gnu.build-id .gnu.hash .dynsym .dynstr .rela.dyn .rela.plt .init .plt .plt.got .text __libc_freeres_fn __libc_thread_freeres_fn .fini .rodata .stapsdt.base .eh_frame_hdr .eh_frame .gcc_except_table
+   01     .tdata .init_array .fini_array .data.rel.ro .dynamic .got .data __libc_subfreeres __libc_IO_vtables __libc_atexit __libc_thread_subfreeres .bss __libc_freeres_ptrs
+   02     .dynamic
+   03     .note.ABI-tag .note.gnu.build-id
+   04     .tdata .tbss
+   05     .eh_frame_hdr
+   06
+   07     .tdata .init_array .fini_array .data.rel.ro .dynamic .got
+</code></pre><p>As an overview of the whole process, when we want to run an application on Unikraft using binary compatibility, the first step is to pass the application to the unikernel as an initial ram disk.
+Once the unikernel gets the application, the loader reads the executable segments and loads them accordingly.
+After the program is loaded, the last step is to jump to its entry point and start executing.</p><p>The loader that we currently have implemented in Unikraft only supports executables that are static (so all the libraries are part of the executables) and also position-independent.
+A position independent binary is a binary that can run correctly independent of the address at which it was loaded.
+So we need executables that are built using the <code>-static-pie</code> compiler / linker option, available in GCC since version 8.</p><h3 id=02-unikraft-syscall-shim>02. Unikraft Syscall Shim</h3><p>As stated previously, the system call shim layer in Unikraft is what we use in order to achieve the same system call behaviour as the Linux kernel.</p><p>Let&rsquo;s take a code snippet that does a system call from a binary:</p><pre><code>mov	edx,4		; message length
+mov	ecx,msg		; message to write
+mov	ebx,1		; file descriptor (stdout)
+mov	eax,4		; system call number (sys_write)
+syscall		    ; call kernel
+</code></pre><p>In this case, when the <code>syscall</code> instruction gets executed, we have to reach the write function inside our unikernel.
+In our case, when the <code>syscall</code> instruction gets called there are a few steps taken until we reach the <strong>system call</strong> inside Unikraft:</p><ol><li><p>After the <code>syscall</code> instruction gets executed we reach the <code>ukplat_syscall_handler</code>.
+This function has an intermediate role, printing some debug messages and passing the correct parameters further down.
+The next function that gets called is the <code>uk_syscall6_r</code> function.</p><pre><code>void ukplat_syscall_handler(struct __regs *r)
+{
+	UK_ASSERT(r);
+
+	uk_pr_debug(&quot;Binary system call request \&quot;%s\&quot; (%lu) at ip:%p (arg0=0x%lx, arg1=0x%lx, ...)\n&quot;,
+         uk_syscall_name(r-&gt;rsyscall), r-&gt;rsyscall,
+         (void *) r-&gt;rip, r-&gt;rarg0, r-&gt;rarg1);
+	r-&gt;rret0 = uk_syscall6_r(r-&gt;rsyscall,
+              r-&gt;rarg0, r-&gt;rarg1, r-&gt;rarg2,
+              r-&gt;rarg3, r-&gt;rarg4, r-&gt;rarg5);
+}
+</code></pre></li><li><p>The <code>uk_syscall6_r</code> is the function that redirects the flow of the program to the actual <strong>system call</strong> function inside the kernel.</p><pre><code>switch (nr) {
+	case SYS_brk:
+     return uk_syscall_r_brk(arg1);
+	case SYS_arch_prctl:
+     return uk_syscall_r_arch_prctl(arg1, arg2, arg3);
+	case SYS_exit:
+     return uk_syscall_r_exit(arg1);
+    ...
+</code></pre></li></ol><p>All the above functions are generated, so the only thing that we have to do when we want to register a system call to the system call shim layer is to use the correct macros.</p><p>There are four definition macros that we can use in order to add a system call to the system call shim layer:</p><ul><li><code>UK_SYSCALL_DEFINE</code> - to implement the libc style system calls. That returns <code>-1</code> and sets the <code>errno</code> accordingly.</li><li><code>UK_SYSCALL_R_DEFINE</code> - to implement the raw variant which returns a negative error value in case of errors. <code>errno</code> is not used at all.</li></ul><p>The above two macros will generate the following functions:</p><div class=highlight><pre style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-C data-lang=C><span style=color:#8f5902;font-style:italic>/* libc-style system call that returns -1 and sets errno on errors */</span>
+<span style=color:#204a87;font-weight:700>long</span> <span style=color:#000>uk_syscall_e_</span><span style=color:#ce5c00;font-weight:700>&lt;</span><span style=color:#000>syscall_name</span><span style=color:#ce5c00;font-weight:700>&gt;</span><span style=color:#000;font-weight:700>(</span><span style=color:#204a87;font-weight:700>long</span> <span style=color:#ce5c00;font-weight:700>&lt;</span><span style=color:#000>arg1_name</span><span style=color:#ce5c00;font-weight:700>&gt;</span><span style=color:#000;font-weight:700>,</span> <span style=color:#204a87;font-weight:700>long</span> <span style=color:#ce5c00;font-weight:700>&lt;</span><span style=color:#000>arg2_name</span><span style=color:#ce5c00;font-weight:700>&gt;</span><span style=color:#000;font-weight:700>,</span> <span style=color:#000;font-weight:700>...);</span>
+
+<span style=color:#8f5902;font-style:italic>/* Raw system call that returns negative error codes on errors */</span>
+<span style=color:#204a87;font-weight:700>long</span> <span style=color:#000>uk_syscall_r_</span><span style=color:#ce5c00;font-weight:700>&lt;</span><span style=color:#000>syscall_name</span><span style=color:#ce5c00;font-weight:700>&gt;</span><span style=color:#000;font-weight:700>(</span><span style=color:#204a87;font-weight:700>long</span> <span style=color:#ce5c00;font-weight:700>&lt;</span><span style=color:#000>arg1_name</span><span style=color:#ce5c00;font-weight:700>&gt;</span><span style=color:#000;font-weight:700>,</span> <span style=color:#204a87;font-weight:700>long</span> <span style=color:#ce5c00;font-weight:700>&lt;</span><span style=color:#000>arg2_name</span><span style=color:#ce5c00;font-weight:700>&gt;</span><span style=color:#000;font-weight:700>,</span> <span style=color:#000;font-weight:700>...);</span>
+
+<span style=color:#8f5902;font-style:italic>/* libc-style wrapper (the same as uk_syscall_e_&lt;syscall_name&gt; but with actual types) */</span>
+<span style=color:#ce5c00;font-weight:700>&lt;</span><span style=color:#000>return_type</span><span style=color:#ce5c00;font-weight:700>&gt;</span> <span style=color:#ce5c00;font-weight:700>&lt;</span><span style=color:#000>syscall_name</span><span style=color:#ce5c00;font-weight:700>&gt;</span><span style=color:#000;font-weight:700>(</span><span style=color:#ce5c00;font-weight:700>&lt;</span><span style=color:#000>arg1_type</span><span style=color:#ce5c00;font-weight:700>&gt;</span> <span style=color:#ce5c00;font-weight:700>&lt;</span><span style=color:#000>arg1_name</span><span style=color:#ce5c00;font-weight:700>&gt;</span><span style=color:#000;font-weight:700>,</span>
+                              <span style=color:#ce5c00;font-weight:700>&lt;</span><span style=color:#000>arg2_type</span><span style=color:#ce5c00;font-weight:700>&gt;</span> <span style=color:#ce5c00;font-weight:700>&lt;</span><span style=color:#000>arg2_name</span><span style=color:#ce5c00;font-weight:700>&gt;</span><span style=color:#000;font-weight:700>,</span> <span style=color:#000;font-weight:700>...);</span>
+</code></pre></div><p>For the case that the libc-style wrapper does not match the signature and return type of the underlying system call, a so called low-level variant of these two macros are available: <code>UK_LLSYSCALL_DEFINE</code>, <code>UK_LLSYSCALL_R_DEFINE</code>.
+These macros only generate the <code>uk_syscall_e_&lt;syscall_name></code> and <code>uk_syscall_r_&lt;syscall_name></code> symbols. You can then provide the custom libc-style wrapper on top.</p><p>Apart from using the macro to define the function, we also have to register the system call by adding it to <code>UK_PROVIDED_SYSCALLS-y</code> withing the corresponding <code>Makefile.uk</code> file.
+Let&rsquo;s see how this is done with an example for the write system call.
+We have the following definition of the write system call:</p><div class=highlight><pre style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-C data-lang=C><span style=color:#000>ssize_t</span> <span style=color:#000>write</span><span style=color:#000;font-weight:700>(</span><span style=color:#204a87;font-weight:700>int</span> <span style=color:#000>fd</span><span style=color:#000;font-weight:700>,</span> <span style=color:#204a87;font-weight:700>const</span> <span style=color:#204a87;font-weight:700>void</span> <span style=color:#ce5c00;font-weight:700>*</span> <span style=color:#000>buf</span><span style=color:#000;font-weight:700>,</span> <span style=color:#000>size_t</span> <span style=color:#000>count</span><span style=color:#000;font-weight:700>)</span>
+<span style=color:#000;font-weight:700>{</span>
+    <span style=color:#000>ssize_t</span> <span style=color:#000>ret</span><span style=color:#000;font-weight:700>;</span>
+
+    <span style=color:#000>ret</span> <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#000>vfs_do_write</span><span style=color:#000;font-weight:700>(</span><span style=color:#000>fd</span><span style=color:#000;font-weight:700>,</span> <span style=color:#000>buf</span><span style=color:#000;font-weight:700>,</span> <span style=color:#000>count</span><span style=color:#000;font-weight:700>);</span>
+    <span style=color:#204a87;font-weight:700>if</span> <span style=color:#000;font-weight:700>(</span><span style=color:#000>ret</span> <span style=color:#ce5c00;font-weight:700>&lt;</span> <span style=color:#0000cf;font-weight:700>0</span><span style=color:#000;font-weight:700>)</span> <span style=color:#000;font-weight:700>{</span>
+        <span style=color:#000>errno</span> <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#000>EFAULT</span><span style=color:#000;font-weight:700>;</span>
+        <span style=color:#204a87;font-weight:700>return</span> <span style=color:#ce5c00;font-weight:700>-</span><span style=color:#0000cf;font-weight:700>1</span><span style=color:#000;font-weight:700>;</span>
+    <span style=color:#000;font-weight:700>}</span>
+    <span style=color:#204a87;font-weight:700>return</span> <span style=color:#000>ret</span><span style=color:#000;font-weight:700>;</span>
+<span style=color:#000;font-weight:700>}</span>
+</code></pre></div><p>The next step is to define the function using the correct macro:</p><div class=highlight><pre style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-C data-lang=C><span style=color:#8f5902;font-style:italic>#include</span> <span style=color:#8f5902;font-style:italic>&lt;uk/syscall.h&gt;</span><span style=color:#8f5902;font-style:italic>
+</span><span style=color:#8f5902;font-style:italic></span>
+<span style=color:#000>UK_SYSCALL_DEFINE</span><span style=color:#000;font-weight:700>(</span><span style=color:#000>ssize_t</span><span style=color:#000;font-weight:700>,</span> <span style=color:#000>write</span><span style=color:#000;font-weight:700>,</span> <span style=color:#204a87;font-weight:700>int</span><span style=color:#000;font-weight:700>,</span> <span style=color:#000>fd</span><span style=color:#000;font-weight:700>,</span> <span style=color:#204a87;font-weight:700>const</span> <span style=color:#204a87;font-weight:700>void</span> <span style=color:#ce5c00;font-weight:700>*</span><span style=color:#000;font-weight:700>,</span> <span style=color:#000>buf</span><span style=color:#000;font-weight:700>,</span> <span style=color:#000>size_t</span><span style=color:#000;font-weight:700>,</span> <span style=color:#000>count</span><span style=color:#000;font-weight:700>)</span>
+<span style=color:#000;font-weight:700>{</span>
+    <span style=color:#000>ssize_t</span> <span style=color:#000>ret</span><span style=color:#000;font-weight:700>;</span>
+
+    <span style=color:#000>ret</span> <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#000>vfs_do_write</span><span style=color:#000;font-weight:700>(</span><span style=color:#000>fd</span><span style=color:#000;font-weight:700>,</span> <span style=color:#000>buf</span><span style=color:#000;font-weight:700>,</span> <span style=color:#000>count</span><span style=color:#000;font-weight:700>);</span>
+    <span style=color:#204a87;font-weight:700>if</span> <span style=color:#000;font-weight:700>(</span><span style=color:#000>ret</span> <span style=color:#ce5c00;font-weight:700>&lt;</span> <span style=color:#0000cf;font-weight:700>0</span><span style=color:#000;font-weight:700>)</span> <span style=color:#000;font-weight:700>{</span>
+        <span style=color:#000>errno</span> <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#000>EFAULT</span><span style=color:#000;font-weight:700>;</span>
+        <span style=color:#204a87;font-weight:700>return</span> <span style=color:#ce5c00;font-weight:700>-</span><span style=color:#0000cf;font-weight:700>1</span><span style=color:#000;font-weight:700>;</span>
+    <span style=color:#000;font-weight:700>}</span>
+    <span style=color:#204a87;font-weight:700>return</span> <span style=color:#000>ret</span><span style=color:#000;font-weight:700>;</span>
+<span style=color:#000;font-weight:700>}</span>
+</code></pre></div><p>And the raw variant:</p><div class=highlight><pre style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-C data-lang=C>    <span style=color:#8f5902;font-style:italic>#include</span> <span style=color:#8f5902;font-style:italic>&lt;uk/syscall.h&gt;</span><span style=color:#8f5902;font-style:italic>
+</span><span style=color:#8f5902;font-style:italic></span>
+    <span style=color:#000>UK_SYSCALL_R_DEFINE</span><span style=color:#000;font-weight:700>(</span><span style=color:#000>ssize_t</span><span style=color:#000;font-weight:700>,</span> <span style=color:#000>write</span><span style=color:#000;font-weight:700>,</span> <span style=color:#204a87;font-weight:700>int</span><span style=color:#000;font-weight:700>,</span> <span style=color:#000>fd</span><span style=color:#000;font-weight:700>,</span> <span style=color:#204a87;font-weight:700>const</span> <span style=color:#204a87;font-weight:700>void</span> <span style=color:#ce5c00;font-weight:700>*</span><span style=color:#000;font-weight:700>,</span> <span style=color:#000>buf</span><span style=color:#000;font-weight:700>,</span> <span style=color:#000>size_t</span><span style=color:#000;font-weight:700>,</span> <span style=color:#000>count</span><span style=color:#000;font-weight:700>)</span>
+    <span style=color:#000;font-weight:700>{</span>
+        <span style=color:#000>ssize_t</span> <span style=color:#000>ret</span><span style=color:#000;font-weight:700>;</span>
+
+        <span style=color:#000>ret</span> <span style=color:#ce5c00;font-weight:700>=</span> <span style=color:#000>vfs_do_write</span><span style=color:#000;font-weight:700>(</span><span style=color:#000>fd</span><span style=color:#000;font-weight:700>,</span> <span style=color:#000>buf</span><span style=color:#000;font-weight:700>,</span> <span style=color:#000>count</span><span style=color:#000;font-weight:700>);</span>
+        <span style=color:#204a87;font-weight:700>if</span> <span style=color:#000;font-weight:700>(</span><span style=color:#000>ret</span> <span style=color:#ce5c00;font-weight:700>&lt;</span> <span style=color:#0000cf;font-weight:700>0</span><span style=color:#000;font-weight:700>)</span> <span style=color:#000;font-weight:700>{</span>
+            <span style=color:#204a87;font-weight:700>return</span> <span style=color:#ce5c00;font-weight:700>-</span><span style=color:#000>EFAULT</span><span style=color:#000;font-weight:700>;</span>
+        <span style=color:#000;font-weight:700>}</span>
+        <span style=color:#204a87;font-weight:700>return</span> <span style=color:#000>ret</span><span style=color:#000;font-weight:700>;</span>
+    <span style=color:#000;font-weight:700>}</span>
+</code></pre></div><p>The last step is to add the system call to <code>UK_PROVIDED_SYSCALLS-y</code> in the <code>Makefile.uk</code> file.
+The format is:</p><p><code>UK_PROVIDED_SYSCALLS-$(CONFIG_&lt;YOURLIB>) += &lt;syscall_name>-&lt;number_of_arguments></code></p><p>So, in our case:</p><p><code>UK_PROVIDED_SYSCALLS-$(CONFIG_LIBWRITESYS) += write-3</code></p><h2 id=summary>Summary</h2><p>The binary compatibility layer is a very important part of the Unikraft unikernel.
+It helps us run applications that were not build for Unikraft while, at the same time, keeps the classic benefits of Unikraft: speed, security and small memory footprint.</p><h2 id=practical-work>Practical Work</h2><h3 id=support-files>Support Files</h3><p>Session support files are available <a href=https://github.com/unikraft/summer-of-code-2021>in the repository</a>.
+If you already cloned the repository, update it and enter the session directory:</p><pre><code>$ cd path/to/repository/clone
+
+$ git pull --rebase
+
+$ cd content/en/docs/sessions/07-syscall-shim/
+
+$ ls -F
+demo/  images/  index.md  work/
+</code></pre><p>If you haven&rsquo;t cloned the repository yet, clone it and enter the session directory:</p><pre><code>$ git clone https://github.com/unikraft/summer-of-code-2021
+
+$ cd content/en/docs/sessions/07-syscall-shim/
+
+$ ls -F
+demo/  images/  index.md  work/
+</code></pre><h3 id=00-setup>00. Setup</h3><p>For the practical work we will need the following prerequisites:</p><ul><li><p><strong>gcc version >= 8</strong> - installation guide <a href=https://linuxize.com/post/how-to-install-gcc-compiler-on-ubuntu-18-04/>here</a></p></li><li><p><strong>the elfloader application</strong> - this is the implementation of our loader which is build like a normal Unikraft application.
+You can clone the <a href=https://github.com/skuenzer/app-elfloader/>ELF Loader repository</a>, on the <code>usoc21</code> branch.
+This cloned repo should go into the <code>apps</code> folder in your Unikraft directory structure.</p></li><li><p><strong>the configuration file</strong> - you can find the <code>config</code> files in the <code>demo/01</code> and <code>demo/03</code> folder of this session.</p></li><li><p><strong>lwip, zydis, libelf libs</strong> - we have to clone all the repos coresponding to the previously mentioned libraries into the libs folder.
+All of them have to be on the <code>staging</code> branch.</p><ul><li><a href=https://github.com/unikraft/lwip.git>lwip</a></li><li><a href=https://github.com/unikraft/lib-zydis.git>zydis</a></li><li><a href=https://github.com/unikraft/lib-libelf.git>libelf</a></li></ul></li><li><p><strong>unikraft</strong> - the <a href=https://github.com/unikraft/unikraft>Unikraft repository</a> must also be cloned and checked out on the <code>usoc21</code> branch.</p></li></ul><p>Set the repositories in a directory of your choosing.
+We&rsquo;ll call this directory <code>&lt;WORKDIR></code>.
+The final directory structure for this session should look like this:</p><pre><code>workdir/
+`-- apps/
+|   `-- app-elfloader/ [usoc21]
+`-- libs/
+|   |-- lwip/ [staging]
+|   |-- libelf/ [staging]
+|   `-- zydis/ [staging]
+`-- unikraft/ [usoc21]
+</code></pre><h3 id=01-compiling-the-elf-loader-application>01. Compiling the ELF Loader Application</h3><p>The goal of this task is to make sure that our setup is correct.
+The first step is to copy the correct <code>.config</code> file into our application.</p><pre><code>$ cp demo/01/config &lt;WORKDIR&gt;/apps/app-elfloader/.config
+</code></pre><p>To check that the config file is the correct one, go to the <code>app-elfloader/</code> directory and configure it:</p><ol><li><p>Change the directory to <code>&lt;WORKDIR>/apps/app-elfloader/</code>.</p></li><li><p>Run <code>make menuconfig</code></p></li><li><p>Select <code>library configuration</code>.
+It should look like the below picture.
+Take a moment and inspect all the sub-menus, especially the syscall-shim one.</p><p><img src=images/config-image alt="Libraries configuration"></p></li></ol><p>If everything is correct, we can run <code>make</code> and the image for our unikernel should be compiled.
+In the <code>build</code> folder you should have the <code>elfloader_kvm-x86_64</code> binary.
+To also test if it runs correctly:</p><pre><code>.../&lt;WORKDIR&gt;/apps/app-elfloader$ qemu-guest -k build/elfloader_kvm-x86_64
+
+SeaBIOS (version 1.10.2-1ubuntu1)
+Booting from ROM...
+Powered by
+o.   .o       _ _               __ _
+Oo   Oo  ___ (_) | __ __  __ _ ' _) :_
+oO   oO ' _ `| | |/ /  _)' _` | |_|  _)
+oOo oOO| | | | |   (| | | (_) |  _) :_
+ OoOoO ._, ._:_:_,\_._,  .__,_:_, \___)
+                  Tethys 0.5.0~825b1150
+[    0.105192] ERR:  &lt;0x3f20000&gt; [appelfloader] No image found (initrd parameter missing?)
+</code></pre><p>Because we did not pass an initial ramdisk, the loader does not have anything to load, so that&rsquo;s where the error comes from.</p><h3 id=02-compile-a-static-pie-executable-and-run-it-on-top-of-unikraft>02. Compile a Static-Pie Executable and Run It On Top of Unikraft</h3><p>The next step is to get an executable with the correct format.
+We require a static executable that is also PIE (<em>Position-Independent Executable</em>).</p><p>We go to the <code>apps/app-elfloader/example/helloworld</code> directory.
+We can see that the directory has a <code>helloworld.c</code> (a simple helloworld program) and a <code>Makefile</code>.
+The program will be compiled as a static PIE:</p><div class=highlight><pre style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-Makefile data-lang=Makefile><span style=color:#000>RM</span> <span style=color:#ce5c00;font-weight:700>=</span> rm -f
+<span style=color:#000>CC</span> <span style=color:#ce5c00;font-weight:700>=</span> gcc
+<span style=color:#000>CFLAGS</span> <span style=color:#ce5c00;font-weight:700>+=</span> -O2 -g -fpie <span style=color:#8f5902;font-style:italic># fpie generates position independet code in the object file</span>
+<span style=color:#000>LDFLAGS</span> <span style=color:#ce5c00;font-weight:700>+=</span> -static-pie <span style=color:#8f5902;font-style:italic># static-pie makes the final linking generate a static and a pie executable</span>
+<span style=color:#000>LDLIBS</span> <span style=color:#ce5c00;font-weight:700>+=</span>
+
+<span style=color:#000>all</span><span style=color:#ce5c00;font-weight:700>:</span> <span style=color:#000>helloworld</span>
+
+<span style=color:#000>%.o</span><span style=color:#ce5c00;font-weight:700>:</span> %.<span style=color:#000>c</span>
+	<span style=color:#204a87;font-weight:700>$(</span>CC<span style=color:#204a87;font-weight:700>)</span> <span style=color:#204a87;font-weight:700>$(</span>CFLAGS<span style=color:#204a87;font-weight:700>)</span> -c $&lt; -o <span style=color:#000>$@</span>
+
+<span style=color:#000>%</span><span style=color:#ce5c00;font-weight:700>:</span> %.<span style=color:#000>o</span>
+	<span style=color:#204a87;font-weight:700>$(</span>CC<span style=color:#204a87;font-weight:700>)</span> <span style=color:#204a87;font-weight:700>$(</span>LDFLAGS<span style=color:#204a87;font-weight:700>)</span> $^ <span style=color:#204a87;font-weight:700>$(</span>LDLIBS<span style=color:#204a87;font-weight:700>)</span> -o <span style=color:#000>$@</span>
+
+<span style=color:#000>helloworld</span><span style=color:#ce5c00;font-weight:700>:</span> <span style=color:#000>helloworld</span>.<span style=color:#000>o</span>
+
+<span style=color:#000>clean</span><span style=color:#ce5c00;font-weight:700>:</span>
+	<span style=color:#204a87;font-weight:700>$(</span>RM<span style=color:#204a87;font-weight:700>)</span> *.o *~ core helloworld
+</code></pre></div><p>We can now run <code>make</code> so we can get the <code>helloworld</code> executable:</p><pre><code>.../&lt;WORKDIR&gt;/apps/app-elfloader/example/helloworld$ make
+gcc -O2 -g -fpie -c helloworld.c -o helloworld.o
+gcc -static-pie helloworld.o  -o helloworld
+
+.../&lt;WORKDIR&gt;/apps/app-elfloader/example/helloworld$ ldd helloworld
+	statically linked
+
+.../&lt;WORKDIR&gt;/apps/app-elfloader/example/helloworld$ checksec helloworld
+[*] '/home/daniel/Faculty/BachelorThesis/apps/app-elfloader/example/helloworld/helloworld'
+    Arch:     amd64-64-little
+    RELRO:    Full RELRO
+    Stack:    Canary found
+    NX:       NX enabled
+    PIE:      PIE enabled
+</code></pre><p>We can see above from the <code>ldd</code> and <code>checksec</code> output that the <code>helloworld</code> executable is a static PIE.</p><p>Now, the last part is to pass this executable to our unikernel.
+We can use the <code>-i</code> option to pass the initial ramdisk to the virtual machine.</p><pre><code>.../&lt;WORKDIR&gt;/apps/app-elfloader$ qemu-guest -k build/elfloader_kvm-x86_64 -i example/helloworld/helloworld
+
+SeaBIOS (version 1.10.2-1ubuntu1)
+Booting from ROM...
+Powered by
+o.   .o       _ _               __ _
+Oo   Oo  ___ (_) | __ __  __ _ ' _) :_
+oO   oO ' _ `| | |/ /  _)' _` | |_|  _)
+oOo oOO| | | | |   (| | | (_) |  _) :_
+ OoOoO ._, ._:_:_,\_._,  .__,_:_, \___)
+                  Tethys 0.5.0~825b1150
+Hello world!
+</code></pre><p>We can see that the binary is successfully loaded and executed.</p><h3 id=03-diving-deeper>03. Diving Deeper</h3><p>Now that we saw how we can run an executable on top of Unikraft through binary compatibility, let&rsquo;s take a look at what happens behind the scenes.
+For this we have to compile the unikernel with debug printing.</p><p>Copy the <code>config_debug</code> file to our application folder:</p><pre><code>$ cp demo/03/config_debug &lt;WORKDIR&gt;/apps/app-elfloader/.config
+</code></pre><p>Now, recompile the unikernel:</p><pre><code>.../&lt;WORKDIR&gt;/apps/app-elfloader$ make properclean
+[...]
+.../&lt;WORKDIR&gt;/apps/app-elfloader$ make
+</code></pre><p>Now, let&rsquo;s rerun the previously compiled executable on top of Unikraft:</p><pre><code>.../&lt;WORKDIR&gt;/apps/app-elfloader$ qemu-guest -k build/elfloader_kvm-x86_64 -i example/helloworld/helloworld
+
+SeaBIOS (version 1.10.2-1ubuntu1)
+Booting from ROM...
+Powered by
+o.   .o       _ _               __ _
+Oo   Oo  ___ (_) | __ __  __ _ ' _) :_
+oO   oO ' _ `| | |/ /  _)' _` | |_|  _)
+oOo oOO| | | | |   (| | | (_) |  _) :_
+ OoOoO ._, ._:_:_,\_._,  .__,_:_, \___)
+                  Tethys 0.5.0~825b1150
+[    0.153848] dbg:  &lt;0x3f20000&gt; [libukboot] Call constructor: 0x10b810()...
+[    0.156271] dbg:  &lt;0x3f20000&gt; [appelfloader] Searching for image...
+[    0.159115] dbg:  &lt;0x3f20000&gt; [appelfloader] Load image...
+[    0.161569] dbg:  &lt;0x3f20000&gt; [appelfloader] build/elfloader_kvm-x86_64: ELF machine type: 62
+[    0.164844] dbg:  &lt;0x3f20000&gt; [appelfloader] build/elfloader_kvm-x86_64: ELF OS ABI: 3
+[    0.167843] dbg:  &lt;0x3f20000&gt; [appelfloader] build/elfloader_kvm-x86_64: ELF object type: 3
+[...]
+</code></pre><p>We now have a more detailed output to see exactly what happens.
+The debug output is divided as follows:</p><ol><li>Debug information that comes from when the unikernel is executing.</li><li>Debug information that comes from when the binary is executing.</li></ol><p>When the unikernel is executing (so our loader application) there are two phases:</p><ol><li><p>The <em>loading phase</em>: copies the contents of the binary at certain memory zones, as specified by the ELF header.
+You can see the loading phase in the debug output:</p><pre><code>[appelfloader] Load image...
+[...]
+[appelfloader] build/elfloader_kvm-x86_64: Program/Library memory region: 0x3801000-0x3ac88e0 &lt;- this is the memory zone where our binary will be mapped
+[appelfloader] build/elfloader_kvm-x86_64: Copying 0x171000 - 0x23113e -&gt; 0x3801000 - 0x38c113e &lt;- actual copying of the binary
+[appelfloader] build/elfloader_kvm-x86_64: Zeroing 0x38c113e - 0x38c113e &lt;- zeroing out zones of the binary, like the bss
+[...]
+</code></pre></li><li><p>The <em>execution phase</em>: sets the correct information on the stack (for example environment variables) and jumps to the program entry point.</p><pre><code>[appelfloader] Execute image...
+[appelfloader] build/elfloader_kvm-x86_64: image:          0x3801000 - 0x3ac88e0
+[appelfloader] build/elfloader_kvm-x86_64: start:          0x3801000
+[appelfloader] build/elfloader_kvm-x86_64: entry:          0x3809940
+[appelfloader] build/elfloader_kvm-x86_64: ehdr_phoff:     0x40
+[appelfloader] build/elfloader_kvm-x86_64: ehdr_phnum:     8
+[appelfloader] build/elfloader_kvm-x86_64: ehdr_phentsize: 0x38
+[appelfloader] build/elfloader_kvm-x86_64: rnd16 at 0x3f1ff20
+[appelfloader] Jump to program entry point at 0x3809940...
+</code></pre></li></ol><p>From this point forward, the binary that we passed in the initial ramdisk starts executing.
+Now all the debug messages come from an operation that happened in the binary.
+We can also now see the syscall shim layer in action:</p><pre><code>[libsyscall_shim] Binary system call request &quot;write&quot; (1) at ip:0x3851c21 (arg0=0x1, arg1=0x3c01640, ...)
+Hello world!
+</code></pre><p>In the above case, the binary used a <code>write</code> system call in order to write <em>Hello world!</em> to standard output.</p><h3 id=04-solve-the-missing-syscall>04. Solve the Missing Syscall</h3><p>For the last part of today&rsquo;s session we will try to run another binary on top of Unikraft.
+You can find the C program in the <code>04-missing-syscall/</code> directory.
+Try compiling it as static-pie and then run it on top of Unikraft.</p><pre><code>[libsyscall_shim] Binary system call request &quot;getcpu&quot; (309) at ip:0x3851926 (arg0=0x3f1fc14, arg1=0x0, ...)
+[libsyscall_shim] syscall &quot;getcpu&quot; is not available
+[libsyscall_shim] Binary system call request &quot;write&quot; (1) at ip:0x3851cb1 (arg0=0x1, arg1=0x3c01640, ...)
+Here we are in the binary, calling getcpu
+Getcpu returned: -1
+</code></pre><p>Your task is to print a debug message betweem the <code>Here we are in the binary</code> and <code>Getcpu returned</code> message above and also make the <code>sched_getcpu()</code> return 0.</p><p><strong>Hint 1</strong>: <a href=http://docs.unikraft.org/developers-app.html#syscall-shim-layer>Syscall Shim Layer</a></p><p><strong>Hint 2</strong>: Check the <code>brk.c</code>, <code>Makefile.uk</code> and <code>exportsyms.uk</code> files in the <code>app-elfloader</code> directory.
+You do not have to use <code>UK_LLSYSCALL_R_DEFINE</code>, instead, use the two other macros previously described in the session (eg. <code>UK_SYSCALL_DEFINE</code> and <code>UK_SYSCALL_R_DEFINE</code>).</p><h3 id=05-inspect-the-program-flow-of-an-application>05. Inspect the program flow of an application.</h3><p>Take the above C program and compile it dirrectly into Unikraft.
+Inspect the flow of the program, see how we get from the application code to the library code and then to the unikernel code.
+After you see all the functions that get called, modify you program to skip the library code but still keep the same functionality.</p><p><strong>Hint 1</strong>: You should call a function that is generated with the syscall shim macros.</p><h3 id=06-give-us-feedback>06. Give Us Feedback</h3><p>We want to know how to make the next sessions better. For this we need your <a href=https://forms.gle/cY75bQ3x4wdpxWKKA>feedback</a>. Thank you!</p><h2 id=further-reading>Further Reading</h2><p><a href=https://dtrugman.medium.com/elf-loaders-libraries-and-executables-on-linux-e5cfce318f94>Elf Loaders, Libraries and Executables on Linux</a></p></div><div class=td-content style=page-break-before:always><h1 id=pg-0cf305157c0d79c36b53cb269a783170>10 - Session 08: Basic App Porting</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-f352576afa36c9b30f15b2be6533c580>11 - Session 09: Advanced App Porting</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-9026b735a1faa018402aa9ac7ce1ebd9>12 - Session 10: High Performance</h1></div></main></div></div><footer class="bg-dark py-5 row d-print-none"><div class="container-fluid mx-sm-5"><div class=row><div class="col-6 col-sm-4 text-xs-center order-sm-2"><ul class="list-inline mb-0"><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=Discord aria-label=Discord><a class=text-white target=_blank rel="noopener noreferrer" href=https://bit.ly/UnikraftDiscord><i class="fab fa-discord"></i></a></li><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=Twitter aria-label=Twitter><a class=text-white target=_blank rel="noopener noreferrer" href=https://twitter.com/UnikraftSDK><i class="fab fa-twitter"></i></a></li></ul></div><div class="col-6 col-sm-4 text-right text-xs-center order-sm-3"><ul class="list-inline mb-0"><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=GitHub aria-label=GitHub><a class=text-white target=_blank rel="noopener noreferrer" href=https://github.com/unikraft/unikraft><i class="fab fa-github"></i></a></li><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=LinkedIn aria-label=LinkedIn><a class=text-white target=_blank rel="noopener noreferrer" href=https://linkedin.com/company/unikraft-sdk><i class="fab fa-linkedin"></i></a></li></ul></div><div class="col-12 col-sm-4 text-center py-2 order-sm-2"><small class=text-white>&copy; 2021 Unikraft and Open-Source Contributors. All Rights Reserved</small></div></div></div></footer></div><script src=https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js integrity=sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49 crossorigin=anonymous></script><script src=https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js integrity=sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy crossorigin=anonymous></script><script src=/js/main.min.5c74b870c6953931a705f390a49c7e4c0a842ec5c83b24354758dd674343ed0d.js integrity="sha256-XHS4cMaVOTGnBfOQpJx+TAqELsXIOyQ1R1jdZ0ND7Q0=" crossorigin=anonymous></script></body></html>
