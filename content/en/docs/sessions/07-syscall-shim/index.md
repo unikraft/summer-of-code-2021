@@ -42,7 +42,39 @@ Below you can see a list of the commands you have used so far.
 
 ### System Calls
 
-TODO: Shortly present system calls: system call IDs, classical transition from user mode to kernel mode, system call tracing, system call arguments, downsides of system calls, system calls in unikernels / SASOSes
+A system call is the programatic way in which a process requests a priviledged service from the kernel of the operating system.
+
+A system call is not a function, but specific assembly instructions that do the following:
+
+* setup information to identify the system call and its parameters
+* trigger a kernel mode switch
+* retrieve the result of a system call
+
+In Linux, system calls are identified by a system call ID (a number) and the parameters for system calls are machine word sized (32 or 64 bit).
+There can be a maximum of 6 system call parameters.
+Both the system call number and the parameters are stored in certain registers.
+
+For example, on 32bit x86 architecture, the system call identifier is stored in the `EAX` register, while parameters in registers `EBX`, `ECX`, `EDX`, `ESI`, `EDI`, `EBP`.
+
+Usually an application does not make a system call dirrectly, but call functions in the system libraries (e.g. libc) that implement the actual system call.
+
+Let's take an example that you can see in the below image:
+
+1. Application program makes a system call by invoking a wrapper function in the C library.
+1. Each system call has a unique call number which is used by kernel to identify which system call is invoked. The wrapper function again copies the system call number into specific CPU registers
+1. The wrapper function takes care of copying the arguments to the correct registers.
+1. Now the wrapper function executes trap instruction (int 0x80). This instruction causes the processor to switch from `User Mode` to `Kernel Mode`
+1. We reach a trap handler, that will call the correct kernel function based on the id we passed.
+1. The system call service routine is called.
+
+![system_call_image](https://qph.fs.quoracdn.net/main-qimg-0cb5c3a6e1fd7642ac988badc7598c0c)
+
+Now, let's take a quick look at unikernels.
+As stated above, in Linux, we use system calls to talk to the operating system, but there is a slight problem.
+The system calling process adds some overhead to our application, because we have to do all the extra operations to switch from `user space` to `kernel space`.
+In unikernels, because we don't have a delimitation between `kernel space` and `user space` we do not need system calls so everything can be done as simple function calls.
+This is both good and bad.
+It is good because we do not get the overhead that Linux does when doing a system call, but at the same time it is bad because we need to find a way to support applications that are compiled on Linux, so application that do system calls, even though we don't need them.
 
 ## Overview
 
@@ -164,12 +196,32 @@ In our case, when the `syscall` instruction gets called there are a few steps ta
 
 All the above functions are generated, so the only thing that we have to do when we want to register a system call to the system call shim layer is to use the correct macros.
 
-There are two definition macros that we can use in order to add a system call to the system call shim layer: `UK_SYSCALL_DEFINE` and `UK_SYSCALL_R_DEFINE`.
+There are four definition macros that we can use in order to add a system call to the system call shim layer:
+
+* `UK_SYSCALL_DEFINE` - to implement the libc style system calls. That returns `-1` and sets the `errno` accordingly.
+* `UK_SYSCALL_R_DEFINE` - to implement the raw variant which returns a negative error value in case of errors. `errno` is not used at all.
+
+The above two macros will generate the following functions:
+
+```C
+/* libc-style system call that returns -1 and sets errno on errors */
+long uk_syscall_e_<syscall_name>(long <arg1_name>, long <arg2_name>, ...);
+
+/* Raw system call that returns negative error codes on errors */
+long uk_syscall_r_<syscall_name>(long <arg1_name>, long <arg2_name>, ...);
+
+/* libc-style wrapper (the same as uk_syscall_e_<syscall_name> but with actual types) */
+<return_type> <syscall_name>(<arg1_type> <arg1_name>,
+                              <arg2_type> <arg2_name>, ...);
+```
+For the case that the libc-style wrapper does not match the signature and return type of the underlying system call, a so called low-level variant of these two macros are available: ``UK_LLSYSCALL_DEFINE``, ``UK_LLSYSCALL_R_DEFINE``.
+These macros only generate the ``uk_syscall_e_<syscall_name>`` and ``uk_syscall_r_<syscall_name>`` symbols. You can then provide the custom libc-style wrapper on top.
+
 Apart from using the macro to define the function, we also have to register the system call by adding it to `UK_PROVIDED_SYSCALLS-y` withing the corresponding `Makefile.uk` file.
 Let's see how this is done with an example for the write system call.
 We have the following definition of the write system call:
 
-```
+```C
 ssize_t write(int fd, const void * buf, size_t count)
 {
     ssize_t ret;
@@ -185,7 +237,7 @@ ssize_t write(int fd, const void * buf, size_t count)
 
 The next step is to define the function using the correct macro:
 
-```
+```C
 #include <uk/syscall.h>
 
 UK_SYSCALL_DEFINE(ssize_t, write, int, fd, const void *, buf, size_t, count)
@@ -199,6 +251,23 @@ UK_SYSCALL_DEFINE(ssize_t, write, int, fd, const void *, buf, size_t, count)
     }
     return ret;
 }
+```
+
+And the raw variant:
+
+```C
+    #include <uk/syscall.h>
+
+    UK_SYSCALL_R_DEFINE(ssize_t, write, int, fd, const void *, buf, size_t, count)
+    {
+        ssize_t ret;
+
+        ret = vfs_do_write(fd, buf, count);
+        if (ret < 0) {
+            return -EFAULT;
+        }
+        return ret;
+    }
 ```
 
 The last step is to add the system call to `UK_PROVIDED_SYSCALLS-y` in the `Makefile.uk` file.
@@ -293,7 +362,8 @@ To check that the config file is the correct one, go to the `app-elfloader/` dir
 1. Change the directory to `<WORKDIR>/apps/app-elfloader/`.
 1. Run `make menuconfig`
 1. Select `library configuration`.
-   It should look like this:
+   It should look like the below picture.
+   Take a moment and inspect all the sub-menus, especially the syscall-shim one.
 
    ![Libraries configuration](images/config-image)
 
@@ -497,7 +567,15 @@ Your task is to print a debug message betweem the `Here we are in the binary` an
 **Hint 2**: Check the `brk.c`, `Makefile.uk` and `exportsyms.uk` files in the `app-elfloader` directory.
 You do not have to use `UK_LLSYSCALL_R_DEFINE`, instead, use the two other macros previously described in the session (eg. `UK_SYSCALL_DEFINE` and `UK_SYSCALL_R_DEFINE`).
 
-### 05. Give Us Feedback
+### 05. Inspect the program flow of an application.
+
+Take the above C program and compile it dirrectly into Unikraft.
+Inspect the flow of the program, see how we get from the application code to the library code and then to the unikernel code.
+After you see all the functions that get called, modify you program to skip the library code but still keep the same functionality.
+
+**Hint 1**: You should call a function that is generated with the syscall shim macros.
+
+### 06. Give Us Feedback
 
 We want to know how to make the next sessions better. For this we need your [feedback](https://forms.gle/cY75bQ3x4wdpxWKKA). Thank you!
 
