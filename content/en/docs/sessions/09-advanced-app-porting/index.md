@@ -4,17 +4,17 @@ linkTitle: "09. Advanced App Porting"
 ---
 As programs may grow quite complicated, porting them requires a thorough grasp of Unikraft core components, and in certain cases, the addition of new ones. In this session, we'll take a closer look at Unikraft's core libraries and APIs.
 
-## REMINDERS
+## Reminders
 TODO: add reminders from previous sessions
 
 ## Adding New Sections to the ELF
 There are situations in which we want to add new sections in the executable for our application or library.
 The reason these sections are useful is that the library (or application) becomes much easier to configure, thus serving more purposes.
-For example, the Unikraft virtual filesystem (i.e. the `vfscore` library) uses such a section in which it registers the used filesystem (`ramfs`, `9pfs`), and we ar going to discuss this in the following sections.
+For example, the Unikraft virtual filesystem (i.e. the `vfscore` library) uses such a section in which it registers the used filesystem (`ramfs`, `9pfs`), and we are going to discuss this in the following sections.
 Another component that makes use of additional sections is the scheduler.
 The scheduler interface allows us to register a set of functions at build time that will be called when a thread is created or at the end of its execution.
 
-The way we can add such a section in our application / library is the following:
+The way we can add such a section in our application/library is the following:
 1. Create a file with the `.ld` extension (e.g. extra.ld) with the following content:
 ```
 SECTIONS
@@ -32,7 +32,7 @@ INSERT AFTER .text;
 LIBYOURAPPNAME_SRCS-$(CONFIG_LIBYOURAPPNAME) += $(LIBYOURAPPNAME_BASE)/extra.ld
 ```
 This will add the `.my_section` section after the `.text` section in the ELF file.
-The `.my_section_entry` field will be used to register an entry in this section, and access to it is generally gained via traversing the section's endpoints (i.e. from `my_section_start` to `my_section_end`.
+The `.my_section_entry` field will be used to register an entry in this section, and access to it is generally gained via traversing the section's endpoints (i.e. from `my_section_start` to `my_section_end`).
 
 But enough with the chit-chat, let's get our hands dirty.
 In the `/demo/01-extrald-app` directory there is an application that defines a new section in the ELF.
@@ -82,8 +82,10 @@ Using the endpoints we can write the macro for iterating through the section:
                 iter++)
 
 ```
-**NOTE** If you're not familiar with macros, you may check what they expand to with the GCC's preprocessor.
+{{% alert title="Note" %}}
+If you're not familiar with macros, you may check what they expand to with the GCC's preprocessor.
 Remove all the included headers and run `gcc -E main.c`.
+{{% /alert %}}
 
 Let's configure the program.
 Use the `make menuconfig` command to set the KVM platform as in the following image.
@@ -92,7 +94,7 @@ Use the `make menuconfig` command to set the KVM platform as in the following im
 
 Save the configuration, exit the menuconfig tab and run `make`.
 Now, let's run it.
-You can use the following comand:
+You can use the following command:
 ```
 qemu-guest -k build/01-extrald-app_kvm-x86_64
 ```
@@ -151,7 +153,7 @@ struct vnops {
         ...
 };
 ```
-The first structure mainly defines the operation of mounting the filesystem, while the second defines the operations that can be executed on files (regular files, directories etc.).
+The first structure mainly defines the operation of mounting the filesystem, while the second defines the operations that can be executed on files (regular files, directories, etc).
 The `vnops` structure can be seen as the `file_operation` structure in the Linux Kernel (more as an idea).
 More about this structure [here](https://tldp.org/LDP/lkmpg/2.4/html/c577.htm).
 
