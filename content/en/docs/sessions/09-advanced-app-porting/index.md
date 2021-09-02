@@ -571,3 +571,5 @@ In today's last exercise we will really do what is done most with files, we writ
 Check `struct uio` structure and the `vfscore_uiomove` routine.
 {{% /alert %}}
 
+## 07. Give Us Feedback
+We want to know how to make the next sessions better. For this we need your [feedback](https://docs.google.com/forms/d/1FW1mzu19G7A1okzkssNctjgMUDsUyMvIvDvIO1Yr6Xo/edit).
