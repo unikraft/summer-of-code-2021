@@ -2160,4 +2160,298 @@ There are 7 entry points during the boot sequence:</p><table><thead><tr><th styl
 This allows application developers or library developers to correctly set up the unikernel by registering a constructor or initialiser at the right time or before or after others.</p><p>Initialisers have 6 different levels, allowing code to be injected before certain operations occur during the boot sequence.
 This includes, in order: before and after the <code>plat</code>form drivers are initialised; before and after all <code>lib</code>raries are initialised; before and after all filesystems (<code>rootfs</code>) are initialised; and, before and after various &ldquo;<code>sys</code>tem&rdquo; methods are called.</p><p>The source code for this sequence is defined in <a href=https://github.com/unikraft/unikraft/blob/staging/lib/ukboot/boot.c><code>ukboot</code></a>.</p><p>In this task, add a new KConfig option to the Unikraft port of <code>libfortune</code> which allows you to enable or disable the ability to introduce a fortune during the boot sequence of a Unikernel.
 Demonstrate the ability of using this library by building the Unikraft port of <code>libfortune</code> to the Unikraft port of <a href=https://github.com/unikraft/app-python3>python3</a> and show a fortune before the Unikraft banner.</p><h3 id=03-create-a-patch-to-introduce-a-new-fortune>03. Create a Patch to Introduce a New Fortune</h3><p>There is a well-known kernel quote, which should be introduced to this library as an Easter egg for unikernel users:</p><p>&ldquo;<a href=https://twitter.com/avsm/status/1265666433914191876>Kernel hacking: where the time to solve a problem is inversely proportional to the size of the resulting diff</a>&rdquo;</p><p>&ndash; Anil Madhavapeddy</p><p>Please add this quote to <code>libfortune</code> as a patch so it is only available when used with unikernels.</p><h3 id=04-give-us-feedback>04. Give Us Feedback</h3><p>We want to know how to make the next sessions better.
-For this <a href=https://forms.gle/RY5sZbDqCXyAXH6v6>we need your feedback</a>!</p></div><div class=td-content style=page-break-before:always><h1 id=pg-f352576afa36c9b30f15b2be6533c580>11 - Session 09: Advanced App Porting</h1></div><div class=td-content style=page-break-before:always><h1 id=pg-9026b735a1faa018402aa9ac7ce1ebd9>12 - Session 10: High Performance</h1></div></main></div></div><footer class="bg-dark py-5 row d-print-none"><div class="container-fluid mx-sm-5"><div class=row><div class="col-6 col-sm-4 text-xs-center order-sm-2"><ul class="list-inline mb-0"><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=Discord aria-label=Discord><a class=text-white target=_blank rel="noopener noreferrer" href=https://bit.ly/UnikraftDiscord><i class="fab fa-discord"></i></a></li><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=Twitter aria-label=Twitter><a class=text-white target=_blank rel="noopener noreferrer" href=https://twitter.com/UnikraftSDK><i class="fab fa-twitter"></i></a></li></ul></div><div class="col-6 col-sm-4 text-right text-xs-center order-sm-3"><ul class="list-inline mb-0"><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=GitHub aria-label=GitHub><a class=text-white target=_blank rel="noopener noreferrer" href=https://github.com/unikraft/unikraft><i class="fab fa-github"></i></a></li><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=LinkedIn aria-label=LinkedIn><a class=text-white target=_blank rel="noopener noreferrer" href=https://linkedin.com/company/unikraft-sdk><i class="fab fa-linkedin"></i></a></li></ul></div><div class="col-12 col-sm-4 text-center py-2 order-sm-2"><small class=text-white>&copy; 2021 Unikraft and Open-Source Contributors. All Rights Reserved</small></div></div></div></footer></div><script src=https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js integrity=sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49 crossorigin=anonymous></script><script src=https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js integrity=sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy crossorigin=anonymous></script><script src=/js/main.min.5c74b870c6953931a705f390a49c7e4c0a842ec5c83b24354758dd674343ed0d.js integrity="sha256-XHS4cMaVOTGnBfOQpJx+TAqELsXIOyQ1R1jdZ0ND7Q0=" crossorigin=anonymous></script></body></html>
+For this <a href=https://forms.gle/RY5sZbDqCXyAXH6v6>we need your feedback</a>!</p></div><div class=td-content style=page-break-before:always><h1 id=pg-f352576afa36c9b30f15b2be6533c580>11 - Session 09: Advanced App Porting</h1><h2 id=reminders>Reminders</h2><p>At this stage, you should be familiar with the steps of configuring, building and running any application within Unikraft and know the main parts of the architecture.
+Below you can see a list of the commands you have used so far, and will be useful in today&rsquo;s session as well.</p><table><thead><tr><th>Command</th><th>Description</th></tr></thead><tbody><tr><td><code>make clean</code></td><td>Clean the application</td></tr><tr><td><code>make properclean</code></td><td>Clean the application, fully remove the <code>build/</code> folder</td></tr><tr><td><code>make distclean</code></td><td>Clean the application, also remove <code>.config</code></td></tr><tr><td><code>make menuconfig</code></td><td>Configure application through the main menu</td></tr><tr><td><code>make</code></td><td>Build configured application (in <code>.config</code>)</td></tr><tr><td><code>qemu-guest -k &lt;kernel_image></code></td><td>Start the unikernel</td></tr><tr><td><code>qemu-guest -k &lt;kernel_image> -e &lt;directory></code></td><td>Start the unikernel with a filesystem mapping of <code>fs0</code> id from <code>&lt;directory></code></td></tr><tr><td><code>qemu-guest -k &lt;kernel_image> -g &lt;port> -P</code></td><td>Start the unikernel in debug mode, with GDB server on port <code>&lt;port></code></td></tr></tbody></table><h2 id=overview>Overview</h2><p>As programs may grow quite complicated, porting them requires a thorough grasp of Unikraft core components, and in certain cases, the addition of new ones.
+In this session, we&rsquo;ll take a closer look at Unikraft&rsquo;s core libraries and APIs.</p><h3 id=adding-new-sections-to-an-elf>Adding New Sections to an ELF</h3><p>There are situations in which we want to add new sections in the executable file (ELF format - <em>Executable and Linking Format</em>) for our application or library.
+The reason these sections are useful is that the library (or application) becomes much easier to configure, thus serving more purposes.
+For example, the Unikraft virtual filesystem (i.e. the <code>vfscore</code> library) uses such a section in which it registers the used filesystem (<code>ramfs</code>, <code>9pfs</code>), and we are going to discuss this in the following sections.
+Another component that makes use of additional sections is the scheduler.
+The scheduler interface allows us to register a set of functions at build time that will be called when a thread is created or at the end of its execution.</p><p>The way we can add such a section in our application/library is the following:</p><ol><li><p>Create a file with the <code>.ld</code> extension (e.g. extra.ld) with the following content:</p><pre><code>SECTIONS
+{
+	.my_section : {
+     PROVIDE(my_section_start = .);
+         KEEP (*(.my_section_entry))
+         PROVIDE(my_section_end = .);
+	}
+}
+INSERT AFTER .text;
+</code></pre></li><li><p>Add the following line to <code>Makefile.uk</code>:</p><pre><code>LIBYOURAPPNAME_SRCS-$(CONFIG_LIBYOURAPPNAME) += $(LIBYOURAPPNAME_BASE)/extra.ld
+</code></pre><p>This will add the <code>.my_section</code> section after the <code>.text</code> section in the ELF file.
+The <code>.my_section_entry</code> field will be used to register an entry in this section, and access to it is generally gained via traversing the section&rsquo;s endpoints (i.e. from <code>my_section_start</code> to <code>my_section_end</code>).</p></li></ol><p>But enough with the chit-chat, let&rsquo;s get our hands dirty.
+In the <code>/demo/01-extrald-app</code> directory there is an application that defines a new section in the ELF.
+Copy this directory to your app&rsquo;s directory.
+Your working directory should look like this:</p><pre><code>workdir
+|_______apps
+|       |_______01-extrald-app
+|_______libs
+|_______unikraft
+</code></pre><p>Before running the program let&rsquo;s analyze the source code.
+Look in the <code>main.c</code> file.
+We want to register the <code>my-structure</code> structure in the newly added section.
+In Unikraft core libraries this is usually done using macros.
+So we will do the same.</p><pre><code>#define MY_REGISTER(s, f) static const struct my_structure      \
+        __section(&quot;.my_section_entry&quot;)                          \
+        __my_section_var __used =                               \
+                {.name = (s),                                   \
+                .func = (f)};
+</code></pre><p>This macro receives the fields of the structure and defines a variable called <code>__my_section_var</code> in the newly added section.
+This is done via <code>__section()</code>.
+We also use the <code>__used</code> attribute to tell the compiler not to optimize out the variable.
+Note that this macro uses different compiler attributes.
+Most of these are in <code>uk/essentials.h</code>, so please make sure you include it when working with macros.</p><p>Next, let&rsquo;s analyze the method by which we can go through this section to find the entries.
+We must first import the endpoints of the section.
+It can be done as follows:</p><pre><code>extern const struct my_structure my_section_start;
+extern const struct my_structure my_section_end;
+</code></pre><p>Using the endpoints we can write the macro for iterating through the section:</p><pre><code>#define for_each_entry(iter)                                    \
+        for (iter = &amp;my_section_start;                          \
+                iter &lt; &amp;my_section_end;                         \
+                iter++)
+
+</code></pre><div class="alert alert-primary" role=alert><h4 class=alert-heading>Note</h4>If you&rsquo;re not familiar with macros, you may check what they expand to with the GCC&rsquo;s preprocessor.
+Remove all the included headers and run <code>gcc -E main.c</code>.</div><p>Let&rsquo;s configure the program.
+Use the <code>make menuconfig</code> command to set the KVM platform as in the following image.</p><p><img src=./images/platform_configuration.png alt=platform_configuration></p><p>Save the configuration, exit the menuconfig tab and run <code>make</code>.
+Now, let&rsquo;s run it.
+You can use the following command:</p><pre><code>$ qemu-guest -k build/01-extrald-app_kvm-x86_64
+</code></pre><p>The program&rsquo;s output should be the following:</p><p><img src=./images/01-extrald-app-output.png alt=01-extrald-app-output></p><p>To see that the information about the section size and its start address is correct we will examine the binary using the readelf utility.
+The readelf utility is used to display information about ELF files, like sections or segments.
+More about it <a href=https://man7.org/linux/man-pages/man1/readelf.1.html>here</a>
+Use the following command to display information about the ELF sections:</p><pre><code>$ readelf -S build/01-extrald-app_kvm-x86_64
+</code></pre><p>The output should look like this:</p><p><img src=./images/readelf_output.png alt=readelf_output></p><p>We can see that <code>my_section</code> is indeed among the sections of the ELF.
+Looking at its size we see that it is 0x10 bytes (the equivalent of 16 in decimal).
+We also notice that the start address of the section is 0x1120f0, the same as the one we got from running the program.</p><h3 id=unikraft-apis>Unikraft APIs</h3><p>One important thing to point out regarding Unikraft internal libraries is that for each &ldquo;category&rdquo; of library (e.g., memory allocators, schedulers, filesystems, network drivers, etc.)
+Unikraft defines (or will define) an API that each library under that category must comply with.
+This is so that it&rsquo;s possible to easily plug and play different libraries of a certain type (e.g., using a co-operative scheduler or a pre-emptive one).</p><h4 id=vfscore>VFScore</h4><p>Take for example the virtual filesystem (i.e. <code>vfscore</code>).
+This library provides the implementation of system calls related to filesystem management.
+We saw in previous sessions that there are two types of filesystems available in Unikraft <code>ramfs</code> and<code> 9pfs</code>.
+Obviously, these two have different implementations of generic file operations, such as reading, writing, etc.
+The natural question is: how can we have the same API for system calls (e.g. <code>read</code>,<code> write</code>) but with configurable functionalities?
+The answer is by mapping system calls to different implementations.
+This is done by using function pointers that redirect the program&rsquo;s flow to the functions we have defined.</p><p>In this regard, the <code>vfscore</code> library provides 2 structures to define operations on the filesystem:</p><pre><code>struct vfsops {
+        int (*vfs_mount)        (struct mount *, const char *, int, const void *);
+        ...
+        struct vnops    *vfs_vnops;
+};
+</code></pre><pre><code>struct vnops {
+        vnop_open_t             vop_open;
+        vnop_close_t            vop_close;
+        vnop_read_t             vop_read;
+        vnop_write_t            vop_write;
+        vnop_seek_t             vop_seek;
+        vnop_ioctl_t            vop_ioctl;
+        ...
+};
+</code></pre><p>The first structure mainly defines the operation of mounting the filesystem, while the second defines the operations that can be executed on files (regular files, directories, etc).
+The <code>vnops</code> structure can be seen as the <code>file_operation</code> structure in the Linux Kernel (more as an idea).
+More about this structure <a href=https://tldp.org/LDP/lkmpg/2.4/html/c577.htm>here</a>.</p><p>The filesystem library will define two such structures through which it will provide the specified operations.
+To understand how these operations end up being used let&rsquo;s examine the open system call:</p><pre><code>int
+sys_open(char *path, int flags, mode_t mode, struct vfscore_file **fpp)
+{
+        struct vfscore_file *fp;
+        struct vnode *vp;
+        ...
+        error = VOP_OPEN(vp, fp);
+}
+</code></pre><p><code>VOP_OPEN()</code> is a macro that is defined as follows:</p><pre><code>#define VOP_OPEN(VP, FP)           ((VP)-&gt;v_op-&gt;vop_open)(FP)
+</code></pre><p>So the system call will eventually call the registered operation.</p><div class="alert alert-primary" role=alert><h4 class=alert-heading>Note</h4><p>In order to find the source that contains the definition of a structure, function or other component in the <code>unikraft</code> directory you can use the following command:</p><pre><code>$ grep -r &lt;what_you_want_to_search_for&gt;
+</code></pre><p>For example:</p><p><img src=./images/grep_r_usage.png alt=grep_r_usage></p></div><p>Let&rsquo;s see now how to link the &ldquo;file operations&rdquo; of a filesystem to the <code>vfscore</code> library.
+For this, the library exposes a specific structure named <code>vfscore_fs_type</code>:</p><pre><code>struct vfscore_fs_type {
+        const char      *vs_name;       /* name of file system */
+        int             (*vs_init)(void); /* initialize routine */
+        struct vfsops   *vs_op;         /* pointer to vfs operation */
+};
+</code></pre><p>Notice that this structure contains a pointer to the <code>vfsops</code> structure, which in turn contains the <code>vnops</code> structure.
+To register a filesystem, the <code>vfscore</code> library uses an additional section in the ELF.
+You can inspect the <code>extra.ld</code> file, in the <code>vfscore</code> directory to see it.
+As we mentioned before, these sections come with help macros, so this time is no exception either.
+The macro that registers a filesystem is:</p><pre><code> UK_FS_REGISTER(fssw)
+</code></pre><p>Where the <code>fssw</code> argument is a <code>vfscore_fs_type</code> structure.</p><p>There are three other important structures that we should discuss.
+First of all, the <code>vnode</code> structure.
+This is the abstraction that <code>vfscore</code> provides for a file (no matter its nature, regular, directory, etc), and it can be seen as the equivalent of an inode in Linux-based systems.</p><pre><code>struct vnode {
+        uint64_t        v_ino;          /* inode number */
+        struct mount    *v_mount;       /* mounted vfs pointer */
+        struct vnops    *v_op;          /* vnode operations */
+        mode_t          v_mode;         /* file mode */
+        off_t           v_size;         /* file size */
+        ...
+        void            *v_data;        /* private data for fs */
+};
+</code></pre><p>This structure maintains the metadata of the file, such as the operations we can perform on it, permissions, or the size of the file.
+In addition to this, we notice the existence of a <strong>void pointer field</strong> which is used to keep a reference to the specific structures of the filesystem.
+This field is used by the two available filesystems and we will use it today in our practical work.</p><p>The <code>dentry</code> structure is the second relevant structure. It offers the possibility to create links (although currently neither <code>ramfs</code> or <code>9pfs</code> does not support hard links).
+A dentry can be seen as the equivalent of a path in the filesystem, and it has a pointer to the inode.</p><pre><code>struct dentry {
+        char            *d_path;        /* pointer to path in fs */
+        struct vnode    *d_vnode;       /* pointer to inode */
+        ...
+};
+</code></pre><p>One thing to point out is that an inode is deleted only when there are no dentries that reference it.</p><p>Last but not least is the <code>mount</code> structure.
+Mounting filesystems is the process by which the user makes the contents of a filesystem accessible.
+From this point of view, the filesystem, for example, <code>ramfs</code>, is seen as a device on Linux to which we have to associate a directory (technically speaking a dentry).</p><pre><code>struct mount {
+        struct vfsops   *m_op;          /* pointer to vfs operation */
+        int             m_flags;        /* mount flag */
+        char            m_path[PATH_MAX]; /* mounted path */
+        ...
+        struct dentry   *m_root;        /* root vnode */
+};
+</code></pre><p>Notice that the mount structure does have a dentry which will point to the inode describing the root directory.</p><h4 id=ramfs>RAMFS</h4><p>Now that we have seen the API of the virtual filesystem, let&rsquo;s go deeper into the hierarchy and look at the implementation of the ramfs filesystem.
+For storage, this uses, as the name implies, the memory.
+Its advantage is that it is very fast, the disadvantage you probably already guessed it&mldr; From a simplified perspective we can look at a file in ramfs as a buffer in memory.
+But wait a minute, if a file is just a memory buffer, doesn&rsquo;t going through so many layers of code mean overhead?
+Bien sûr, mi amigo! But having these methods of abstraction makes our work easier in terms of porting an application.
+There are applications that need a small filesystem, although the source code is not very easy.
+Then we prefer a little overhead than trying to patch the code.</p><p>Let&rsquo;s see how the ramfs system is registered into <code>vfscore</code>. We inspect the code from the <code>ramfs_vfsops.c</code> file from <code>ramfs</code> directory:</p><pre><code>static struct vfscore_fs_type fs_ramfs = {
+        .vs_name = &quot;ramfs&quot;,
+        .vs_init = NULL,
+        .vs_op = &amp;ramfs_vfsops,
+};
+
+UK_FS_REGISTER(fs_ramfs);
+</code></pre><p>It defines the <code>vfscore_fs_type</code> structure and uses the registration macro for the corresponding section.</p><p>Next, let&rsquo;s look at the specific structure, which is essentially the &ldquo;file&rdquo;:</p><pre><code>struct ramfs_node {
+        struct ramfs_node *rn_next;   /* next node in the same directory */
+        struct ramfs_node *rn_child;  /* first child node */
+        int rn_type;    /* file or directory */
+        char *rn_name;    /* name (null-terminated) */
+        char *rn_buf;    /* buffer to the file data */
+        size_t rn_bufsize;    /* allocated buffer size */
+        ...
+};
+</code></pre><p>This structure contains the file type, the buffer in which the data will be stored, and its size.
+A field that normally should not be here is the name, but for the simplicity of the library, it is used.
+Unfortunately, the fact that the name field is here and is used in the code does not allow the creation of hard links.</p><p>We notice that the filesystem has the following tree-like structure:</p><p><img src=./images/ramfs_structure.png alt=ramfs_strucutre></p><p>Let&rsquo;s look at how the filesystem is mounted.
+In the boot process, the mount syscall from <code>vfscore</code> is called.
+This is redirected to the <code>ramfs_mount</code> function as follows:</p><pre><code>UK_SYSCALL_R_DEFINE(int, mount, const char*, dev, const char*, dir,
+                const char*, fsname, unsigned long, flags, const void*, data)
+{
+        ...
+        /*
+         * Call a file system specific routine.
+         */
+        if ((error = VFS_MOUNT(mp, dev, flags, data)) != 0)
+                goto err4;
+        ...
+}
+</code></pre><p>Now let&rsquo;s examine this specific routine:</p><pre><code>/*
+ * Mount a file system.
+ */
+static int
+ramfs_mount(struct mount *mp, const char *dev __unused,
+            int flags __unused, const void *data __unused)
+{
+        struct ramfs_node *np;
+
+        /* Create a root node */
+        np = ramfs_allocate_node(&quot;/&quot;, VDIR);
+
+        mp-&gt;m_root-&gt;d_vnode-&gt;v_data = np;
+
+        return 0;
+}
+</code></pre><p>If we go back to the 3 important structures of <code>vfscore</code>, <code>mount</code>, <code>dentry</code> and <code>vnode</code> we notice this call provides the upper layer the possibility to explore all the file hierarchy.</p><p>The reason why it is important to do the <code>vnode</code> - <code>ramfs_node</code> association is that most operations are done on vnodes.
+Thus, in the first phases of a defined operation, references to the <code>ramfs_node</code> field are usually found.
+For example:</p><pre><code>static int
+ramfs_read(struct vnode *vp, struct vfscore_file *fp __unused,
+           struct uio *uio, int ioflag __unused)
+{
+        struct ramfs_node *np =  vp-&gt;v_data;
+        ...
+}
+</code></pre><h4 id=generic-list-api-in-unikraft>Generic List API in Unikraft</h4><p>Unikraft has an implementation of generic lists similar to those in the Linux kernel.
+To use this API, one must include the <code>uk/list.h</code> header.
+This type of structure is important because it is a unified way of using linked lists, which is why it is useful to know it, especially if we are working in the Unikraft core.
+The <code>uk_list_head</code> structure looks as follows:</p><pre><code>struct uk_list_head {
+        struct uk_list_head *next;
+        struct uk_list_head *prev;
+};
+</code></pre><p>The way these lists are built exploits the way of defining structures in C.
+A field in a structure is actually just an offset in memory.
+To define a list, for example, we just need to include the <code>uk_list_head</code> structure in our container structure:</p><pre><code>struct car {
+        char name[50];
+        struct uk_list_head list;
+};
+</code></pre><p>All the list operations, adding, removing, traversing will be performed on the list field.</p><p>The usual routines from this API are:</p><ol><li><code>UK_LIST_HEAD(name)</code> declare the sentinel of a list globally.</li><li><code>UK_INIT_LIST_HEAD(struct uk_list_head *list)</code> declare the sentinel of a list dynamically (i.e. can be used inside a function).</li><li><code>uk_list_add(struct uk_list_head *new_entry, struct uk_list_head *head)</code> add a new entry to the list.</li><li><code>uk_list_entry(ptr, type, field)</code> returns the structure with the type <strong>type</strong> that contains the element <strong>ptr</strong> from the list, having the name <strong>field</strong> within the structure.</li><li><code>uk_list_for_each(p, head)</code> iterates over a list using <strong>p</strong> as a cursor.</li><li><code>uk_list_for_each_safe(p, n, head)</code> iterates over a list using <strong>p</strong> as a cursor and <strong>n</strong> as a temporary cursor.
+This is useful for deletion.</li></ol><p>In the <code>/demo/02-linked-list-app</code> directory there is an application that uses generic lists.
+Copy this directory to your app&rsquo;s directory.
+Run <code>make menuconfig</code> and select the KVM platform.
+After that run <code>make</code>.
+You can start the program using the following command:</p><pre><code>$ qemu-guest -k build/02-linked-list-app_kvm-x86_64
+</code></pre><p>Let&rsquo;s look at the following part of the code:</p><pre><code>        printf(&quot;\nThe structure address for c1 is: %p\n&quot;, c1);
+        zero = (struct car *) 0;
+        printf(&quot;The offset of list field inside car strucure is: %p\n&quot;,
+                &amp;zero-&gt;list);
+        printf(&quot;The list field address for c1 is: %p\n&quot;,
+                &amp;c1-&gt;list);
+        printf(&quot;The address of c1 based on calculation is %p\n&quot;,
+                (void *) ((void *) &amp;c1-&gt;list - (void *) &amp;zero-&gt;list));
+</code></pre><p>In this part we calculate the offset of the <code>list</code> field within the <code>car</code> structure, which we subtract from the actual address of the <code>list</code> field inside the structure to determine the start address.
+This is precisely the way <code>uk_list_entry</code> macro works.</p><h2 id=practical-work>Practical Work</h2><p>All tasks are in the <code>work</code> directory.</p><h3 id=support-files>Support Files</h3><p>Session support files are available <a href=https://github.com/unikraft/summer-of-code-2021>in the repository</a>.
+If you already cloned the repository, update it and enter the session directory:</p><pre><code>$ cd path/to/repository/clone
+
+$ git pull --rebase
+
+$ cd content/en/docs/sessions/09-advanced-app-porting/
+
+$ ls
+demo/  images/  index.md/  sol/  work/
+</code></pre><p>If you haven&rsquo;t cloned the repository yet, clone it and enter the session directory:</p><pre><code>$ git clone https://github.com/unikraft/summer-of-code-2021
+
+$ cd summer-of-code-2021/content/en/docs/sessions/09-advanced-app-porting/
+
+$ ls
+demo/  images/  index.md/  sol/  work/
+</code></pre><h3 id=01-add-extra-section-in-the-elf>01. Add Extra Section in the ELF</h3><p>In this task we will add a new section in the elf and we will define a series of macros.</p><p>Navigate to the <code>01-extrald</code> directory.
+Copy <code>mycorelibrary</code> to the <code>lib</code> directory in <code>unikraft</code> and the two applications in the <code>apps</code> directory.
+Your working directory should look like this:</p><pre><code>workdir
+|_______apps
+|       |_______01-app
+|       |_______02-app
+|_______libs
+|_______unikraft
+        |_______lib
+                |_______mycorelib
+                |_______Makefile.uk
+</code></pre><p>Edit the <code>Makefile.uk</code> from the <code>lib</code> directory and add the following:</p><pre><code>$(eval $(call _import_lib,$(CONFIG_UK_BASE)/lib/mycorelib))
+</code></pre><p>Follow the TODOs from the sources and headers.
+After solving all the TODOs compile both applications and run them.
+Don&rsquo;t forget to <code>make menuconfig</code> to select <code>mycorelib</code> and the KVM platform.</p><h3 id=02-using-readelf>02. Using <code>readelf</code></h3><p>Use the <code>readelf</code> utility to see the section&rsquo;s address and size and check them with the program&rsquo;s output (like we did in the demo).</p><h3 id=03-searching-symbols>03. Searching Symbols</h3><p>Using the <code>grep</code> utility search the following and inspect the source code:</p><ol><li><code>struct vfsops</code>, <code>struct vnops</code>, <code>struct vfscore_fs_type</code></li><li><code>struct vnode</code>, <code>struct dentry</code>, <code>struct mount</code></li><li><code>sys_open</code> look especially for VOP macros.
+How many operations does the open system call do?</li><li><code>vfscore_vget</code> can you figure it out what this function does?</li></ol><h3 id=04-myramfs-register-the-filesystem>04. MyRamfs. Register the Filesystem.</h3><p>In the following exercises, we will build step by step a simplified version of the ramfs library.
+The first step is to register the filesystem into <code>vfscore</code>.</p><p>Navigate to the <code>04-05-06-myramfs</code> directory.
+Copy <code>myramfs</code> directory to the <code>lib</code> directory in <code>unikraft</code> and the application in the <code>apps</code> directory.
+Your working directory should look like this:</p><pre><code>workdir
+|_______apps
+|       |_______ramfs-app
+|_______libs
+|_______unikraft
+        |_______lib
+                |_______myramfs
+                |_______vfscore
+                |_______Makefile.uk
+</code></pre><p>Edit the <code>Makefile.uk</code> from the <code>lib</code> directory and add the following:</p><pre><code>$(eval $(call _import_lib,$(CONFIG_UK_BASE)/lib/myramfs))
+</code></pre><p>Now we need to make our library configurable from <code>vfscore</code>, for this we will need to edit the <code>Config.uk</code> file in the <code>vfscore</code> directory.</p><p>First we will add the configuration menu:</p><div class=highlight><pre style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go><span style=color:#ce5c00;font-weight:700>...</span>
+<span style=color:#204a87;font-weight:700>if</span> <span style=color:#000>LIBVFSCORE_AUTOMOUNT_ROOTFS</span>
+        <span style=color:#000>choice</span> <span style=color:#000>LIBVFSCORE_ROOTFS</span>
+        <span style=color:#000>prompt</span> <span style=color:#4e9a06>&#34;Default root filesystem&#34;</span>
+
+                <span style=color:#000>config</span> <span style=color:#000>LIBVFSCORE_ROOTFS_RAMFS</span>
+                <span style=color:#204a87;font-weight:700>bool</span> <span style=color:#4e9a06>&#34;RamFS&#34;</span>
+                <span style=color:#204a87;font-weight:700>select</span> <span style=color:#000>LIBRAMFS</span>
+
+<span style=display:block;width:100%;background-color:#dfdfdf>                <span style=color:#000>config</span> <span style=color:#000>LIBVFSCORE_ROOTFS_MYRAMFS</span>
+</span><span style=display:block;width:100%;background-color:#dfdfdf>                <span style=color:#204a87;font-weight:700>bool</span> <span style=color:#4e9a06>&#34;My-ramfs&#34;</span>
+</span><span style=display:block;width:100%;background-color:#dfdfdf>                <span style=color:#204a87;font-weight:700>select</span> <span style=color:#000>LIBMYRAMFS</span>
+</span><span style=color:#ce5c00;font-weight:700>...</span></code></pre></div><p>If we run now <code>make menuconfig</code> in the application <code>ramfs-app</code> we should see our library under the <code>vfscore configuration</code>:</p><p><img src=./images/vfscore_config_myramfs.png alt=vfscore_config_myramfs></p><p>The second fundamental step is to add the following line to the same <code>Config.uk</code> file:<div class=highlight><pre style=background-color:#f8f8f8;-moz-tab-size:4;-o-tab-size:4;tab-size:4><code class=language-go data-lang=go> <span style=color:#a40000>#</span> <span style=color:#000>Hidden</span> <span style=color:#000>configuration</span> <span style=color:#000>option</span> <span style=color:#000>that</span> <span style=color:#000>gets</span> <span style=color:#000>automatically</span> <span style=color:#000>filled</span>
+        <span style=color:#a40000>#</span> <span style=color:#000>with</span> <span style=color:#000>the</span> <span style=color:#000>selected</span> <span style=color:#000>filesystem</span> <span style=color:#000>name</span>
+        <span style=color:#000>config</span> <span style=color:#000>LIBVFSCORE_ROOTFS</span>
+        <span style=color:#204a87;font-weight:700>string</span>
+        <span style=color:#204a87;font-weight:700>default</span> <span style=color:#4e9a06>&#34;ramfs&#34;</span> <span style=color:#204a87;font-weight:700>if</span> <span style=color:#000>LIBVFSCORE_ROOTFS_RAMFS</span>
+<span style=display:block;width:100%;background-color:#dfdfdf>        <span style=color:#204a87;font-weight:700>default</span> <span style=color:#4e9a06>&#34;myramfs&#34;</span> <span style=color:#204a87;font-weight:700>if</span> <span style=color:#000>LIBVFSCORE_ROOTFS_MYRAMFS</span>
+</span>        <span style=color:#204a87;font-weight:700>default</span> <span style=color:#4e9a06>&#34;9pfs&#34;</span> <span style=color:#204a87;font-weight:700>if</span> <span style=color:#000>LIBVFSCORE_ROOTFS_9PFS</span>
+        <span style=color:#204a87;font-weight:700>default</span> <span style=color:#4e9a06>&#34;initrd&#34;</span> <span style=color:#204a87;font-weight:700>if</span> <span style=color:#000>LIBVFSCORE_ROOTFS_INITRD</span>
+        <span style=color:#204a87;font-weight:700>default</span> <span style=color:#000>LIBVFSCORE_ROOTFS_CUSTOM_ARG</span> <span style=color:#204a87;font-weight:700>if</span> <span style=color:#000>LIBVFSCORE_ROOTFS_CUSTOM</span></code></pre></div></p><p>This will fill the <code>CONFIG_LIBVFSCORE_ROOTFS</code> with the string <code>myramfs</code>.</p><p>Now that we&rsquo;ve done our setup, let&rsquo;s get started.
+Follow TODOs 1-4 in myramfs_vnops.c and myramfs_vfsops.c.
+Now, when you run <code>make menuconfig</code> in the app be sure you use the <code>myramfs</code>library and also check the debug library.
+If everything is fine you should get a similar output:</p><p><img src=./images/04_output.png alt=04_output></p><div class="alert alert-primary" role=alert><h4 class=alert-heading>Note</h4>Try to rename the filesystem in the <code>vfscore_fs_type</code> structure. What happens? Look for the <code>fs_getfs</code> function.</div><h3 id=05-myramfs-building-the-structure>05. MyRamfs. Building the Structure</h3><p>The <code>ramfs</code> library has a tree-like structure, as we saw in the section dedicated to it.
+Our library will be in the form of a list for ease of use.
+We&rsquo;ll use the generic lists given before to make it even prettier.
+This indicates that only ordinary files, not directories, are supported.</p><p>For this task we will still look in the files <code>myramfs_vfsops.c</code> and <code>myramfs_vnops.c</code> and we will perform the TODOs from 5 to 13.
+But first we recommend you to look at the <code>struct myramfs_node</code> which is in the <code>myramfs.h</code> file.</p><p>To test this task go back to the <code>ramfs-app</code> and build it again (make sure to properclean).
+If you solved everything correctly the output should look like this:</p><p><img src=./images/05_output.png alt=05_output></p><h3 id=06-myramfs-reading-and-writing>06. MyRamfs. Reading and Writing</h3><p>In today&rsquo;s last exercise we will really do what is done most with files, we write and read. Follow TODOs 14, 15 from <code>myramfs_vnops.c</code>.</p><div class="alert alert-primary" role=alert><h4 class=alert-heading>HINT</h4>Check <code>struct uio</code> structure and the <code>vfscore_uiomove</code> routine.</div><h3 id=07-give-us-feedback>07. Give Us Feedback</h3><p>We want to know how to make the next sessions better.
+For this we need your <a href=https://docs.google.com/forms/d/1FW1mzu19G7A1okzkssNctjgMUDsUyMvIvDvIO1Yr6Xo/edit>feedback</a>.</p></div><div class=td-content style=page-break-before:always><h1 id=pg-9026b735a1faa018402aa9ac7ce1ebd9>12 - Session 10: High Performance</h1></div></main></div></div><footer class="bg-dark py-5 row d-print-none"><div class="container-fluid mx-sm-5"><div class=row><div class="col-6 col-sm-4 text-xs-center order-sm-2"><ul class="list-inline mb-0"><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=Discord aria-label=Discord><a class=text-white target=_blank rel="noopener noreferrer" href=https://bit.ly/UnikraftDiscord><i class="fab fa-discord"></i></a></li><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=Twitter aria-label=Twitter><a class=text-white target=_blank rel="noopener noreferrer" href=https://twitter.com/UnikraftSDK><i class="fab fa-twitter"></i></a></li></ul></div><div class="col-6 col-sm-4 text-right text-xs-center order-sm-3"><ul class="list-inline mb-0"><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=GitHub aria-label=GitHub><a class=text-white target=_blank rel="noopener noreferrer" href=https://github.com/unikraft/unikraft><i class="fab fa-github"></i></a></li><li class="list-inline-item mx-2 h3" data-toggle=tooltip data-placement=top title=LinkedIn aria-label=LinkedIn><a class=text-white target=_blank rel="noopener noreferrer" href=https://linkedin.com/company/unikraft-sdk><i class="fab fa-linkedin"></i></a></li></ul></div><div class="col-12 col-sm-4 text-center py-2 order-sm-2"><small class=text-white>&copy; 2021 Unikraft and Open-Source Contributors. All Rights Reserved</small></div></div></div></footer></div><script src=https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.3/umd/popper.min.js integrity=sha384-ZMP7rVo3mIykV+2+9J3UJ46jBk0WLaUAdn689aCwoqbBJiSnjAK/l8WvCWPIPm49 crossorigin=anonymous></script><script src=https://stackpath.bootstrapcdn.com/bootstrap/4.1.3/js/bootstrap.min.js integrity=sha384-ChfqqxuZUCnJSK3+MXmPNIyE6ZbWh2IMqE241rYiqJxyMiZ6OW/JmZQ5stwEULTy crossorigin=anonymous></script><script src=/js/main.min.5c74b870c6953931a705f390a49c7e4c0a842ec5c83b24354758dd674343ed0d.js integrity="sha256-XHS4cMaVOTGnBfOQpJx+TAqELsXIOyQ1R1jdZ0ND7Q0=" crossorigin=anonymous></script></body></html>
