@@ -423,4 +423,107 @@ Don't forget to `make menuconfig` to select `mycorelib` and the KVM platform.
 
 ## 02. Using Readelf
 Use the `readelf` utility to see the section's address and size and check
-them with the program's output (like we did in the demo).   
+them with the program's output (like we did in the demo).
+
+## 03. Searching Symbols
+Using the  `grep` utility search the following and inspect the source code:
+1. `struct vfsops`, `struct vnops`, `struct vfscore_fs_type`
+2. `struct vnode`, `struct dentry`,  `struct mount`
+3. `sys_open` look especially for VOP macros.
+How many operations does the open system call do?
+4. `vfscore_vget` can you figure it out what this function does?
+
+## 04. MyRamfs. Register the Filesystem.
+In the following exercises, we will build step by step a simplified version of the ramfs library.
+The first step is to register the filesystem into `vfscore`.
+
+Navigate to the `04-05-06-myramfs` directory.
+Copy `myramfs` directory to the `lib` directory in `unikraft` and the application in the `apps` directory.
+Your working directory should look like this:
+```
+workdir
+|_______apps
+|       |_______ramfs-app
+|_______libs
+|_______unikraft
+        |_______lib
+                |_______myramfs
+                |_______vfscore
+                |_______Makefile.uk
+```
+Edit the `Makefile.uk` from the `lib` directory and add the following:
+```
+$(eval $(call _import_lib,$(CONFIG_UK_BASE)/lib/myramfs))
+```
+Now we need to make our library configurable from `vfscore`, for this we will need to edit the `Config.uk` file in the `vfscore` directory.
+
+First we will add the configuration menu:
+{{< highlight go "hl_lines=10-12">}}
+...
+if LIBVFSCORE_AUTOMOUNT_ROOTFS
+        choice LIBVFSCORE_ROOTFS
+        prompt "Default root filesystem"
+
+                config LIBVFSCORE_ROOTFS_RAMFS
+                bool "RamFS"
+                select LIBRAMFS
+
+                config LIBVFSCORE_ROOTFS_MYRAMFS
+                bool "My-ramfs"
+                select LIBMYRAMFS
+...
+{{< / highlight >}}
+
+If we run now `make menuconfig` in the application `ramfs-app` we should see our library under the `vfscore configuration`:
+
+![vfscore_config_myramfs](./images/vfscore_config_myramfs.png)
+
+The second fundamental step is to add the following line to the same `Config.uk` file:
+{{< highlight go "hl_lines=6">}}
+ # Hidden configuration option that gets automatically filled
+        # with the selected filesystem name
+        config LIBVFSCORE_ROOTFS
+        string
+        default "ramfs" if LIBVFSCORE_ROOTFS_RAMFS
+        default "myramfs" if LIBVFSCORE_ROOTFS_MYRAMFS
+        default "9pfs" if LIBVFSCORE_ROOTFS_9PFS
+        default "initrd" if LIBVFSCORE_ROOTFS_INITRD
+        default LIBVFSCORE_ROOTFS_CUSTOM_ARG if LIBVFSCORE_ROOTFS_CUSTOM
+{{< / highlight >}}
+
+This will fill the `CONFIG_LIBVFSCORE_ROOTFS` with the string `myramfs`.
+
+Now that we've done our setup, let's get started.
+Follow TODOs 1-4 in myramfs_vnops.c and myramfs_vfsops.c.
+Now, when you run `make menuconfig` in the app be sure you use the `myramfs`library and also check the debug library.
+If everything is fine you should get a similar output:
+
+![04_output](./images/04_output.png)
+
+
+
+{{% alert title="Note" %}}
+Try to rename the filesystem in the `vfscore_fs_type` structure. What happens? Look for the `fs_getfs` function.
+{{% /alert %}}
+
+## 05. MyRamfs. Building the Structure
+The `ramfs` library has a tree-like structure, as we saw in the section dedicated to it. 
+Our library will be in the form of a list for ease of use. 
+We'll use the generic lists given before to make it even prettier. 
+This indicates that only ordinary files, not directories, are supported.
+
+For this task we will still look in the files `myramfs_vfsops.c` and `myramfs_vnops.c` and we will perform the TODOs from 5 to 13.
+But first we recommend you to look at the `struct myramfs_node` 
+which is in the `myramfs.h` file.
+
+To test this task go back to the `ramfs-app` and build it again (make sure to properclean).
+If you solved everything correctly the output should look like this:
+
+![05_output](./images/05_output.png)
+
+## 06. MyRamfs. Reading and Writing.
+In today's last exercise we will really do what is done most with files, we write and read. Follow TODOs 14, 15 from `myramfs_vnops.c`.
+{{% alert title="HINT" %}}
+Check `struct uio` structure and the `vfscore_uiomove` routine.
+{{% /alert %}}
+
