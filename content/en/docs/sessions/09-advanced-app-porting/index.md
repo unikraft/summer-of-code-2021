@@ -350,7 +350,7 @@ struct uk_list_head {
         struct uk_list_head *prev;
 };
 ```
-The way these lists are build exploits the way of defining structures in C.
+The way these lists are built exploits the way of defining structures in C.
 A field in a structure is actually just an offset in memory.
 To define a list, for example, we just need to include the `uk_list_head` structure in our container structure:
 ```
@@ -362,9 +362,9 @@ struct car {
 All the list operations, adding, removing, traversing will be performed on the list field.
 
 The usual routines from this API are:
-1. `UK_LIST_HEAD(name)` declare the sentinel of a list globally
-2. `UK_INIT_LIST_HEAD(struct uk_list_head *list)` declare the sentinel of a list dynammically (i.e. can be used inside a function)
-3. `uk_list_add(struct uk_list_head *new_entry, struct uk_list_head *head)` add a new entry to the list
+1. `UK_LIST_HEAD(name)` declare the sentinel of a list globally.
+2. `UK_INIT_LIST_HEAD(struct uk_list_head *list)` declare the sentinel of a list dynamically (i.e. can be used inside a function).
+3. `uk_list_add(struct uk_list_head *new_entry, struct uk_list_head *head)` add a new entry to the list.
 4. `uk_list_entry(ptr, type, field)` returns the structure with the type **type** that contains the element **ptr** from the list, having the name **field** within the structure.
 5. `uk_list_for_each(p, head)` iterates over a list using **p** as a cursor.
 6. `uk_list_for_each_safe(p, n, head)` iterates over a list using **p** as a cursor and **n** as a temporary cursor.
