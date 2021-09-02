@@ -2,10 +2,54 @@
 title: "Session 09: Advanced App Porting"
 linkTitle: "09. Advanced App Porting"
 ---
-As programs may grow quite complicated, porting them requires a thorough grasp of Unikraft core components, and in certain cases, the addition of new ones. In this session, we'll take a closer look at Unikraft's core libraries and APIs.
+
 
 ## Reminders
-TODO: add reminders from previous sessions
+At this stage, you should be familiar with the steps of configuring, building and running any application within Unikraft and know the main parts of the architecture.
+Below you can see a list of the commands you have used so far, and will be useful in today's session as well.
+
+| Command                                                | Description                                                             |
+|--------------------------------------------------------|-------------------------------------------------------------------------|
+| `make clean`                                           | Clean the application                                                   |
+| `make properclean`                                     | Clean the application, fully remove the `build/` folder                 |
+| `make distclean`                                       | Clean the application, also remove `.config`                            |
+| `make menuconfig`                                      | Configure application through the main menu                             |
+| `make`                                                 | Build configured application (in `.config`)                             |
+| `qemu-guest -k <kernel_image>`                         | Start the unikernel                                                     |
+| `qemu-guest -k <kernel_image> -e <directory>`          | Start the unikernel with a filesystem mapping of `fs0` id from `<directory>` |
+| `qemu-guest -k <kernel_image> -g <port> -P`            | Start the unikernel in debug mode, with GDB server on port `<port>`     |
+
+## Support Files
+
+Session support files are available [in the repository](https://github.com/unikraft/summer-of-code-2021).
+If you already cloned the repository, update it and enter the session directory:
+
+```
+$ cd path/to/repository/clone
+
+$ git pull --rebase
+
+$ cd content/en/docs/sessions/09-advanced-app-porting/
+
+$ ls
+demo/  images/  index.md/  sol/  work/
+```
+
+If you haven't cloned the repository yet, clone it and enter the session directory:
+
+```
+$ git clone https://github.com/unikraft/summer-of-code-2021
+
+$ cd summer-of-code-2021/content/en/docs/sessions/09-advanced-app-porting/
+
+$ ls
+demo/  images/  index.md/  sol/  work/
+```
+
+
+
+## Overview
+As programs may grow quite complicated, porting them requires a thorough grasp of Unikraft core components, and in certain cases, the addition of new ones. In this session, we'll take a closer look at Unikraft's core libraries and APIs.
 
 ## Adding New Sections to the ELF
 There are situations in which we want to add new sections in the executable for our application or library.
@@ -96,7 +140,7 @@ Save the configuration, exit the menuconfig tab and run `make`.
 Now, let's run it.
 You can use the following command:
 ```
-qemu-guest -k build/01-extrald-app_kvm-x86_64
+$ qemu-guest -k build/01-extrald-app_kvm-x86_64
 ```
 
 The program's output should be the following:
@@ -108,7 +152,7 @@ The readelf utility is used to display information about ELF files, like section
 More about it [here](https://man7.org/linux/man-pages/man1/readelf.1.html)
 Use the following command to display information about the ELF sections:
 ```
-readelf -S build/01-extrald-app_kvm-x86_64
+$ readelf -S build/01-extrald-app_kvm-x86_64
 ```
 
 The output should look like this:
@@ -178,7 +222,7 @@ So the system call will eventually call the registered operation.
 {{% alert title="Note" %}}
 In order to find the source that contains the definition of a structure, function or other component in the `unikraft` directory you can use the following command:
 ```
-grep -r <what_you_want_to_search_for>
+$ grep -r <what_you_want_to_search_for>
 ```
 For example:
 
@@ -376,7 +420,7 @@ Run `make menuconfig` and select the KVM platform.
 After that run `make`.
 You can start the program using the following command:
 ```
-qemu-guest -k build/02-linked-list-app_kvm-x86_64
+$ qemu-guest -k build/02-linked-list-app_kvm-x86_64
 ```
 Let's look at the following part of the code:
 ```
@@ -394,7 +438,7 @@ This is precisely the way `uk_list_entry` macro works.
 
 
 # Practical Work
-All tasks are in this path: `summer-of-code-2021/content/en/docs/sessions/09-advanced-app-porting/work`
+All tasks are in the `work` directory.
 
 ## 01. Add Extra Section in the ELF
 In this task we will add a new section in the elf and we will define a series of macros.
