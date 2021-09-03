@@ -293,7 +293,7 @@ kraft init -t postgres@staging ./my-postgres-app
 
 #### Description
 
-Port the relational database program [Postgres](https://www.mysql.com/) so it
+Port the relational database program [MySQL](https://www.mysql.com/) so it
 can run as a Unikraft unikernel.  Create a matching application component.  A
 user should be able to run the project via:
 
