@@ -26,7 +26,7 @@ Additional points will be awarded for:
 
 * Signing off your commits with `git commit -s`, as part of [Developer Certificate of Origin](https://en.wikipedia.org/wiki/Developer_Certificate_of_Origin) (1 point per commit) (note, teams of multiple people should have multiple sign-offs);
 * Every commit should include a precise explanation of the changes made (1 point per commit);
-* Every commit of the solution should leave the project in a working state (2 point per commit).
+* Every commit of the solution should leave the project in a working state (2 points per commit).
 
 ## Challenges
 
@@ -42,7 +42,7 @@ In this challenge, introduce new test suites, cases and assertions/expects in th
 New tests should be introduced as new files under a new directory `tests/` of internal microlibraries.
 For example, for `vfscore`, a new directory will be located at `libs/vfscore/tests/`.
 
-To create a suite, for, for example, `stat()` in `vfscore`, introduce a new file `test_stat.c` where you register the suite, cases and create expectations from the `stat()` syscall provided by `vfscore`.
+To create a suite, such as for `stat()` in `vfscore`, introduce a new file `test_stat.c` where you register the suite, cases and create expectations from the `stat()` syscall provided by `vfscore`.
 Expectations and tests can usually be checked by programming different scenarios and checking whether the return code or `errno` is set correctly.
 Check out the relevant POSIX document for the function in question.
 
@@ -85,8 +85,8 @@ Every warning (1 line) will receive 1 point.
 
 #### Description
 
-`ukstore` is a new internal library for storing and retrieving information, for example, statistics or state.
-Introduce new counters, stats, or states via `ukstore` in other libraries which generate information.
+`ukstore` is a new internal library for storing and retrieving information, such as statistics or state.
+Introduce new counters, stats, or states via `ukstore` in other libraries that generate information.
 
 #### Links and Additional Resources
 
@@ -450,7 +450,7 @@ A successful port will allow the user to replace LwIP completely with PicoTCP.
 #### Description
 
 There are a number of outstanding issues/bugs with the Unikraft core repository.
-To help increase the stability and solve problems for edge cases and other issues, solve an open issue which has been reported.
+To help increase the stability and solve problems for edge cases and other issues, solve an open issue that has been reported.
 
 #### Links
 
