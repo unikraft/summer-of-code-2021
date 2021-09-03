@@ -19,21 +19,14 @@ You solve a challenge:
 * by submitting a pull request to the [corresponding Unikraft repository](https://github.com/unikraft/), or
 * by creating a repository for a ported application / library
 
-Points listed in challenges are a rough indication of difficulty.  It is
-possible to solve more than one challenge and earn all points from all
-challenges solved.
+Points listed in challenges are a rough indication of difficulty.
+It is possible to solve more than one challenge and earn all points from all challenges solved.
 
 Additional points will be awarded for:
 
- * Signing off your commits with `git commit -s`, as part of [Developer
-    Certificate of
-    Origin](https://en.wikipedia.org/wiki/Developer_Certificate_of_Origin) (1
-    point per commit) (note, teams of multiple people should have multiple sign-offs);
- * Every commit should include a precise explanation of the changes made (1
-   point per commit);
- * Every commit of the solution should be leave the project in a working state
-   (2 point per commit);
-
+* Signing off your commits with `git commit -s`, as part of [Developer Certificate of Origin](https://en.wikipedia.org/wiki/Developer_Certificate_of_Origin) (1 point per commit) (note, teams of multiple people should have multiple sign-offs);
+* Every commit should include a precise explanation of the changes made (1 point per commit);
+* Every commit of the solution should leave the project in a working state (2 point per commit).
 
 ## Challenges
 
@@ -45,26 +38,22 @@ Additional points will be awarded for:
 
 #### Description
 
-In this challenge, introduce new test suites, cases and assertions/expects in
-the Unikraft core repository.  New tests should be introduced as new files under
-a new directory `tests/` of internal microlibraries.  For example, for
-`vfscore`, a new directory will be located at `libs/vfscore/tests/`.
+In this challenge, introduce new test suites, cases and assertions/expects in the Unikraft core repository.
+New tests should be introduced as new files under a new directory `tests/` of internal microlibraries.
+For example, for `vfscore`, a new directory will be located at `libs/vfscore/tests/`.
 
-To create a suite, for, for example, `stat()` in `vfscore`, introduce a new file
-`test_stat.c` where you register the suite, cases and create expectations from
-the `stat()` syscall provided by `vfscore`.  Expectations and tests can usually
-be checked by programming different scenarios and checking whether the return
-code or `errno` is set correctly.  Check out the relevant POSIX document for
-function in question.
+To create a suite, for, for example, `stat()` in `vfscore`, introduce a new file `test_stat.c` where you register the suite, cases and create expectations from the `stat()` syscall provided by `vfscore`.
+Expectations and tests can usually be checked by programming different scenarios and checking whether the return code or `errno` is set correctly.
+Check out the relevant POSIX document for the function in question.
 
 Every new `*_EXPECT_*` test assertion will receive 1 point.
 
-#### Links and additional resources
+#### Links and Additional Resources
 
 * [uktest](docs/sessions/06-testing-unikraft/#03-unikrafts-testing-framework.md): Unikraft's testing framework
 
 
-***
+---
 
 
 ### 2. Fix Build Warnings
@@ -75,19 +64,17 @@ Every new `*_EXPECT_*` test assertion will receive 1 point.
 
 #### Description
 
-In this challenge, fix compiler warnings during builds of internal Unikraft
-libraries.
-
+In this challenge, fix compiler warnings during builds of internal Unikraft libraries.
 (There may be other warnings in other Unikraft repositories.)
 
 Every warning (1 line) will receive 1 point.
 
-#### Links and additional resources
+#### Links and Additional Resources
 
 * [Issue on Unikraft build warnings](https://github.com/unikraft/unikraft/issues/242)
 
 
-***
+---
 
 
 ### 3. Add ukstore Entries
@@ -98,17 +85,16 @@ Every warning (1 line) will receive 1 point.
 
 #### Description
 
-`ukstore` is a new internal library for storing and retreving information, for
-example, statistics or state.  Introduce new counters, stats, or states via
-`ukstore` in other libraries which generate information.
+`ukstore` is a new internal library for storing and retrieving information, for example, statistics or state.
+Introduce new counters, stats, or states via `ukstore` in other libraries which generate information.
 
-#### Links and additional resources
+#### Links and Additional Resources
 
 * [ukstore](https://github.com/unikraft/unikraft/pull/275) Library
 * [Example of adding new counters to `uknetdev`](#)
 
 
-***
+---
 
 
 ### 3. Add new unit tests to `kraft`
@@ -119,17 +105,17 @@ example, statistics or state.  Introduce new counters, stats, or states via
 
 #### Description
 
-`kraft` is a Python-based toolchain and acts as the companion tool for manging,
-configuring, building and running Unikraft unikernels.  It has very limited unit
-tests.  In this challenge, add more unit tests to `kraft`
+`kraft` is a Python-based toolchain and acts as the companion tool for managing, configuring, building and running Unikraft unikernels.
+It has very limited unit tests.
+In this challenge, add more unit tests to `kraft`
 
-#### Links and additional resources
+#### Links and Additional Resources
 
 * [kraft repository](https://github.com/unikraft/kraft)
 * [kraft tests folder](https://github.com/unikraft/kraft/tree/staging/tests)
 
 
-***
+---
 
 
 ### 4. Run Django on Unikraft
@@ -140,12 +126,10 @@ tests.  In this challenge, add more unit tests to `kraft`
 
 #### Description
 
-Create a new Python 3 application based on the
-[Django](https://www.djangoproject.com/) web framework.  Serve a simple HTTP
-response and run this via
-[lib-python3](https://github.com/unikraft/lib-python3).  Create a relevant
-`kraft.yaml` file with corresponding required KConfig values.  A user should be
-able to run the project via:
+Create a new Python 3 application based on the [Django](https://www.djangoproject.com/) web framework.
+Serve a simple HTTP response and run this via [lib-python3](https://github.com/unikraft/lib-python3).
+Create a relevant `kraft.yaml` file with corresponding required KConfig values.
+A user should be able to run the project via:
 
 ```bash
 kraft list add https://github.com/$USERNAME/app-django.git
@@ -153,7 +137,7 @@ kraft list update
 kraft init -t django@staging ./my-django-app
 ```
 
-#### Links and additional resources
+#### Links and Additional Resources
 
 * [Django](https://www.djangoproject.com/)
 * [app-python3](https://github.com/unikraft/app-python3)
@@ -161,7 +145,7 @@ kraft init -t django@staging ./my-django-app
 * [Session 04: Complex Applications](/docs/sessions/04-complex-applications/)
 
 
-***
+---
 
 
 ### 5. Run Flask on Unikraft
@@ -172,12 +156,10 @@ kraft init -t django@staging ./my-django-app
 
 #### Description
 
-Create a new Python 3 application based on the
-[Flask](https://flask.palletsprojects.com/en/2.0.x/) web framework.  Serve a simple HTTP
-response and run this via
-[lib-python3](https://github.com/unikraft/lib-python3).  Create a relevant
-`kraft.yaml` file with corresponding required KConfig values.  A user should be
-able to run the project via:
+Create a new Python 3 application based on the [Flask](https://flask.palletsprojects.com/en/2.0.x/) web framework.
+Serve a simple HTTP response and run this via [lib-python3](https://github.com/unikraft/lib-python3).
+Create a relevant `kraft.yaml` file with corresponding required KConfig values.
+A user should be able to run the project via:
 
 ```bash
 kraft list add https://github.com/$USERNAME/app-flask.git
@@ -186,7 +168,7 @@ kraft init -t flask@staging ./my-flask-app
 ```
 
 
-#### Links and additional resources
+#### Links and Additional Resources
 
 * [Flask](https://flask.palletsprojects.com/en/2.0.x/)
 * [app-python3](https://github.com/unikraft/app-python3)
@@ -194,7 +176,7 @@ kraft init -t flask@staging ./my-flask-app
 * [Session 04: Complex Applications](/docs/sessions/04-complex-applications/)
 
 
-***
+---
 
 
 ### 6. Run Ruby on Rails on Unikraft
@@ -205,12 +187,10 @@ kraft init -t flask@staging ./my-flask-app
 
 #### Description
 
-Create a new Ruby application based on the
-[Ruby on Rails](https://rubyonrails.org/) web framework.  Serve a simple HTTP
-response and run this via
-[lib-ruby](https://github.com/unikraft/lib-ruby).  Create a relevant
-`kraft.yaml` file with corresponding required KConfig values.  A user should be
-able to run the project via:
+Create a new Ruby application based on the [Ruby on Rails](https://rubyonrails.org/) web framework.
+Serve a simple HTTP response and run this via [lib-ruby](https://github.com/unikraft/lib-ruby).
+Create a relevant `kraft.yaml` file with corresponding required KConfig values.
+A user should be able to run the project via:
 
 ```bash
 kraft list add https://github.com/$USERNAME/app-rails.git
@@ -218,7 +198,7 @@ kraft list update
 kraft init -t rails@staging ./my-rails-app
 ```
 
-#### Links and additional resources
+#### Links and Additional Resources
 
 * [Rails](https://rubyonrails.org/)
 * [app-ruby](https://github.com/unikraft/app-ruby/)
@@ -226,7 +206,7 @@ kraft init -t rails@staging ./my-rails-app
 * [Session 04: Complex Applications](/docs/sessions/04-complex-applications/)
 
 
-***
+---
 
 
 ### 7. Port PHP to Unikraft
@@ -237,10 +217,9 @@ kraft init -t rails@staging ./my-rails-app
 
 #### Description
 
-Port the interpreted language runtime [PHP](https://github.com/php/php-src) so
-it can be run on top of Unikraft.  Create a matching application component, so a
-simple PHP program can be run via Unikraft.  A user should be
-able to run the project via:
+Port the interpreted language runtime [PHP](https://github.com/php/php-src) so it can be run on top of Unikraft.
+Create a matching application component, so a simple PHP program can be run via Unikraft.
+A user should be able to run the project via:
 
 ```bash
 kraft list add https://github.com/$USERNAME/app-php.git
@@ -248,7 +227,7 @@ kraft list update
 kraft init -t php@staging ./my-php-app
 ```
 
-#### Links and additional resources
+#### Links and Additional Resources
 
 * [PHP source code](https://github.com/php/php-src)
 * [PHP main website](https://www.php.net/)
@@ -263,10 +242,9 @@ kraft init -t php@staging ./my-php-app
 
 #### Description
 
-Port the object-relational database program
-[Postgres](https://www.postgresql.org/) so it can run as a Unikraft unikernel.
-Create a matching application component.  A user should be
-able to run the project via:
+Port the object-relational database program [Postgres](https://www.postgresql.org/) so it can run as a Unikraft unikernel.
+Create a matching application component.
+A user should be able to run the project via:
 
 ```bash
 kraft list add https://github.com/$USERNAME/app-postgres.git
@@ -274,28 +252,28 @@ kraft list update
 kraft init -t postgres@staging ./my-postgres-app
 ```
 
-#### Links and additional resources
+#### Links and Additional Resources
 
 * [Postgres source code](https://github.com/postgres/postgres)
 * [Postgres main website](https://www.postgresql.org/)
 * [Session 08: Basic App Porting](/docs/sessions/08-basic-app-porting/)
 
 
-***
+---
 
 
 ### 9. Port MySQL to Unikraft
 
 | ID | Points | Short description |
 |----|--------|-------------------|
-| `lib-mysql` | 25 points| Port [MySQl](https://github.com/mysql/mysql-server) as a Unikraft library. |
+| `lib-mysql` | 25 points| Port [MySQL](https://github.com/mysql/mysql-server) as a Unikraft library. |
 
 
 #### Description
 
-Port the relational database program [MySQL](https://www.mysql.com/) so it
-can run as a Unikraft unikernel.  Create a matching application component.  A
-user should be able to run the project via:
+Port the relational database program [MySQL](https://www.mysql.com/) so it can run as a Unikraft unikernel.
+Create a matching application component.
+A user should be able to run the project via:
 
 ```bash
 kraft list add https://github.com/$USERNAME/app-mysql.git
@@ -303,14 +281,14 @@ kraft list update
 kraft init -t mysql@staging ./my-mysql-app
 ```
 
-#### Links and additional resources
+#### Links and Additional Resources
 
-* [MySQl source code](https://github.com/mysql/mysql-server)
-* [MySQl main website](https://www.mysql.com/)
+* [MySQL source code](https://github.com/mysql/mysql-server)
+* [MySQL main website](https://www.mysql.com/)
 * [Session 08: Basic App Porting](/docs/sessions/08-basic-app-porting/)
 
 
-***
+---
 
 
 ### 10. Port Tinyproxy to Unikraft
@@ -322,8 +300,8 @@ kraft init -t mysql@staging ./my-mysql-app
 #### Description
 
 [Tinyproxy](https://github.com/tinyproxy/tinyproxy) is a fast HTTP/HTTPS server.
-Port this as a new library and application to Unikraft.  A user should be able
-to run the project via:
+Port this as a new library and application to Unikraft.
+A user should be able to run the project via:
 
 ```bash
 kraft list add https://github.com/$USERNAME/app-tinyproxy.git
@@ -331,13 +309,13 @@ kraft list update
 kraft init -t tinyproxy@staging ./my-tinyproxy-app
 ```
 
-#### Links and additional resources
+#### Links and Additional Resources
 
 * [Tinyproxy source code](https://github.com/tinyproxy/tinyproxy)
 * [Session 08: Basic App Porting](/docs/sessions/08-basic-app-porting/)
 
 
-***
+---
 
 
 ### 11. Port Bjoern to Unikraft
@@ -348,8 +326,8 @@ kraft init -t tinyproxy@staging ./my-tinyproxy-app
 
 #### Description
 
-[Bjoern](https://github.com/jonashaag/bjoern) is a fast And ultra-lightweight
-HTTP/1.1 WSGI Server.  Port this as a new library and application to Unikraft.
+[Bjoern](https://github.com/jonashaag/bjoern) is a fast And ultra-lightweight HTTP/1.1 WSGI Server.
+Port this as a new library and application to Unikraft.
 A user should be able to run the project via:
 
 ```bash
@@ -358,13 +336,13 @@ kraft list update
 kraft init -t bjoern@staging ./my-bjoern-app
 ```
 
-#### Links and additional resources
+#### Links and Additional Resources
 
-* [Bjoern source code](https://github.com/php/php-src)
+* [Bjoern source code](https://github.com/jonashaag/bjoern)
 * [Session 08: Basic App Porting](/docs/sessions/08-basic-app-porting/)
 
 
-***
+---
 
 
 ### 12. Lua Telnet shell
@@ -377,11 +355,10 @@ kraft init -t bjoern@staging ./my-bjoern-app
 
 #### Description
 
-[Telnet](https://en.wikipedia.org/wiki/Telnet) is a protocol for doing
-bi-directional text communication.  Create a simple telnet server on top of the
-Lua language and run it on Unikraft.
+[Telnet](https://en.wikipedia.org/wiki/Telnet) is a protocol for doing bi-directional text communication.
+Create a simple telnet server on top of the Lua language and run it on Unikraft.
 
-#### Links and additional resources
+#### Links and Additional Resources
 
 * [app-lua](https://github.com/unikraft/app-lua)
 * [lib-lua](https://github.com/unikraft/lib-lua)
@@ -389,7 +366,7 @@ Lua language and run it on Unikraft.
 * [Session 04: Complex Applications](/docs/sessions/04-complex-applications/)
 
 
-***
+---
 
 
 ### 13. Port Memcached to Unikraft
@@ -400,9 +377,9 @@ Lua language and run it on Unikraft.
 
 #### Description
 
-[memecached](https://memcached.org/) is a general purpose key-value store.  Port
-this as a new library and application to Unikraft.  A user should be able to run
-the project via:
+[memcached](https://memcached.org/) is a general purpose key-value store.
+Port this as a new library and application to Unikraft.
+A user should be able to run the project via:
 
 ```bash
 kraft list add https://github.com/$USERNAME/app-memcached.git
@@ -411,12 +388,12 @@ kraft init -t memcached@staging ./my-memcached-app
 ```
 
 
-#### Links and additional resources
+#### Links and Additional Resources
 
 * [memcached source code](https://github.com/memcached/memcached)
-* [memecached main website](https://memcached.org/)
+* [memcached main website](https://memcached.org/)
 
-***
+---
 
 
 ### 14. Rewrite a Unikraft Internal Library in Rust
@@ -428,22 +405,18 @@ kraft init -t memcached@staging ./my-memcached-app
 #### Description
 
 Rust is proving itself to be a type-safe, fast language suitable for the kernel.
-Use the [newly added capabilities of compiling Rust with
-Unikraft](https://github.com/unikraft/unikraft/commit/825b1150f74a2e809341369bc19757560371b418)
-to re-write an [internal
-library](https://github.com/unikraft/unikraft/tree/staging/lib).  A successful
-port of an internal library, e.g. `vfscore` to `vfscore-rs`, should work as the
-original is expected.
+Use the [newly added capabilities of compiling Rust with Unikraft](https://github.com/unikraft/unikraft/commit/825b1150f74a2e809341369bc19757560371b418) to re-write an [internal library](https://github.com/unikraft/unikraft/tree/staging/lib).
+A successful port of an internal library, e.g. `vfscore` to `vfscore-rs`, should work as the original is expected.
 
 Additional points will be awarded for benchmarks.
 
 
-#### Links and additional resources
+#### Links and Additional Resources
 
 * [Embedded Rust support in Unikraft](https://github.com/unikraft/unikraft/commit/825b1150f74a2e809341369bc19757560371b418)
 
 
-***
+---
 
 
 ### 15. Port PicoTCP to Unikraft
@@ -454,22 +427,21 @@ Additional points will be awarded for benchmarks.
 
 #### Description
 
-PicoTCP is a TCP/IP stack written in C.  Port this as an alternative to
-[LwIP](https://github.com/unikraft/lib-lwip) so it can be used with other
-network-based applications built with Unikraft.  A successful port will allow
-the user to replace LwIP completely with PicoTCP.
+PicoTCP is a TCP/IP stack written in C.
+Port this as an alternative to [LwIP](https://github.com/unikraft/lib-lwip) so it can be used with other network-based applications built with Unikraft.
+A successful port will allow the user to replace LwIP completely with PicoTCP.
 
-#### Links and additional resources
+#### Links and Additional Resources
 
 * [PicoTCP source code](https://github.com/tass-belgium/picotcp)
 * [lib-lwip](https://github.com/unikraft/lib-lwip)
 * [Session 04: Complex Applications](/docs/sessions/04-complex-applications/)
 
 
-***
+---
 
 
-### 16. Fix an open bug in the core
+### 16. Fix an Open Bug in the Core
 
 | ID | Points | Short description |
 |----|--------|-------------------|
@@ -477,11 +449,9 @@ the user to replace LwIP completely with PicoTCP.
 
 #### Description
 
-There are a number of out standing issues/bugs with the Unikraft core
-repository.  To help increase the stability and solve problems for edge cases
-and other issues, solve an open issue which has been reported.
+There are a number of outstanding issues/bugs with the Unikraft core repository.
+To help increase the stability and solve problems for edge cases and other issues, solve an open issue which has been reported.
 
 #### Links
 
  * [List of open bugs](https://github.com/unikraft/unikraft/issues?q=is%3Aissue+is%3Aopen+label%3Akind%2Fbug)
-
