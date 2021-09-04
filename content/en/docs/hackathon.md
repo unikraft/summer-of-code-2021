@@ -91,7 +91,7 @@ Introduce new counters, stats, or states via `ukstore` in other libraries that g
 #### Links and Additional Resources
 
 * [ukstore](https://github.com/unikraft/unikraft/pull/275) Library
-* [Example of adding new counters to `uknetdev`](#)
+* [Example of adding new counters to `uknetdev`](https://github.com/craciunoiuc/unikraft-diploma-demo/blob/eead6d98b1f236417ad5610b21fda63759aee654/unikraft/lib/ukalloc/stats.c#L63-L77)
 
 
 ---
