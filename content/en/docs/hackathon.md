@@ -91,8 +91,9 @@ Introduce new counters, stats, or states via `ukstore` in other libraries that g
 #### Links and Additional Resources
 
 * [ukstore](https://github.com/unikraft/unikraft/pull/275) Library
-* [Example of adding new counters to `uknetdev`](https://github.com/craciunoiuc/unikraft-diploma-demo/blob/eead6d98b1f236417ad5610b21fda63759aee654/unikraft/lib/ukalloc/stats.c#L63-L77)
-
+* [Example of adding new `ukstore` entries related to `ukalloc`](https://github.com/unikraft/unikraft/pull/279/commits/0d659369abf0b6c841c36cf0981ac8258b5630da)
+* [Example of adding new counters to `uknetdev`](https://github.com/unikraft/unikraft/pull/226)
+* [Document explaining `ukstore` usage (chapters 1. and 3.)](https://docs.google.com/document/d/1g50nGvjiQDCHwdLUZNco9XsBGCfiKkqjcYckTSgC7fk/edit?usp=sharing)
 
 ---
 
